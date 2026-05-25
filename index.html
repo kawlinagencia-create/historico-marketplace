@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Histórico Marketplace</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 :root{
@@ -252,7 +253,8 @@ tr:hover td{background:#FAFAF8}
 
 <script>
 const SUPABASE_URL="https://yvgoseljxxdczpziituq.supabase.co";
-const SUPABASE_KEY="sb_publishable_vBN74k12O7LpSXxC7pvREQ_sRUwv_iSZGxFgKjPpds";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2Z29zZWxqeHhkY3pwemlpdHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTQ0MzksImV4cCI6MjA5NTI5MDQzOX0.1gEdI1aaw97oYMQV0pmWJR2JXQgtp514ZuUsKHI9dZE";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PLATS=[
   {id:"shopee",label:"Shopee",cor:"#EE4D2D",cor10:"#FDECEA"},
@@ -266,11 +268,33 @@ const TIPOS=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","
 let st={view:"geral",plat:"shopee",loja:"",filtroTipo:"",lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},historico:[],geralHistorico:[]};
 
 async function api(path,method="GET",body=null){
-  const opts={method,headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=representation"}};
-  if(body) opts.body=JSON.stringify(body);
-  const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,opts);
-  if(!r.ok) throw new Error(await r.text());
-  return r.status===204?null:r.json();
+  // Parse path to get table and query params
+  const [tablePart, ...rest] = path.split("?");
+  const table = tablePart;
+  const params = new URLSearchParams(rest.join("?"));
+  
+  if(method==="GET"){
+    let query = sb.from(table).select(params.get("select")||"*");
+    if(params.get("order")) {
+      const [col, dir] = params.get("order").split(".");
+      query = query.order(col, {ascending: dir!=="desc"});
+    }
+    if(params.get("limit")) query = query.limit(parseInt(params.get("limit")));
+    // Handle filters like plataforma=eq.shopee
+    for(const [k,v] of params.entries()){
+      if(v && v.startsWith("eq.")){
+        query = query.eq(k, decodeURIComponent(v.slice(3)));
+      }
+    }
+    const {data,error} = await query;
+    if(error) throw new Error(error.message);
+    return data;
+  } else if(method==="POST"){
+    const {data,error} = await sb.from(table).insert(body).select();
+    if(error) throw new Error(error.message);
+    return data;
+  }
+  return null;
 }
 
 function setSyncing(v){
