@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Histórico Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#F7F6F3;--surface:#FFFFFF;--border:#E8E6E1;--border2:#D4D0C8;
+  --text:#1A1916;--text2:#6B6860;--text3:#A8A59E;
+  --radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.06);
+  --plat-cor:#EE4D2D;--plat-cor-10:#FDECEA;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{padding:2rem;overflow-x:hidden}
+.sb-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+.sb-logo-text{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.sb-logo-sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px}
+.sb-section{padding:.75rem 1.25rem .25rem;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 1.25rem;cursor:pointer;transition:background .12s;border-left:3px solid transparent;font-size:13px;font-weight:500;color:var(--text2)}
+.nav-item:hover{background:var(--bg)}
+.nav-item.active{border-left-color:var(--plat-cor);background:var(--bg);color:var(--text);font-weight:600}
+.nav-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.nav-count{margin-left:auto;font-size:11px;background:var(--bg);padding:2px 7px;border-radius:999px;color:var(--text3);font-family:'DM Mono',monospace}
+.sb-lojas{padding:.5rem .75rem}
+.loja-btn{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);text-align:left;transition:all .12s}
+.loja-btn:hover{background:var(--bg)}
+.loja-btn.active{background:var(--plat-cor-10);color:var(--text);font-weight:500}
+.loja-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.loja-btn.active .loja-dot{background:var(--plat-cor)}
+.add-loja-wrap{padding:.5rem .75rem 1rem}
+.add-loja-row{display:flex;gap:6px}
+.add-loja-row input{flex:1;font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+.add-loja-row input:focus{outline:none;border-color:var(--plat-cor)}
+.add-loja-row button{padding:6px 12px;border-radius:8px;border:none;background:var(--plat-cor);color:#fff;cursor:pointer;font-size:14px;font-weight:600;transition:opacity .15s}
+.add-loja-row button:hover{opacity:.85}
+.sb-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid var(--border)}
+.sb-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-mini{background:var(--bg);border-radius:8px;padding:8px 10px}
+.stat-mini-n{font-size:18px;font-weight:600;font-family:'DM Mono',monospace}
+.stat-mini-l{font-size:10px;color:var(--text3);margin-top:1px}
+.page{display:none}.page.active{display:block}
+.main-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
+.main-title{font-size:22px;font-weight:600;letter-spacing:-.4px}
+.main-sub{font-size:13px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace}
+.plat-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;color:#fff}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem;box-shadow:var(--shadow)}
+.ov-card-top{display:flex;align-items:center;gap:8px;margin-bottom:.5rem}
+.ov-dot{width:8px;height:8px;border-radius:50%}
+.ov-label{font-size:11px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.ov-num{font-size:28px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:-1px}
+.ov-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.search-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);flex-wrap:wrap}
+.search-bar-label{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
+.search-big{flex:1;min-width:150px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
+.search-big:focus{outline:none;border-color:var(--border2)}
+select.filter-sel{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
+select.filter-sel:focus{outline:none;border-color:var(--border2)}
+.clear-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer}
+.clear-btn:hover{background:var(--bg)}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.form-card-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.03em}
+.field input,.field select,.field textarea{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--plat-cor)}
+.field textarea{resize:vertical;min-height:70px}
+.btn-save{width:100%;margin-top:4px;padding:10px;border-radius:8px;border:none;background:var(--plat-cor);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s,transform .1s}
+.btn-save:hover{opacity:.9}.btn-save:active{transform:scale(.99)}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+.filtros-row{display:flex;align-items:center;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.filtros-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.filtro-chip{padding:4px 11px;border-radius:999px;font-size:11px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif}
+.filtro-chip:hover{border-color:var(--border2)}
+.filtro-chip.active{background:var(--plat-cor);color:#fff;border-color:var(--plat-cor)}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
+.table-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-title{font-size:13px;font-weight:600}
+.count-pill{font-size:11px;font-family:'DM Mono',monospace;background:var(--bg);padding:3px 9px;border-radius:999px;color:var(--text2)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAF8}
+.td-mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)}
+.td-muted{color:var(--text3)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
+.badge-ok{background:#E8F5E9;color:#1B5E20}
+.badge-wip{background:#E3F2FD;color:#0D47A1}
+.badge-pend{background:#FFF3E0;color:#E65100}
+.badge-rev{background:#F3E5F5;color:#6A1B9A}
+.tipo-tag{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--text2);white-space:nowrap}
+.plat-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;color:#fff;white-space:nowrap}
+.loja-mono{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.empty-state{padding:3rem;text-align:center}
+.empty-icon{font-size:32px;margin-bottom:.75rem;opacity:.3}
+.empty-text{font-size:13px;color:var(--text3)}
+.loading{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--plat-cor);border-radius:50%;animation:spin .6s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
+.sync-indicator{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#4CAF50}
+.sync-dot.syncing{background:#FFB900;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto}.main{padding:1rem}.form-grid,.form-grid-3{grid-template-columns:1fr}.overview-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-text">Histórico MKT</div>
+      <div class="sb-logo-sub" id="sync-status">
+        <span class="sync-indicator"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">conectando...</span></span>
+      </div>
+    </div>
+    <div class="sb-section">Visão</div>
+    <div class="nav-item active" id="nav-geral" onclick="irParaGeral()" style="--plat-cor:#1A1916">
+      <span style="font-size:15px">📊</span> Visão Geral
+      <span class="nav-count" id="nav-geral-count"></span>
+    </div>
+    <div class="sb-section" style="margin-top:.5rem">Plataformas</div>
+    <div id="plat-list"></div>
+    <div class="sb-section" style="margin-top:.5rem">Lojas</div>
+    <div class="sb-lojas" id="lojas-list"></div>
+    <div class="add-loja-wrap">
+      <div class="add-loja-row">
+        <input id="nova-loja" type="text" placeholder="Nova loja..."/>
+        <button onclick="adicionarLoja()">+</button>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <div class="sb-stats">
+        <div class="stat-mini"><div class="stat-mini-n" id="stat-total">—</div><div class="stat-mini-l">Registros</div></div>
+        <div class="stat-mini"><div class="stat-mini-n" id="stat-lojas">—</div><div class="stat-mini-l">Lojas</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- VISÃO GERAL -->
+    <div class="page active" id="page-geral">
+      <div class="main-header">
+        <div>
+          <div class="main-title">Visão Geral</div>
+          <div class="main-sub">todos os registros de todas as plataformas</div>
+        </div>
+      </div>
+      <div class="overview-grid" id="ov-cards"></div>
+      <div class="search-bar">
+        <span class="search-bar-label">🔍 Buscar</span>
+        <input class="search-big" id="geral-search-loja" type="text" placeholder="Nome da loja..." oninput="renderGeralTabela()"/>
+        <select class="filter-sel" id="geral-filter-plat" onchange="renderGeralTabela()">
+          <option value="">Todas as plataformas</option>
+          <option value="shopee">Shopee</option><option value="shein">Shein</option>
+          <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
+        </select>
+        <select class="filter-sel" id="geral-filter-tipo" onchange="renderGeralTabela()">
+          <option value="">Todos os tipos</option>
+          <option>Título</option><option>Descrição</option><option>Foto Capa</option>
+          <option>Fotos Secundárias</option><option>Preço</option><option>Ads</option>
+          <option>Vídeo</option><option>Decoração da Loja</option>
+          <option>Oferta Relâmpago</option><option>Cupom</option>
+          <option>Afiliados</option><option>Campanha</option><option>Promoção</option>
+        </select>
+        <button class="clear-btn" onclick="limparFiltrosGeral()">Limpar</button>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Histórico completo</span>
+          <span class="count-pill" id="geral-count">—</span>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th>#</th><th>Plataforma</th><th>Loja</th><th>Data / Hora</th>
+            <th>Colaborador</th><th>Tipo</th><th>Detalhes</th><th>Antes</th><th>Depois</th><th>Status</th>
+          </tr></thead><tbody id="geral-tbody"><tr><td colspan="10"><div class="loading"><span class="spinner"></span>Carregando dados...</div></td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLATAFORMA -->
+    <div class="page" id="page-plat">
+      <div class="main-header">
+        <div>
+          <div class="main-title" id="plat-title">Shopee</div>
+          <div class="main-sub" id="plat-sub">selecione uma loja para filtrar</div>
+        </div>
+        <div class="plat-badge" id="plat-badge">Shopee</div>
+      </div>
+      <div class="form-card">
+        <div class="form-card-title">Novo registro</div>
+        <div class="form-grid">
+          <div class="field"><label>Colaborador</label><input id="f-colab" type="text" placeholder="Seu nome"/></div>
+          <div class="field"><label>Tipo de alteração</label>
+            <select id="f-tipo">
+              <option value="">Selecione...</option>
+              <option>Título</option><option>Descrição</option><option>Foto Capa</option>
+              <option>Fotos Secundárias</option><option>Preço</option><option>Ads</option>
+              <option>Vídeo</option><option>Decoração da Loja</option>
+              <option>Oferta Relâmpago</option><option>Cupom</option>
+              <option>Afiliados</option><option>Campanha</option><option>Promoção</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="field"><label>Antes</label><input id="f-antes" type="text" placeholder="Valor anterior"/></div>
+          <div class="field"><label>Depois</label><input id="f-depois" type="text" placeholder="Valor novo"/></div>
+          <div class="field"><label>Status</label>
+            <select id="f-status">
+              <option>Concluído</option><option>Em andamento</option><option>Pendente</option><option>Revisão</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:4px">
+          <label>Detalhes / Observação</label>
+          <textarea id="f-obs" placeholder="Descreva a alteração realizada..."></textarea>
+        </div>
+        <button class="btn-save" id="btn-save" onclick="salvar()">💾 Salvar registro</button>
+      </div>
+      <div class="filtros-row">
+        <span class="filtros-label">Filtrar:</span>
+        <div id="filtros-tipo"></div>
+        <input style="padding:5px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;width:180px;margin-left:4px" id="search" type="text" placeholder="Buscar colaborador..." oninput="renderTabela()"/>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Histórico</span>
+          <span class="count-pill" id="count-pill">—</span>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th>#</th><th>Data / Hora</th><th>Colaborador</th><th>Loja</th>
+            <th>Tipo</th><th>Detalhes</th><th>Antes</th><th>Depois</th><th>Status</th>
+          </tr></thead><tbody id="tbody"><tr><td colspan="9"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL="https://yvgoseljxxdczpziituq.supabase.co";
+const SUPABASE_KEY="sb_publishable_vBN74k12O7LpSXxC7pvREQ_sRUwv_iSZGxFgKjPpds";
+
+const PLATS=[
+  {id:"shopee",label:"Shopee",cor:"#EE4D2D",cor10:"#FDECEA"},
+  {id:"shein",label:"Shein",cor:"#222222",cor10:"#F0F0F0"},
+  {id:"mlivre",label:"M. Livre",cor:"#FFB900",cor10:"#FFF8E1",fc:"#333"},
+  {id:"tiktok",label:"TikTok",cor:"#010101",cor10:"#F0F0F0"},
+];
+const STATUS_CLASS={"Concluído":"badge-ok","Em andamento":"badge-wip","Pendente":"badge-pend","Revisão":"badge-rev"};
+const TIPOS=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
+
+let st={view:"geral",plat:"shopee",loja:"",filtroTipo:"",lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},historico:[],geralHistorico:[]};
+
+async function api(path,method="GET",body=null){
+  const opts={method,headers:{"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=representation"}};
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(SUPABASE_URL+"/rest/v1/"+path,opts);
+  if(!r.ok) throw new Error(await r.text());
+  return r.status===204?null:r.json();
+}
+
+function setSyncing(v){
+  const dot=document.getElementById("sync-dot");
+  const txt=document.getElementById("sync-text");
+  if(v){dot.className="sync-dot syncing";txt.textContent="salvando...";}
+  else{dot.className="sync-dot";txt.textContent="sincronizado";}
+}
+
+function platAtual(){return PLATS.find(p=>p.id===st.plat)}
+function setCSSVars(cor,cor10){
+  document.documentElement.style.setProperty("--plat-cor",cor);
+  document.documentElement.style.setProperty("--plat-cor-10",cor10);
+}
+
+async function carregarLojas(){
+  const data=await api("lojas?select=plataforma,nome&order=nome");
+  st.lojas={shopee:[],shein:[],mlivre:[],tiktok:[]};
+  data.forEach(({plataforma,nome})=>{if(st.lojas[plataforma])st.lojas[plataforma].push(nome);});
+}
+
+async function carregarHistorico(platId=null,lojaFiltro=null){
+  let path="historico?select=*&order=created_at.desc&limit=500";
+  if(platId) path+="&plataforma=eq."+platId;
+  if(lojaFiltro) path+="&loja=eq."+encodeURIComponent(lojaFiltro);
+  return api(path);
+}
+
+async function inicializar(){
+  try{
+    await carregarLojas();
+    st.geralHistorico=await carregarHistorico();
+    setSyncing(false);
+    renderSidebar();
+    renderGeralCards();
+    renderGeralTabela();
+  }catch(e){
+    document.getElementById("sync-text").textContent="erro de conexão";
+    document.getElementById("sync-dot").style.background="#f44336";
+    showToast("⚠️ Erro ao conectar. Verifique a configuração.");
+    console.error(e);
+  }
+}
+
+function renderSidebar(){
+  const p=platAtual();
+  const totalGeral=st.geralHistorico.length;
+  document.getElementById("nav-geral-count").textContent=totalGeral||"";
+  document.getElementById("nav-geral").className="nav-item"+(st.view==="geral"?" active":"");
+
+  document.getElementById("plat-list").innerHTML=PLATS.map(pl=>{
+    const total=st.geralHistorico.filter(r=>r.plataforma===pl.id).length;
+    const isActive=st.view==="plat"&&pl.id===st.plat;
+    return`<div class="nav-item${isActive?" active":""}" style="--plat-cor:${pl.cor}" onclick="selecionarPlat('${pl.id}')">
+      <span class="nav-dot" style="background:${pl.cor}"></span>
+      <span>${pl.label}</span>
+      <span class="nav-count">${total||""}</span>
+    </div>`;
+  }).join("");
+
+  const lojas=st.lojas[st.plat]||[];
+  document.getElementById("lojas-list").innerHTML=lojas.map(l=>`
+    <button class="loja-btn${l===st.loja?" active":""}" style="--plat-cor:${p.cor}" onclick="selecionarLoja('${l}')">
+      <span class="loja-dot"></span>${l}
+    </button>`).join("")||`<p style="font-size:11px;color:var(--text3);padding:4px 10px">Nenhuma loja</p>`;
+
+  let totalL=0;Object.values(st.lojas).forEach(a=>totalL+=a.length);
+  document.getElementById("stat-total").textContent=totalGeral;
+  document.getElementById("stat-lojas").textContent=totalL;
+}
+
+function renderGeralCards(){
+  document.getElementById("ov-cards").innerHTML=PLATS.map(pl=>{
+    const total=st.geralHistorico.filter(r=>r.plataforma===pl.id).length;
+    const lojas=(st.lojas[pl.id]||[]).length;
+    return`<div class="ov-card">
+      <div class="ov-card-top"><span class="ov-dot" style="background:${pl.cor}"></span><span class="ov-label">${pl.label}</span></div>
+      <div class="ov-num">${total}</div>
+      <div class="ov-sub">${lojas} loja${lojas!==1?"s":""}</div>
+    </div>`;
+  }).join("")+`<div class="ov-card">
+    <div class="ov-card-top"><span class="ov-dot" style="background:#888"></span><span class="ov-label">Total</span></div>
+    <div class="ov-num">${st.geralHistorico.length}</div>
+    <div class="ov-sub">todos os registros</div>
+  </div>`;
+}
+
+function renderGeralTabela(){
+  let regs=[...st.geralHistorico];
+  const sl=document.getElementById("geral-search-loja").value.toLowerCase().trim();
+  const fp=document.getElementById("geral-filter-plat").value;
+  const ft=document.getElementById("geral-filter-tipo").value;
+  if(sl) regs=regs.filter(r=>r.loja.toLowerCase().includes(sl));
+  if(fp) regs=regs.filter(r=>r.plataforma===fp);
+  if(ft) regs=regs.filter(r=>r.tipo===ft);
+  document.getElementById("geral-count").textContent=regs.length+" registro"+(regs.length!==1?"s":"");
+  if(!regs.length){
+    document.getElementById("geral-tbody").innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro encontrado</div></div></td></tr>`;
+    return;
+  }
+  const platMap=Object.fromEntries(PLATS.map(p=>[p.id,p]));
+  document.getElementById("geral-tbody").innerHTML=regs.map((r,i)=>{
+    const pl=platMap[r.plataforma]||{label:r.plataforma,cor:"#888"};
+    const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
+    const hr=r.hora_registro||new Date(r.created_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    return`<tr>
+      <td class="td-mono td-muted">${regs.length-i}</td>
+      <td><span class="plat-pill" style="background:${pl.cor};color:${pl.fc||"#fff"}">${pl.label}</span></td>
+      <td class="loja-mono">${r.loja}</td>
+      <td class="td-mono">${dt}<br><span style="color:var(--text3)">${hr}</span></td>
+      <td style="font-weight:500">${r.colaborador}</td>
+      <td><span class="tipo-tag">${r.tipo}</span></td>
+      <td style="max-width:140px;color:var(--text2);font-size:11px">${r.detalhes||"—"}</td>
+      <td class="td-muted">${r.antes||"—"}</td>
+      <td style="font-weight:500">${r.depois||"—"}</td>
+      <td><span class="badge ${STATUS_CLASS[r.status]||""}">${r.status}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function limparFiltrosGeral(){
+  document.getElementById("geral-search-loja").value="";
+  document.getElementById("geral-filter-plat").value="";
+  document.getElementById("geral-filter-tipo").value="";
+  renderGeralTabela();
+}
+
+function renderHeader(){
+  const p=platAtual();
+  document.getElementById("plat-title").textContent=p.label;
+  document.getElementById("plat-sub").textContent=st.loja?`loja: ${st.loja}`:"todas as lojas";
+  document.getElementById("plat-badge").textContent=p.label;
+  document.getElementById("plat-badge").style.background=p.cor;
+  document.getElementById("plat-badge").style.color=p.fc||"#fff";
+  document.getElementById("btn-save").style.background=p.cor;
+}
+
+function renderFiltros(){
+  document.getElementById("filtros-tipo").innerHTML=
+    [`<button class="filtro-chip${!st.filtroTipo?" active":""}" onclick="filtrarTipo('')">Todos</button>`]
+    .concat(TIPOS.map(t=>`<button class="filtro-chip${st.filtroTipo===t?" active":""}" onclick="filtrarTipo('${t}')">${t}</button>`))
+    .join("");
+}
+
+function renderTabela(){
+  let regs=[...st.historico];
+  if(st.loja) regs=regs.filter(r=>r.loja===st.loja);
+  if(st.filtroTipo) regs=regs.filter(r=>r.tipo===st.filtroTipo);
+  const s=document.getElementById("search").value.toLowerCase();
+  if(s) regs=regs.filter(r=>r.colaborador.toLowerCase().includes(s));
+  document.getElementById("count-pill").textContent=regs.length+" registro"+(regs.length!==1?"s":"");
+  if(!regs.length){
+    document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro ainda</div></div></td></tr>`;
+    return;
+  }
+  document.getElementById("tbody").innerHTML=regs.map((r,i)=>{
+    const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
+    const hr=r.hora_registro||new Date(r.created_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    return`<tr>
+      <td class="td-mono td-muted">${regs.length-i}</td>
+      <td class="td-mono">${dt}<br><span style="color:var(--text3)">${hr}</span></td>
+      <td style="font-weight:500">${r.colaborador}</td>
+      <td class="loja-mono">${r.loja}</td>
+      <td><span class="tipo-tag">${r.tipo}</span></td>
+      <td style="max-width:140px;color:var(--text2);font-size:11px">${r.detalhes||"—"}</td>
+      <td class="td-muted">${r.antes||"—"}</td>
+      <td style="font-weight:500">${r.depois||"—"}</td>
+      <td><span class="badge ${STATUS_CLASS[r.status]||""}">${r.status}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function filtrarTipo(t){st.filtroTipo=t;renderFiltros();renderTabela();}
+
+async function irParaGeral(){
+  st.view="geral";
+  document.getElementById("page-geral").className="page active";
+  document.getElementById("page-plat").className="page";
+  setCSSVars("#1A1916","#F0EFEC");
+  setSyncing(true);
+  st.geralHistorico=await carregarHistorico();
+  setSyncing(false);
+  renderSidebar();renderGeralCards();renderGeralTabela();
+}
+
+async function selecionarPlat(id){
+  st.view="plat";st.plat=id;st.loja="";st.filtroTipo="";
+  const p=PLATS.find(x=>x.id===id);
+  setCSSVars(p.cor,p.cor10);
+  document.getElementById("page-geral").className="page";
+  document.getElementById("page-plat").className="page active";
+  document.getElementById("search").value="";
+  document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr>`;
+  renderSidebar();renderHeader();renderFiltros();
+  setSyncing(true);
+  st.historico=await carregarHistorico(id);
+  setSyncing(false);
+  renderTabela();
+}
+
+function selecionarLoja(l){
+  st.loja=st.loja===l?"":l;
+  renderSidebar();renderHeader();renderTabela();
+}
+
+async function adicionarLoja(){
+  const inp=document.getElementById("nova-loja");
+  const nome=inp.value.trim();
+  if(!nome)return;
+  if((st.lojas[st.plat]||[]).includes(nome)){showToast("⚠️ Loja já existe");return;}
+  try{
+    setSyncing(true);
+    await api("lojas","POST",{plataforma:st.plat,nome});
+    st.lojas[st.plat]=[...(st.lojas[st.plat]||[]),nome];
+    inp.value="";
+    setSyncing(false);
+    renderSidebar();
+    showToast("✓ Loja '"+nome+"' adicionada!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao adicionar loja");}
+}
+
+async function salvar(){
+  const colab=document.getElementById("f-colab").value.trim();
+  const tipo=document.getElementById("f-tipo").value;
+  if(!colab){showToast("⚠️ Informe o colaborador");return;}
+  if(!tipo){showToast("⚠️ Selecione o tipo de alteração");return;}
+  if(!st.loja){showToast("⚠️ Selecione uma loja no menu lateral");return;}
+  const btn=document.getElementById("btn-save");
+  btn.disabled=true;btn.textContent="Salvando...";
+  const now=new Date();
+  const reg={
+    plataforma:st.plat,loja:st.loja,colaborador:colab,tipo,
+    detalhes:document.getElementById("f-obs").value.trim(),
+    antes:document.getElementById("f-antes").value.trim(),
+    depois:document.getElementById("f-depois").value.trim(),
+    status:document.getElementById("f-status").value,
+    data_registro:now.toLocaleDateString("pt-BR"),
+    hora_registro:now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
+  };
+  try{
+    setSyncing(true);
+    const [saved]=await api("historico","POST",reg);
+    st.historico.unshift(saved);
+    st.geralHistorico.unshift(saved);
+    document.getElementById("f-tipo").value="";
+    document.getElementById("f-obs").value="";
+    document.getElementById("f-antes").value="";
+    document.getElementById("f-depois").value="";
+    setSyncing(false);
+    renderSidebar();renderTabela();
+    showToast("✓ Registro salvo no banco de dados!");
+  }catch(e){
+    setSyncing(false);
+    showToast("⚠️ Erro ao salvar. Tente novamente.");
+    console.error(e);
+  }
+  btn.disabled=false;btn.innerHTML="💾 Salvar registro";
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+document.getElementById("nova-loja").addEventListener("keydown",e=>{if(e.key==="Enter")adicionarLoja();});
+inicializar();
+</script>
+</body>
+</html>
