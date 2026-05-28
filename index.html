@@ -152,7 +152,10 @@ tr:hover .edit-row-btn{opacity:1}
     </div>
     <div class="sb-section" style="margin-top:.5rem">Plataformas</div>
     <div id="plat-list"></div>
-    <div class="sb-section" style="margin-top:.5rem">Lojas</div>
+    <div class="sb-section" style="margin-top:.5rem;display:flex;align-items:center;justify-content:space-between">
+      <span>Lojas</span>
+      <span id="lojas-section-badge" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">selecione uma ou mais</span>
+    </div>
     <div class="sb-lojas" id="lojas-list"></div>
     <div class="add-loja-wrap">
       <div class="add-loja-row">
@@ -195,6 +198,8 @@ tr:hover .edit-row-btn{opacity:1}
           <option>Oferta Relâmpago</option><option>Cupom</option>
           <option>Afiliados</option><option>Campanha</option><option>Promoção</option>
         </select>
+        <input type="date" id="geral-filter-data-ini" class="filter-sel" onchange="renderGeralTabela()" style="font-size:12px" title="Data inicial"/>
+        <input type="date" id="geral-filter-data-fim" class="filter-sel" onchange="renderGeralTabela()" style="font-size:12px" title="Data final"/>
         <button class="clear-btn" onclick="limparFiltrosGeral()">Limpar</button>
       </div>
       <div class="table-card">
@@ -223,7 +228,17 @@ tr:hover .edit-row-btn{opacity:1}
       <div class="form-card">
         <div class="form-card-title">Novo registro</div>
         <div class="form-grid">
-          <div class="field"><label>Colaborador</label><input id="f-colab" type="text" placeholder="Seu nome"/></div>
+          <div class="field"><label>Colaborador</label>
+            <div style="display:flex;gap:6px">
+              <select id="f-colab" style="flex:1">
+                <option value="">Selecione...</option>
+              </select>
+              <button onclick="abrirGerenciarColab()" title="Gerenciar colaboradores" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:13px;color:var(--text2)" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'">⚙️</button>
+            </div>
+          </div>
+          <div class="field" style="grid-column:1/-1"><label>Plataformas</label>
+            <div id="form-plats" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px"></div>
+          </div>
           <div class="field"><label>Tipo de alteração</label>
             <select id="f-tipo">
               <option value="">Selecione...</option>
@@ -277,6 +292,19 @@ const SUPABASE_URL="https://yvgoseljxxdczpziituq.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2Z29zZWxqeHhkY3pwemlpdHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTQ0MzksImV4cCI6MjA5NTI5MDQzOX0.1gEdI1aaw97oYMQV0pmWJR2JXQgtp514ZuUsKHI9dZE";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const COLABORADORES_KEY="colaboradores_lista";
+let COLABORADORES=["Kaylane","Willian","Jennifer","Brenno"];
+
+// Load colaboradores from localStorage
+try{
+  const saved=localStorage.getItem(COLABORADORES_KEY);
+  if(saved) COLABORADORES=JSON.parse(saved);
+}catch(e){}
+
+function salvarColaboradores(){
+  try{localStorage.setItem(COLABORADORES_KEY,JSON.stringify(COLABORADORES));}catch(e){}
+}
+
 const PLATS=[
   {id:"shopee",label:"Shopee",cor:"#EE4D2D",cor10:"#FDECEA"},
   {id:"shein",label:"Shein",cor:"#222222",cor10:"#F0F0F0"},
@@ -286,7 +314,7 @@ const PLATS=[
 const STATUS_CLASS={"Concluído":"badge-ok","Em andamento":"badge-wip","Pendente":"badge-pend","Revisão":"badge-rev"};
 const TIPOS=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
 
-let st={view:"geral",plat:"shopee",loja:"",filtroTipo:"",adminMode:false,lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},historico:[],geralHistorico:[]};
+let st={view:"geral",plat:"shopee",loja:"",lojaSelecionadas:[],platsSelecionadas:["shopee"],filtroTipo:"",adminMode:false,lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},historico:[],geralHistorico:[]};
 
 async function api(path,method="GET",body=null){
   // Parse path to get table and query params
@@ -379,11 +407,17 @@ function renderSidebar(){
   const lojas=st.lojas[st.plat]||[];
   document.getElementById("lojas-list").innerHTML=lojas.map(l=>`
     <div style="display:flex;align-items:center;gap:4px;padding:2px 4px">
-      <button class="loja-btn${l===st.loja?" active":""}" style="--plat-cor:${p.cor};flex:1" onclick="selecionarLoja('${l}')">
+      <button class="loja-btn${st.lojaSelecionadas.includes(l)?" active":""}" style="--plat-cor:${p.cor};flex:1" onclick="toggleLoja('${l}')">
         <span class="loja-dot"></span><span class="loja-nome-text">${l}</span>
+        ${st.lojaSelecionadas.includes(l)?'<span style="margin-left:auto;font-size:10px;opacity:.7">✓</span>':""}
       </button>
       <button onclick="editarLoja('${l}')" title="Editar nome" style="padding:3px 6px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--text3);font-size:11px;flex-shrink:0" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='transparent'">✏️</button>
     </div>`).join("")||`<p style="font-size:11px;color:var(--text3);padding:4px 10px">Nenhuma loja</p>`;
+  
+  // Update loja counter badge
+  const count = st.lojaSelecionadas.length;
+  const badge = document.getElementById("lojas-section-badge");
+  if(badge) badge.textContent = count > 0 ? count+" selecionada"+(count>1?"s":"") : "selecione uma ou mais";
 
   let totalL=0;Object.values(st.lojas).forEach(a=>totalL+=a.length);
   document.getElementById("stat-total").textContent=totalGeral;
@@ -411,9 +445,19 @@ function renderGeralTabela(){
   const sl=document.getElementById("geral-search-loja").value.toLowerCase().trim();
   const fp=document.getElementById("geral-filter-plat").value;
   const ft=document.getElementById("geral-filter-tipo").value;
+  const dataIni=document.getElementById("geral-filter-data-ini").value;
+  const dataFim=document.getElementById("geral-filter-data-fim").value;
   if(sl) regs=regs.filter(r=>r.loja.toLowerCase().includes(sl));
   if(fp) regs=regs.filter(r=>r.plataforma===fp);
   if(ft) regs=regs.filter(r=>r.tipo===ft);
+  if(dataIni) regs=regs.filter(r=>{
+    const d=new Date(r.created_at||r.data_registro?.split("/").reverse().join("-"));
+    return d>=new Date(dataIni);
+  });
+  if(dataFim) regs=regs.filter(r=>{
+    const d=new Date(r.created_at||r.data_registro?.split("/").reverse().join("-"));
+    return d<=new Date(dataFim+"T23:59:59");
+  });
   document.getElementById("geral-count").textContent=regs.length+" registro"+(regs.length!==1?"s":"");
   if(!regs.length){
     document.getElementById("geral-tbody").innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro encontrado</div></div></td></tr>`;
@@ -443,13 +487,19 @@ function limparFiltrosGeral(){
   document.getElementById("geral-search-loja").value="";
   document.getElementById("geral-filter-plat").value="";
   document.getElementById("geral-filter-tipo").value="";
+  document.getElementById("geral-filter-data-ini").value="";
+  document.getElementById("geral-filter-data-fim").value="";
   renderGeralTabela();
 }
 
 function renderHeader(){
   const p=platAtual();
   document.getElementById("plat-title").textContent=p.label;
-  document.getElementById("plat-sub").textContent=st.loja?`loja: ${st.loja}`:"todas as lojas";
+  const selCount=st.lojaSelecionadas.length;
+  document.getElementById("plat-sub").textContent=
+    selCount===0?"todas as lojas":
+    selCount===1?`loja: ${st.lojaSelecionadas[0]}`:
+    `${selCount} lojas selecionadas`;
   document.getElementById("plat-badge").textContent=p.label;
   document.getElementById("plat-badge").style.background=p.cor;
   document.getElementById("plat-badge").style.color=p.fc||"#fff";
@@ -465,7 +515,7 @@ function renderFiltros(){
 
 function renderTabela(){
   let regs=[...st.historico];
-  if(st.loja) regs=regs.filter(r=>r.loja===st.loja);
+  if(st.lojaSelecionadas.length>0) regs=regs.filter(r=>st.lojaSelecionadas.includes(r.loja));
   if(st.filtroTipo) regs=regs.filter(r=>r.tipo===st.filtroTipo);
   const s=document.getElementById("search").value.toLowerCase();
   if(s) regs=regs.filter(r=>r.colaborador.toLowerCase().includes(s));
@@ -506,13 +556,14 @@ async function irParaGeral(){
 }
 
 async function selecionarPlat(id){
-  st.view="plat";st.plat=id;st.loja="";st.filtroTipo="";
+  st.view="plat";st.plat=id;st.loja="";st.lojaSelecionadas=[];st.filtroTipo="";
   const p=PLATS.find(x=>x.id===id);
   setCSSVars(p.cor,p.cor10);
   document.getElementById("page-geral").className="page";
   document.getElementById("page-plat").className="page active";
   document.getElementById("search").value="";
   document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr>`;
+  renderFormPlats();
   renderSidebar();renderHeader();renderFiltros();
   setSyncing(true);
   st.historico=await carregarHistorico(id);
@@ -522,6 +573,18 @@ async function selecionarPlat(id){
 
 function selecionarLoja(l){
   st.loja=st.loja===l?"":l;
+  renderSidebar();renderHeader();renderTabela();
+}
+
+function toggleLoja(l){
+  const idx=st.lojaSelecionadas.indexOf(l);
+  if(idx>=0){
+    st.lojaSelecionadas.splice(idx,1);
+  } else {
+    st.lojaSelecionadas.push(l);
+  }
+  // For filtering table, use first selected or empty
+  st.loja=st.lojaSelecionadas.length===1?st.lojaSelecionadas[0]:"";
   renderSidebar();renderHeader();renderTabela();
 }
 
@@ -542,16 +605,18 @@ async function adicionarLoja(){
 }
 
 async function salvar(){
-  const colab=document.getElementById("f-colab").value.trim();
+  const colab=document.getElementById("f-colab").value;
   const tipo=document.getElementById("f-tipo").value;
-  if(!colab){showToast("⚠️ Informe o colaborador");return;}
+  if(!colab){showToast("⚠️ Selecione o colaborador");return;}
   if(!tipo){showToast("⚠️ Selecione o tipo de alteração");return;}
-  if(!st.loja){showToast("⚠️ Selecione uma loja no menu lateral");return;}
+  if(st.platsSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma plataforma");return;}
+  if(st.lojaSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma loja no menu lateral");return;}
   const btn=document.getElementById("btn-save");
-  btn.disabled=true;btn.textContent="Salvando...";
+  const totalRegs=st.platsSelecionadas.length*st.lojaSelecionadas.length;
+  btn.disabled=true;btn.innerHTML=`💾 Salvando ${totalRegs} registro${totalRegs>1?"s":""}...`;
   const now=new Date();
-  const reg={
-    plataforma:st.plat,loja:st.loja,colaborador:colab,tipo,
+  const base={
+    colaborador:colab,tipo,
     detalhes:document.getElementById("f-obs").value.trim(),
     antes:document.getElementById("f-antes").value.trim(),
     depois:document.getElementById("f-depois").value.trim(),
@@ -561,16 +626,23 @@ async function salvar(){
   };
   try{
     setSyncing(true);
-    const [saved]=await api("historico","POST",reg);
-    st.historico.unshift(saved);
-    st.geralHistorico.unshift(saved);
+    // Create one record per plataforma x loja combination
+    const registros=[];
+    for(const plat of st.platsSelecionadas){
+      for(const loja of st.lojaSelecionadas){
+        registros.push({...base,plataforma:plat,loja});
+      }
+    }
+    const {data:saved,error}=await sb.from("historico").insert(registros).select();
+    if(error) throw error;
+    saved.forEach(r=>{st.historico.unshift(r);st.geralHistorico.unshift(r);});
     document.getElementById("f-tipo").value="";
     document.getElementById("f-obs").value="";
     document.getElementById("f-antes").value="";
     document.getElementById("f-depois").value="";
     setSyncing(false);
-    renderSidebar();renderTabela();
-    showToast("✓ Registro salvo no banco de dados!");
+    renderSidebar();renderTabela();renderGeralCards();
+    showToast(`✓ ${saved.length} registro${saved.length>1?"s salvo":"s salvo"}s com sucesso!`);
   }catch(e){
     setSyncing(false);
     showToast("⚠️ Erro ao salvar. Tente novamente.");
@@ -630,6 +702,99 @@ function showToast(msg){
 document.getElementById("nova-loja").addEventListener("keydown",e=>{if(e.key==="Enter")adicionarLoja();});
 
 // Admin mode
+function renderFormPlats(){
+  const container=document.getElementById("form-plats");
+  if(!container) return;
+  container.innerHTML=PLATS.map(pl=>{
+    const sel=st.platsSelecionadas.includes(pl.id);
+    return`<button type="button" onclick="togglePlatForm('${pl.id}')" style="
+      padding:5px 12px;border-radius:999px;font-size:12px;font-weight:500;
+      border:1.5px solid ${sel?pl.cor:'"var(--border)"'};
+      background:${sel?pl.cor:'"var(--surface)"'};
+      color:${sel?(pl.fc||'"#fff"'):'"var(--text2)"'};
+      cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif"
+    >${pl.label}</button>`;
+  }).join("");
+}
+
+function togglePlatForm(id){
+  const idx=st.platsSelecionadas.indexOf(id);
+  if(idx>=0) st.platsSelecionadas.splice(idx,1);
+  else st.platsSelecionadas.push(id);
+  // Update loja list based on first selected plat
+  if(st.platsSelecionadas.length>0){
+    st.plat=st.platsSelecionadas[0];
+    st.lojaSelecionadas=[];
+  }
+  renderFormPlats();
+  renderSidebar();
+  renderHeader();
+}
+
+function renderColabSelect(){
+  const sel=document.getElementById("f-colab");
+  if(!sel) return;
+  const val=sel.value;
+  sel.innerHTML='<option value="">Selecione...</option>'+
+    COLABORADORES.map(c=>`<option value="${c}"${c===val?" selected":""}>${c}</option>`).join("");
+}
+
+function abrirGerenciarColab(){
+  const overlay=document.createElement("div");
+  overlay.className="modal-overlay";
+  overlay.id="modal-colab";
+  overlay.innerHTML=`
+    <div class="modal">
+      <div class="modal-title">⚙️ Gerenciar colaboradores</div>
+      <div class="modal-sub">Adicione ou remova colaboradores da lista</div>
+      <div id="colab-lista" style="margin-bottom:1rem"></div>
+      <div style="display:flex;gap:8px">
+        <input id="novo-colab-input" type="text" placeholder="Nome do novo colaborador..." style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px"/>
+        <button onclick="adicionarColab()" style="padding:8px 14px;border-radius:8px;border:none;background:var(--plat-cor);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">Adicionar</button>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" onclick="fecharModalColab()">Fechar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)fecharModalColab();});
+  renderColabLista();
+}
+
+function renderColabLista(){
+  document.getElementById("colab-lista").innerHTML=COLABORADORES.map(c=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${c}</span>
+      <button onclick="removerColab('${c}')" style="padding:3px 8px;border-radius:6px;border:none;background:#FFEBEE;color:#C62828;cursor:pointer;font-size:11px">Remover</button>
+    </div>`).join("");
+}
+
+function adicionarColab(){
+  const inp=document.getElementById("novo-colab-input");
+  const nome=inp.value.trim();
+  if(!nome) return;
+  if(COLABORADORES.includes(nome)){showToast("⚠️ Colaborador já existe");return;}
+  COLABORADORES.push(nome);
+  salvarColaboradores();
+  inp.value="";
+  renderColabLista();
+  renderColabSelect();
+  showToast("✓ Colaborador '"+nome+"' adicionado!");
+}
+
+function removerColab(nome){
+  if(!confirm("Remover '"+nome+"' da lista?")) return;
+  COLABORADORES=COLABORADORES.filter(c=>c!==nome);
+  salvarColaboradores();
+  renderColabLista();
+  renderColabSelect();
+}
+
+function fecharModalColab(){
+  const m=document.getElementById("modal-colab");
+  if(m) m.remove();
+}
+
 function toggleAdmin(){
   if(st.adminMode){
     st.adminMode=false;
@@ -735,7 +900,10 @@ async function deletarRegistro(id){
     showToast("✓ Registro excluído!");
   }catch(e){setSyncing(false);showToast("⚠️ Erro ao excluir");console.error(e);}
 }
-inicializar();
+inicializar().then(()=>{
+  renderFormPlats();
+  renderColabSelect();
+});
 </script>
 </body>
 </html>
