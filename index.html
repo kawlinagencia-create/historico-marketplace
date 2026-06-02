@@ -417,7 +417,7 @@ function renderSidebar(){
   // Update loja counter badge
   const count = st.lojaSelecionadas.length;
   const badge = document.getElementById("lojas-section-badge");
-  if(badge) badge.textContent = count > 0 ? count+" selecionada"+(count>1?"s":"") : "selecione uma ou mais";
+  if(badge) badge.textContent = count > 0 ? st.lojaSelecionadas[0] : "selecione uma loja";
 
   let totalL=0;Object.values(st.lojas).forEach(a=>totalL+=a.length);
   document.getElementById("stat-total").textContent=totalGeral;
@@ -577,14 +577,14 @@ function selecionarLoja(l){
 }
 
 function toggleLoja(l){
-  const idx=st.lojaSelecionadas.indexOf(l);
-  if(idx>=0){
-    st.lojaSelecionadas.splice(idx,1);
+  // Single selection — click same to deselect
+  if(st.lojaSelecionadas.includes(l)){
+    st.lojaSelecionadas=[];
+    st.loja="";
   } else {
-    st.lojaSelecionadas.push(l);
+    st.lojaSelecionadas=[l];
+    st.loja=l;
   }
-  // For filtering table, use first selected or empty
-  st.loja=st.lojaSelecionadas.length===1?st.lojaSelecionadas[0]:"";
   renderSidebar();renderHeader();renderTabela();
 }
 
@@ -610,9 +610,9 @@ async function salvar(){
   if(!colab){showToast("⚠️ Selecione o colaborador");return;}
   if(!tipo){showToast("⚠️ Selecione o tipo de alteração");return;}
   if(st.platsSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma plataforma");return;}
-  if(st.lojaSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma loja no menu lateral");return;}
+  if(st.lojaSelecionadas.length===0){showToast("⚠️ Selecione uma loja no menu lateral");return;}
   const btn=document.getElementById("btn-save");
-  const totalRegs=st.platsSelecionadas.length*st.lojaSelecionadas.length;
+  const totalRegs=st.platsSelecionadas.length;
   btn.disabled=true;btn.innerHTML=`💾 Salvando ${totalRegs} registro${totalRegs>1?"s":""}...`;
   const now=new Date();
   const base={
@@ -626,13 +626,9 @@ async function salvar(){
   };
   try{
     setSyncing(true);
-    // Create one record per plataforma x loja combination
-    const registros=[];
-    for(const plat of st.platsSelecionadas){
-      for(const loja of st.lojaSelecionadas){
-        registros.push({...base,plataforma:plat,loja});
-      }
-    }
+    // Create one record per plataforma (single loja)
+    const loja=st.lojaSelecionadas[0];
+    const registros=st.platsSelecionadas.map(plat=>({...base,plataforma:plat,loja}));
     const {data:saved,error}=await sb.from("historico").insert(registros).select();
     if(error) throw error;
     saved.forEach(r=>{st.historico.unshift(r);st.geralHistorico.unshift(r);});
