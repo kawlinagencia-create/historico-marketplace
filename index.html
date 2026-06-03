@@ -79,6 +79,8 @@ select.filter-sel:focus{outline:none;border-color:var(--border2)}
 .filtros-row{display:flex;align-items:center;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
 .filtros-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
 .filtro-chip{padding:4px 11px;border-radius:999px;font-size:11px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif}
+.tipo-chip{padding:5px 12px;border-radius:999px;font-size:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.tipo-chip.sel{border-color:var(--plat-cor);background:var(--plat-cor-10);color:var(--text);font-weight:500}
 .filtro-chip:hover{border-color:var(--border2)}
 .filtro-chip.active{background:var(--plat-cor);color:#fff;border-color:var(--plat-cor)}
 .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
@@ -239,15 +241,9 @@ tr:hover .edit-row-btn{opacity:1}
           <div class="field" style="grid-column:1/-1"><label>Plataformas</label>
             <div id="form-plats" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px"></div>
           </div>
-          <div class="field"><label>Tipo de alteração</label>
-            <select id="f-tipo">
-              <option value="">Selecione...</option>
-              <option>Título</option><option>Descrição</option><option>Foto Capa</option>
-              <option>Fotos Secundárias</option><option>Preço</option><option>Ads</option>
-              <option>Vídeo</option><option>Decoração da Loja</option>
-              <option>Oferta Relâmpago</option><option>Cupom</option>
-              <option>Afiliados</option><option>Campanha</option><option>Promoção</option>
-            </select>
+          <div class="field" style="grid-column:1/-1">
+            <label>Tipo de alteração <span id="tipo-count" style="color:var(--text3);font-weight:400">(selecione um ou mais)</span></label>
+            <div id="tipos-checkboxes" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
           </div>
         </div>
         <div class="form-grid-3">
@@ -314,7 +310,7 @@ const PLATS=[
 const STATUS_CLASS={"Concluído":"badge-ok","Em andamento":"badge-wip","Pendente":"badge-pend","Revisão":"badge-rev"};
 const TIPOS=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
 
-let st={view:"geral",plat:"shopee",loja:"",lojaSelecionadas:[],platsSelecionadas:["shopee"],filtroTipo:"",adminMode:false,lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},historico:[],geralHistorico:[]};
+let st={view:"geral",plat:"shopee",loja:"",lojaSelecionadas:[],platsSelecionadas:["shopee"],tiposSelecionados:[],filtroTipo:"",adminMode:false,lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},historico:[],geralHistorico:[]};
 
 async function api(path,method="GET",body=null){
   // Parse path to get table and query params
@@ -564,6 +560,7 @@ async function selecionarPlat(id){
   document.getElementById("search").value="";
   document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr>`;
   renderFormPlats();
+  renderTiposCheckboxes();
   renderSidebar();renderHeader();renderFiltros();
   setSyncing(true);
   st.historico=await carregarHistorico(id);
@@ -606,17 +603,16 @@ async function adicionarLoja(){
 
 async function salvar(){
   const colab=document.getElementById("f-colab").value;
-  const tipo=document.getElementById("f-tipo").value;
   if(!colab){showToast("⚠️ Selecione o colaborador");return;}
-  if(!tipo){showToast("⚠️ Selecione o tipo de alteração");return;}
+  if(st.tiposSelecionados.length===0){showToast("⚠️ Selecione ao menos um tipo de alteração");return;}
   if(st.platsSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma plataforma");return;}
   if(st.lojaSelecionadas.length===0){showToast("⚠️ Selecione uma loja no menu lateral");return;}
   const btn=document.getElementById("btn-save");
-  const totalRegs=st.platsSelecionadas.length;
+  const totalRegs=st.platsSelecionadas.length*st.tiposSelecionados.length;
   btn.disabled=true;btn.innerHTML=`💾 Salvando ${totalRegs} registro${totalRegs>1?"s":""}...`;
   const now=new Date();
   const base={
-    colaborador:colab,tipo,
+    colaborador:colab,
     detalhes:document.getElementById("f-obs").value.trim(),
     antes:document.getElementById("f-antes").value.trim(),
     depois:document.getElementById("f-depois").value.trim(),
@@ -626,13 +622,19 @@ async function salvar(){
   };
   try{
     setSyncing(true);
-    // Create one record per plataforma (single loja)
+    // Create one record per plataforma x tipo
     const loja=st.lojaSelecionadas[0];
-    const registros=st.platsSelecionadas.map(plat=>({...base,plataforma:plat,loja}));
+    const registros=[];
+    for(const plat of st.platsSelecionadas){
+      for(const tipo of st.tiposSelecionados){
+        registros.push({...base,plataforma:plat,loja,tipo});
+      }
+    }
     const {data:saved,error}=await sb.from("historico").insert(registros).select();
     if(error) throw error;
     saved.forEach(r=>{st.historico.unshift(r);st.geralHistorico.unshift(r);});
-    document.getElementById("f-tipo").value="";
+    st.tiposSelecionados=[];
+    renderTiposCheckboxes();
     document.getElementById("f-obs").value="";
     document.getElementById("f-antes").value="";
     document.getElementById("f-depois").value="";
@@ -698,6 +700,27 @@ function showToast(msg){
 document.getElementById("nova-loja").addEventListener("keydown",e=>{if(e.key==="Enter")adicionarLoja();});
 
 // Admin mode
+const TIPOS_LIST=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
+
+function renderTiposCheckboxes(){
+  const container=document.getElementById("tipos-checkboxes");
+  if(!container) return;
+  container.innerHTML=TIPOS_LIST.map(t=>{
+    const sel=st.tiposSelecionados.includes(t);
+    return`<button type="button" class="tipo-chip${sel?" sel":""}" onclick="toggleTipo('${t}')">${t}</button>`;
+  }).join("");
+  const count=st.tiposSelecionados.length;
+  const badge=document.getElementById("tipo-count");
+  if(badge) badge.textContent=count>0?`(${count} selecionado${count>1?"s":""})`:"(selecione um ou mais)";
+}
+
+function toggleTipo(t){
+  const idx=st.tiposSelecionados.indexOf(t);
+  if(idx>=0) st.tiposSelecionados.splice(idx,1);
+  else st.tiposSelecionados.push(t);
+  renderTiposCheckboxes();
+}
+
 function renderFormPlats(){
   const container=document.getElementById("form-plats");
   if(!container) return;
@@ -899,6 +922,7 @@ async function deletarRegistro(id){
 inicializar().then(()=>{
   renderFormPlats();
   renderColabSelect();
+  renderTiposCheckboxes();
 });
 </script>
 </body>
