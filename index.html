@@ -10,132 +10,201 @@
 :root{
   --bg:#F7F6F3;--surface:#FFFFFF;--border:#E8E6E1;--border2:#D4D0C8;
   --text:#1A1916;--text2:#6B6860;--text3:#A8A59E;
-  --radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.06);
+  --radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-md:0 4px 12px rgba(0,0,0,.1);
   --plat-cor:#EE4D2D;--plat-cor-10:#FDECEA;
+  --green:#1B5E20;--green-bg:#E8F5E9;
+  --orange:#E65100;--orange-bg:#FFF3E0;
+  --red:#C62828;--red-bg:#FFEBEE;
+  --blue:#0D47A1;--blue-bg:#E3F2FD;
+  --purple:#6A1B9A;--purple-bg:#F3E5F5;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
-.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
 .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
-.main{padding:2rem;overflow-x:hidden}
-.sb-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
-.sb-logo-text{font-size:15px;font-weight:600;letter-spacing:-.3px}
-.sb-logo-sub{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px}
-.sb-section{padding:.75rem 1.25rem .25rem;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 1.25rem;cursor:pointer;transition:background .12s;border-left:3px solid transparent;font-size:13px;font-weight:500;color:var(--text2)}
+.main{padding:1.5rem;overflow-x:hidden}
+.sb-logo{padding:1.25rem 1rem .875rem;border-bottom:1px solid var(--border)}
+.sb-logo-text{font-size:14px;font-weight:600;letter-spacing:-.3px}
+.sb-logo-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px;display:flex;align-items:center;gap:4px}
+.sb-section{padding:.6rem 1rem .2rem;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 1rem;cursor:pointer;border-left:3px solid transparent;font-size:12px;font-weight:500;color:var(--text2);transition:all .12s}
 .nav-item:hover{background:var(--bg)}
 .nav-item.active{border-left-color:var(--plat-cor);background:var(--bg);color:var(--text);font-weight:600}
-.nav-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.nav-count{margin-left:auto;font-size:11px;background:var(--bg);padding:2px 7px;border-radius:999px;color:var(--text3);font-family:'DM Mono',monospace}
-.sb-lojas{padding:.5rem .75rem}
-.loja-btn{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);text-align:left;transition:all .12s}
+.nav-count{margin-left:auto;font-size:10px;background:var(--bg);padding:1px 6px;border-radius:999px;color:var(--text3);font-family:'DM Mono',monospace}
+.nav-count.alert{background:#FFEBEE;color:#C62828;font-weight:600}
+.sb-lojas{padding:.4rem .6rem}
+.loja-btn{display:flex;align-items:center;gap:7px;width:100%;padding:5px 8px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--text2);text-align:left;transition:all .12s}
 .loja-btn:hover{background:var(--bg)}
 .loja-btn.active{background:var(--plat-cor-10);color:var(--text);font-weight:500}
-.loja-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.loja-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);flex-shrink:0}
 .loja-btn.active .loja-dot{background:var(--plat-cor)}
-.add-loja-wrap{padding:.5rem .75rem 1rem}
-.add-loja-row{display:flex;gap:6px}
-.add-loja-row input{flex:1;font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+.add-loja-wrap{padding:.4rem .6rem .75rem}
+.add-loja-row{display:flex;gap:5px}
+.add-loja-row input{flex:1;font-size:11px;padding:5px 8px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
 .add-loja-row input:focus{outline:none;border-color:var(--plat-cor)}
-.add-loja-row button{padding:6px 12px;border-radius:8px;border:none;background:var(--plat-cor);color:#fff;cursor:pointer;font-size:14px;font-weight:600;transition:opacity .15s}
-.add-loja-row button:hover{opacity:.85}
-.sb-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid var(--border)}
-.sb-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.stat-mini{background:var(--bg);border-radius:8px;padding:8px 10px}
-.stat-mini-n{font-size:18px;font-weight:600;font-family:'DM Mono',monospace}
-.stat-mini-l{font-size:10px;color:var(--text3);margin-top:1px}
+.add-loja-row button{padding:5px 10px;border-radius:7px;border:none;background:var(--plat-cor);color:#fff;cursor:pointer;font-size:13px;font-weight:600}
+.sb-footer{margin-top:auto;padding:.875rem 1rem;border-top:1px solid var(--border)}
+.sb-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat-mini{background:var(--bg);border-radius:7px;padding:6px 8px}
+.stat-mini-n{font-size:16px;font-weight:600;font-family:'DM Mono',monospace}
+.stat-mini-l{font-size:9px;color:var(--text3);margin-top:1px}
 .page{display:none}.page.active{display:block}
-.main-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
-.main-title{font-size:22px;font-weight:600;letter-spacing:-.4px}
-.main-sub{font-size:13px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace}
-.plat-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;color:#fff}
-.overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
-.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem;box-shadow:var(--shadow)}
-.ov-card-top{display:flex;align-items:center;gap:8px;margin-bottom:.5rem}
-.ov-dot{width:8px;height:8px;border-radius:50%}
-.ov-label{font-size:11px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
-.ov-num{font-size:28px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:-1px}
-.ov-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.search-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);flex-wrap:wrap}
-.search-bar-label{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
-.search-big{flex:1;min-width:150px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
+.main-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;gap:1rem;flex-wrap:wrap}
+.main-title{font-size:20px;font-weight:600;letter-spacing:-.4px}
+.main-sub{font-size:12px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace}
+.plat-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:600;color:#fff}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.25rem}
+.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.875rem;box-shadow:var(--shadow)}
+.ov-card-top{display:flex;align-items:center;gap:7px;margin-bottom:.4rem}
+.ov-dot{width:7px;height:7px;border-radius:50%}
+.ov-label{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.ov-num{font-size:26px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:-1px}
+.ov-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.search-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.875rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);flex-wrap:wrap}
+.search-bar-label{font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
+.search-big{flex:1;min-width:130px;padding:7px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px}
 .search-big:focus{outline:none;border-color:var(--border2)}
-select.filter-sel{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
+select.filter-sel{padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px}
 select.filter-sel:focus{outline:none;border-color:var(--border2)}
-.clear-btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer}
+.clear-btn{padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer}
 .clear-btn:hover{background:var(--bg)}
-.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}
-.form-card-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.03em}
-.field input,.field select,.field textarea{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;transition:border-color .15s}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.form-card-title{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:.875rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:.03em}
+.field input,.field select,.field textarea{padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;transition:border-color .15s}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--plat-cor)}
-.field textarea{resize:vertical;min-height:70px}
-.btn-save{width:100%;margin-top:4px;padding:10px;border-radius:8px;border:none;background:var(--plat-cor);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s,transform .1s}
-.btn-save:hover{opacity:.9}.btn-save:active{transform:scale(.99)}
-.btn-save:disabled{opacity:.5;cursor:not-allowed}
-.filtros-row{display:flex;align-items:center;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
-.filtros-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
-.filtro-chip{padding:4px 11px;border-radius:999px;font-size:11px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif}
-.tipo-chip{padding:5px 12px;border-radius:999px;font-size:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
-.tipo-chip.sel{border-color:var(--plat-cor);background:var(--plat-cor-10);color:var(--text);font-weight:500}
-.filtro-chip:hover{border-color:var(--border2)}
+.field textarea{resize:vertical;min-height:65px}
+.btn-save{width:100%;margin-top:4px;padding:9px;border-radius:7px;border:none;background:var(--plat-cor);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s}
+.btn-save:hover{opacity:.9}.btn-save:disabled{opacity:.5;cursor:not-allowed}
+.filtros-row{display:flex;align-items:center;gap:5px;margin-bottom:.875rem;flex-wrap:wrap}
+.filtros-label{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.filtro-chip{padding:3px 10px;border-radius:999px;font-size:11px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif}
 .filtro-chip.active{background:var(--plat-cor);color:#fff;border-color:var(--plat-cor)}
+.tipo-chip{padding:4px 11px;border-radius:999px;font-size:11px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.tipo-chip.sel{border-color:var(--plat-cor);background:var(--plat-cor-10);color:var(--text);font-weight:500}
 .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
-.table-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.table-title{font-size:13px;font-weight:600}
-.count-pill{font-size:11px;font-family:'DM Mono',monospace;background:var(--bg);padding:3px 9px;border-radius:999px;color:var(--text2)}
+.table-header{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-title{font-size:12px;font-weight:600}
+.count-pill{font-size:10px;font-family:'DM Mono',monospace;background:var(--bg);padding:2px 8px;border-radius:999px;color:var(--text2)}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+th{padding:7px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--border);font-size:11px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#FAFAF8}
-.td-mono{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)}
+.td-mono{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)}
 .td-muted{color:var(--text3)}
-.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
-.badge-ok{background:#E8F5E9;color:#1B5E20}
-.badge-wip{background:#E3F2FD;color:#0D47A1}
-.badge-pend{background:#FFF3E0;color:#E65100}
-.badge-rev{background:#F3E5F5;color:#6A1B9A}
-.tipo-tag{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--text2);white-space:nowrap}
-.plat-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;color:#fff;white-space:nowrap}
-.loja-mono{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
-.empty-state{padding:3rem;text-align:center}
-.empty-icon{font-size:32px;margin-bottom:.75rem;opacity:.3}
-.empty-text{font-size:13px;color:var(--text3)}
-.loading{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--plat-cor);border-radius:50%;animation:spin .6s linear infinite;margin-right:8px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:500}
+.badge-ok{background:var(--green-bg);color:var(--green)}
+.badge-wip{background:var(--blue-bg);color:var(--blue)}
+.badge-pend{background:var(--orange-bg);color:var(--orange)}
+.badge-rev{background:var(--purple-bg);color:var(--purple)}
+.tipo-tag{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 6px;font-size:10px;color:var(--text2);white-space:nowrap}
+.plat-pill{display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:9px;font-weight:600;color:#fff;white-space:nowrap}
+.loja-mono{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.empty-state{padding:2.5rem;text-align:center}
+.empty-icon{font-size:28px;margin-bottom:.6rem;opacity:.3}
+.empty-text{font-size:12px;color:var(--text3)}
+.loading{text-align:center;padding:1.5rem;color:var(--text3);font-size:12px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--plat-cor);border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-.admin-btn{display:flex;align-items:center;gap:6px;width:100%;padding:8px 1.25rem;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text3);text-align:left;border-top:1px solid var(--border);transition:all .12s}
+/* ADMIN */
+.admin-btn{display:flex;align-items:center;gap:6px;width:100%;padding:7px 1rem;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--text3);text-align:left;border-top:1px solid var(--border);transition:all .12s}
 .admin-btn:hover{background:var(--bg);color:var(--text)}
 .admin-btn.ativo{background:#FFF8E1;color:#E65100;font-weight:600}
-.edit-row-btn{opacity:0;padding:2px 6px;border-radius:5px;border:none;background:transparent;cursor:pointer;font-size:11px;color:var(--text3);transition:all .12s}
+.edit-row-btn{opacity:0;padding:2px 5px;border-radius:5px;border:none;background:transparent;cursor:pointer;font-size:10px;color:var(--text3);transition:all .12s}
 tr:hover .edit-row-btn{opacity:1}
-.edit-row-btn:hover{background:var(--bg);color:var(--text)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center}
-.modal{background:var(--surface);border-radius:var(--radius-lg);padding:1.5rem;width:400px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.15)}
-.modal-title{font-size:15px;font-weight:600;margin-bottom:.5rem}
-.modal-sub{font-size:12px;color:var(--text3);margin-bottom:1rem}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:.4rem}
+.modal-sub{font-size:11px;color:var(--text3);margin-bottom:1rem}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .modal-field{display:flex;flex-direction:column;gap:4px}
-.modal-field label{font-size:11px;font-weight:500;color:var(--text2)}
-.modal-field input,.modal-field select,.modal-field textarea{padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
-.modal-field textarea{min-height:60px;resize:vertical}
-.modal-actions{display:flex;gap:8px;margin-top:1rem;justify-content:flex-end}
-.modal-btn{padding:8px 16px;border-radius:7px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.modal-field label{font-size:10px;font-weight:500;color:var(--text2)}
+.modal-field input,.modal-field select,.modal-field textarea{padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px}
+.modal-field textarea{min-height:55px;resize:vertical}
+.modal-actions{display:flex;gap:7px;margin-top:1rem;justify-content:flex-end}
+.modal-btn{padding:7px 14px;border-radius:7px;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer}
 .modal-btn-cancel{background:var(--bg);color:var(--text2)}
 .modal-btn-save{background:#1B5E20;color:#fff}
 .modal-btn-delete{background:#FFEBEE;color:#C62828}
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
-.toast.show{opacity:1;transform:translateY(0)}
-.sync-indicator{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:#4CAF50}
+/* CHECKLIST */
+.check-date-group{margin-bottom:1rem}
+.check-date-header{display:flex;align-items:center;gap:8px;margin-bottom:.6rem}
+.check-date-label{font-size:12px;font-weight:600;color:var(--text)}
+.check-date-badge{font-size:10px;padding:2px 8px;border-radius:999px;background:var(--bg);color:var(--text3);font-family:'DM Mono',monospace}
+.check-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 1rem;border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer}
+.check-item:last-child{border-bottom:none}
+.check-item:hover{background:#FAFAF8}
+.check-item.status-concluido{border-left:3px solid var(--green)}
+.check-item.status-andamento{border-left:3px solid var(--orange)}
+.check-item.status-atrasado{border-left:3px solid var(--red);background:#FFF8F8}
+.check-status-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid var(--border2);transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:9px}
+.check-status-dot.concluido{background:var(--green);border-color:var(--green);color:#fff}
+.check-status-dot.andamento{background:var(--orange);border-color:var(--orange);color:#fff}
+.check-status-dot.atrasado{background:var(--red);border-color:var(--red);color:#fff}
+.check-title{flex:1;font-size:12px;color:var(--text)}
+.check-title.concluido{text-decoration:line-through;color:var(--text3)}
+.freq-badge{font-size:9px;padding:2px 6px;border-radius:999px;font-weight:500;white-space:nowrap}
+.freq-diaria{background:var(--blue-bg);color:var(--blue)}
+.freq-semanal{background:var(--purple-bg);color:var(--purple)}
+.status-badge-check{font-size:9px;padding:2px 7px;border-radius:999px;font-weight:500;white-space:nowrap}
+.sb-concluido{background:var(--green-bg);color:var(--green)}
+.sb-andamento{background:var(--orange-bg);color:var(--orange)}
+.sb-atrasado{background:var(--red-bg);color:var(--red)}
+.sb-pendente{background:var(--bg);color:var(--text3);border:1px solid var(--border)}
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1rem}
+.cal-header-day{text-align:center;font-size:10px;font-weight:600;color:var(--text3);padding:6px 0;text-transform:uppercase;letter-spacing:.05em}
+.cal-cell{min-height:90px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;cursor:pointer;transition:all .12s}
+.cal-cell:hover{border-color:var(--plat-cor);box-shadow:0 0 0 2px var(--plat-cor-10)}
+.cal-cell.other-month{background:var(--bg);opacity:.5}
+.cal-cell.today{border-color:var(--plat-cor);border-width:2px}
+.cal-day-num{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:3px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.cal-cell.today .cal-day-num{background:var(--plat-cor);color:#fff;font-weight:600}
+.cal-event-dot{font-size:10px;padding:1px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-nav-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px}
+.cal-nav-btn:hover{background:var(--bg)}
+.cal-month-title{font-size:15px;font-weight:600}
+.cal-list{margin-top:1rem}
+.evento-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.875rem 1.25rem;margin-bottom:.6rem;display:grid;grid-template-columns:4px 1fr auto;gap:.875rem;align-items:start;box-shadow:var(--shadow)}
+.evento-strip{border-radius:4px;align-self:stretch}
+.evento-titulo{font-size:13px;font-weight:600;margin-bottom:3px}
+.evento-meta{font-size:11px;color:var(--text2);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+.evento-status{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500}
+.ev-ativo{background:var(--green-bg);color:var(--green)}
+.ev-agendado{background:var(--blue-bg);color:var(--blue)}
+.ev-vencido{background:var(--red-bg);color:var(--red)}
+.ev-reagendar{background:var(--orange-bg);color:var(--orange)}
+.evento-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.ev-btn{padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:10px;cursor:pointer}
+.ev-btn:hover{background:var(--border)}
+/* ALERTA */
+.alerta-box{border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:.875rem;display:flex;align-items:flex-start;gap:9px;font-size:12px}
+.alerta-warn{background:var(--orange-bg);border:1px solid #FFB74D}
+.alerta-err{background:var(--red-bg);border:1px solid #EF9A9A}
+/* SYNC */
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#4CAF50;display:inline-block}
 .sync-dot.syncing{background:#FFB900;animation:pulse 1s infinite}
+.sync-dot.err{background:#f44336}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto}.main{padding:1rem}.form-grid,.form-grid-3{grid-template-columns:1fr}.overview-grid{grid-template-columns:1fr 1fr}}
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:9px 14px;border-radius:9px;font-size:12px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:768px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .main{padding:1rem}
+  .form-grid,.form-grid-3,.modal-grid{grid-template-columns:1fr}
+  .cal-grid{grid-template-columns:repeat(7,1fr)}
+  .cal-cell{min-height:55px}
+}
 </style>
 </head>
 <body>
@@ -143,20 +212,16 @@ tr:hover .edit-row-btn{opacity:1}
   <aside class="sidebar">
     <div class="sb-logo">
       <div class="sb-logo-text">Histórico MKT</div>
-      <div class="sb-logo-sub" id="sync-status">
-        <span class="sync-indicator"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">conectando...</span></span>
-      </div>
+      <div class="sb-logo-sub"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">conectando...</span></div>
     </div>
     <div class="sb-section">Visão</div>
-    <div class="nav-item active" id="nav-geral" onclick="irParaGeral()" style="--plat-cor:#1A1916">
-      <span style="font-size:15px">📊</span> Visão Geral
-      <span class="nav-count" id="nav-geral-count"></span>
-    </div>
-    <div class="sb-section" style="margin-top:.5rem">Plataformas</div>
+    <div class="nav-item active" id="nav-geral" onclick="irParaGeral()" style="--plat-cor:#1A1916"><span>📊</span>Visão Geral<span class="nav-count" id="nav-geral-count"></span></div>
+    <div class="nav-item" id="nav-checklist" onclick="irParaChecklist()" style="--plat-cor:#1565C0"><span>✅</span>Checklist<span class="nav-count" id="nav-check-count"></span></div>
+    <div class="nav-item" id="nav-calendar" onclick="irParaCalendario()" style="--plat-cor:#6A1B9A"><span>📅</span>Calendário<span class="nav-count" id="nav-cal-count"></span></div>
+    <div class="sb-section" style="margin-top:.4rem">Plataformas</div>
     <div id="plat-list"></div>
-    <div class="sb-section" style="margin-top:.5rem;display:flex;align-items:center;justify-content:space-between">
-      <span>Lojas</span>
-      <span id="lojas-section-badge" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">selecione uma ou mais</span>
+    <div class="sb-section" style="margin-top:.4rem;display:flex;align-items:center;justify-content:space-between">
+      <span>Lojas</span><span id="lojas-section-badge" style="font-size:9px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">selecione</span>
     </div>
     <div class="sb-lojas" id="lojas-list"></div>
     <div class="add-loja-wrap">
@@ -178,42 +243,29 @@ tr:hover .edit-row-btn{opacity:1}
     <!-- VISÃO GERAL -->
     <div class="page active" id="page-geral">
       <div class="main-header">
-        <div>
-          <div class="main-title">Visão Geral</div>
-          <div class="main-sub">todos os registros de todas as plataformas</div>
-        </div>
+        <div><div class="main-title">Visão Geral</div><div class="main-sub">todos os registros de todas as plataformas</div></div>
       </div>
       <div class="overview-grid" id="ov-cards"></div>
       <div class="search-bar">
-        <span class="search-bar-label">🔍 Buscar</span>
+        <span class="search-bar-label">🔍</span>
         <input class="search-big" id="geral-search-loja" type="text" placeholder="Nome da loja..." oninput="renderGeralTabela()"/>
         <select class="filter-sel" id="geral-filter-plat" onchange="renderGeralTabela()">
-          <option value="">Todas as plataformas</option>
+          <option value="">Todas plataformas</option>
           <option value="shopee">Shopee</option><option value="shein">Shein</option>
           <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
         </select>
         <select class="filter-sel" id="geral-filter-tipo" onchange="renderGeralTabela()">
           <option value="">Todos os tipos</option>
-          <option>Título</option><option>Descrição</option><option>Foto Capa</option>
-          <option>Fotos Secundárias</option><option>Preço</option><option>Ads</option>
-          <option>Vídeo</option><option>Decoração da Loja</option>
-          <option>Oferta Relâmpago</option><option>Cupom</option>
-          <option>Afiliados</option><option>Campanha</option><option>Promoção</option>
         </select>
-        <input type="date" id="geral-filter-data-ini" class="filter-sel" onchange="renderGeralTabela()" style="font-size:12px" title="Data inicial"/>
-        <input type="date" id="geral-filter-data-fim" class="filter-sel" onchange="renderGeralTabela()" style="font-size:12px" title="Data final"/>
+        <input type="date" id="geral-filter-data-ini" class="filter-sel" onchange="renderGeralTabela()" title="Data inicial"/>
+        <input type="date" id="geral-filter-data-fim" class="filter-sel" onchange="renderGeralTabela()" title="Data final"/>
         <button class="clear-btn" onclick="limparFiltrosGeral()">Limpar</button>
       </div>
       <div class="table-card">
-        <div class="table-header">
-          <span class="table-title">Histórico completo</span>
-          <span class="count-pill" id="geral-count">—</span>
-        </div>
+        <div class="table-header"><span class="table-title">Histórico completo</span><span class="count-pill" id="geral-count">—</span></div>
         <div class="table-wrap">
-          <table><thead><tr>
-            <th>#</th><th>Plataforma</th><th>Loja</th><th>Data / Hora</th>
-            <th>Colaborador</th><th>Tipo</th><th>Detalhes</th><th>Antes</th><th>Depois</th><th>Status</th><th></th>
-          </tr></thead><tbody id="geral-tbody"><tr><td colspan="10"><div class="loading"><span class="spinner"></span>Carregando dados...</div></td></tr></tbody></table>
+          <table><thead><tr><th>#</th><th>Plataforma</th><th>Loja</th><th>Data / Hora</th><th>Colaborador</th><th>Tipo</th><th>Detalhes</th><th>Antes</th><th>Depois</th><th>Status</th><th></th></tr></thead>
+          <tbody id="geral-tbody"><tr><td colspan="11"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr></tbody></table>
         </div>
       </div>
     </div>
@@ -221,63 +273,112 @@ tr:hover .edit-row-btn{opacity:1}
     <!-- PLATAFORMA -->
     <div class="page" id="page-plat">
       <div class="main-header">
-        <div>
-          <div class="main-title" id="plat-title">Shopee</div>
-          <div class="main-sub" id="plat-sub">selecione uma loja para filtrar</div>
-        </div>
+        <div><div class="main-title" id="plat-title">Shopee</div><div class="main-sub" id="plat-sub">selecione uma loja</div></div>
         <div class="plat-badge" id="plat-badge">Shopee</div>
       </div>
       <div class="form-card">
         <div class="form-card-title">Novo registro</div>
         <div class="form-grid">
           <div class="field"><label>Colaborador</label>
-            <div style="display:flex;gap:6px">
-              <select id="f-colab" style="flex:1">
-                <option value="">Selecione...</option>
-              </select>
-              <button onclick="abrirGerenciarColab()" title="Gerenciar colaboradores" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:13px;color:var(--text2)" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'">⚙️</button>
+            <div style="display:flex;gap:5px">
+              <select id="f-colab" style="flex:1"><option value="">Selecione...</option></select>
+              <button onclick="abrirGerenciarColab()" title="Gerenciar" style="padding:5px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:12px">⚙️</button>
             </div>
           </div>
-          <div class="field" style="grid-column:1/-1"><label>Plataformas</label>
-            <div id="form-plats" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px"></div>
+          <div class="field"><label>Loja</label>
+            <select id="f-loja"><option value="">Selecione...</option></select>
           </div>
-          <div class="field" style="grid-column:1/-1">
-            <label>Tipo de alteração <span id="tipo-count" style="color:var(--text3);font-weight:400">(selecione um ou mais)</span></label>
-            <div id="tipos-checkboxes" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
-          </div>
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>Plataformas <span id="plat-form-count" style="color:var(--text3);font-weight:400"></span></label>
+          <div id="form-plats" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"></div>
+        </div>
+        <div class="field" style="margin-bottom:10px"><label>Tipo de alteração <span id="tipo-count" style="color:var(--text3);font-weight:400">(selecione um ou mais)</span></label>
+          <div id="tipos-checkboxes" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px"></div>
         </div>
         <div class="form-grid-3">
           <div class="field"><label>Antes</label><input id="f-antes" type="text" placeholder="Valor anterior"/></div>
           <div class="field"><label>Depois</label><input id="f-depois" type="text" placeholder="Valor novo"/></div>
           <div class="field"><label>Status</label>
-            <select id="f-status">
-              <option>Concluído</option><option>Em andamento</option><option>Pendente</option><option>Revisão</option>
-            </select>
+            <select id="f-status"><option>Concluído</option><option>Em andamento</option><option>Pendente</option><option>Revisão</option></select>
           </div>
         </div>
-        <div class="field" style="margin-bottom:4px">
-          <label>Detalhes / Observação</label>
-          <textarea id="f-obs" placeholder="Descreva a alteração realizada..."></textarea>
+        <div class="field" style="margin-bottom:4px"><label>Detalhes / Observação</label>
+          <textarea id="f-obs" placeholder="Descreva a alteração..."></textarea>
         </div>
         <button class="btn-save" id="btn-save" onclick="salvar()">💾 Salvar registro</button>
       </div>
       <div class="filtros-row">
         <span class="filtros-label">Filtrar:</span>
         <div id="filtros-tipo"></div>
-        <input style="padding:5px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;width:180px;margin-left:4px" id="search" type="text" placeholder="Buscar colaborador..." oninput="renderTabela()"/>
+        <input style="padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;width:160px;margin-left:4px" id="search" type="text" placeholder="Buscar colaborador..." oninput="renderTabela()"/>
       </div>
       <div class="table-card">
-        <div class="table-header">
-          <span class="table-title">Histórico</span>
-          <span class="count-pill" id="count-pill">—</span>
-        </div>
+        <div class="table-header"><span class="table-title">Histórico</span><span class="count-pill" id="count-pill">—</span></div>
         <div class="table-wrap">
-          <table><thead><tr>
-            <th>#</th><th>Data / Hora</th><th>Colaborador</th><th>Loja</th>
-            <th>Tipo</th><th>Detalhes</th><th>Antes</th><th>Depois</th><th>Status</th><th></th>
-          </tr></thead><tbody id="tbody"><tr><td colspan="9"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr></tbody></table>
+          <table><thead><tr><th>#</th><th>Data / Hora</th><th>Colaborador</th><th>Loja</th><th>Tipo</th><th>Detalhes</th><th>Antes</th><th>Depois</th><th>Status</th><th></th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="10"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr></tbody></table>
         </div>
       </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="page" id="page-checklist">
+      <div class="main-header">
+        <div><div class="main-title">Checklist de Tarefas</div><div class="main-sub">tarefas diárias e semanais por colaborador</div></div>
+        <button onclick="abrirModalTarefa()" style="padding:7px 16px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Nova tarefa</button>
+      </div>
+      <div id="check-alertas"></div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+        <select id="check-filter-colab" class="filter-sel" onchange="renderChecklist()"><option value="">Todos colaboradores</option></select>
+        <select id="check-filter-freq" class="filter-sel" onchange="renderChecklist()">
+          <option value="">Diária e Semanal</option><option value="diaria">Somente Diária</option><option value="semanal">Somente Semanal</option>
+        </select>
+        <select id="check-filter-status" class="filter-sel" onchange="renderChecklist()">
+          <option value="">Todos os status</option><option value="concluido">Concluído</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="pendente">Pendente</option>
+        </select>
+        <select id="check-filter-semana" class="filter-sel" onchange="renderChecklist()">
+          <option value="semana">Esta semana</option><option value="proxima">Próxima semana</option><option value="todas">Todas as datas</option>
+        </select>
+      </div>
+      <div id="checklist-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
+    </div>
+
+    <!-- CALENDÁRIO -->
+    <div class="page" id="page-calendario">
+      <div class="main-header">
+        <div><div class="main-title">Calendário de Campanhas</div><div class="main-sub">cupons, descontos e promoções agendadas</div></div>
+        <button onclick="abrirModalEvento()" style="padding:7px 16px;border-radius:7px;border:none;background:#6A1B9A;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Novo agendamento</button>
+      </div>
+      <div id="cal-alertas"></div>
+      <!-- Calendário visual -->
+      <div class="form-card" style="padding:1rem">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="mudarMes(-1)">← Anterior</button>
+          <span class="cal-month-title" id="cal-mes-titulo"></span>
+          <button class="cal-nav-btn" onclick="mudarMes(1)">Próximo →</button>
+        </div>
+        <div class="cal-grid" id="cal-grid-header"></div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <!-- Filtros e lista -->
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+        <select id="cal-filter-plat" class="filter-sel" onchange="renderCalendario()">
+          <option value="">Todas plataformas</option>
+          <option value="shopee">Shopee</option><option value="shein">Shein</option>
+          <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
+        </select>
+        <select id="cal-filter-tipo" class="filter-sel" onchange="renderCalendario()">
+          <option value="">Todos os tipos</option>
+          <option value="cupom">Cupom</option><option value="desconto">Desconto</option>
+          <option value="promocao">Promoção</option><option value="campanha">Campanha</option><option value="oferta">Oferta Relâmpago</option>
+        </select>
+        <select id="cal-filter-status" class="filter-sel" onchange="renderCalendario()">
+          <option value="">Todos os status</option>
+          <option value="ativo">Ativo</option><option value="agendado">Agendado</option>
+          <option value="vencido">Vencido</option><option value="reagendar">Vencendo em breve</option>
+        </select>
+      </div>
+      <div id="calendario-lista"></div>
     </div>
   </main>
 </div>
@@ -286,21 +387,9 @@ tr:hover .edit-row-btn{opacity:1}
 <script>
 const SUPABASE_URL="https://yvgoseljxxdczpziituq.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2Z29zZWxqeHhkY3pwemlpdHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTQ0MzksImV4cCI6MjA5NTI5MDQzOX0.1gEdI1aaw97oYMQV0pmWJR2JXQgtp514ZuUsKHI9dZE";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const COLABORADORES_KEY="colaboradores_lista";
-let COLABORADORES=["Kaylane","Willian","Jennifer","Brenno"];
-
-// Load colaboradores from localStorage
-try{
-  const saved=localStorage.getItem(COLABORADORES_KEY);
-  if(saved) COLABORADORES=JSON.parse(saved);
-}catch(e){}
-
-function salvarColaboradores(){
-  try{localStorage.setItem(COLABORADORES_KEY,JSON.stringify(COLABORADORES));}catch(e){}
-}
-
+// ── DADOS GLOBAIS ──────────────────────────────────────────────────────────────
 const PLATS=[
   {id:"shopee",label:"Shopee",cor:"#EE4D2D",cor10:"#FDECEA"},
   {id:"shein",label:"Shein",cor:"#222222",cor10:"#F0F0F0"},
@@ -308,43 +397,26 @@ const PLATS=[
   {id:"tiktok",label:"TikTok",cor:"#010101",cor10:"#F0F0F0"},
 ];
 const STATUS_CLASS={"Concluído":"badge-ok","Em andamento":"badge-wip","Pendente":"badge-pend","Revisão":"badge-rev"};
-const TIPOS=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
+const TIPOS_LIST=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
+const COLAB_KEY="colaboradores_v2";
+let COLABORADORES=JSON.parse(localStorage.getItem(COLAB_KEY)||'["Kaylane","Willian","Jennifer","Brenno"]');
 
-let st={view:"geral",plat:"shopee",loja:"",lojaSelecionadas:[],platsSelecionadas:["shopee"],tiposSelecionados:[],filtroTipo:"",adminMode:false,lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},historico:[],geralHistorico:[]};
+let st={
+  view:"geral",plat:"shopee",loja:"",lojaSelecionadas:[],
+  platsSelecionadas:["shopee"],tiposSelecionados:[],
+  filtroTipo:"",adminMode:false,
+  lojas:{shopee:[],shein:[],mlivre:[],tiktok:[]},
+  historico:[],geralHistorico:[],
+};
 
-async function api(path,method="GET",body=null){
-  // Parse path to get table and query params
-  const [tablePart, ...rest] = path.split("?");
-  const table = tablePart;
-  const params = new URLSearchParams(rest.join("?"));
-  
-  if(method==="GET"){
-    let query = sb.from(table).select(params.get("select")||"*");
-    if(params.get("order")) {
-      const [col, dir] = params.get("order").split(".");
-      query = query.order(col, {ascending: dir!=="desc"});
-    }
-    if(params.get("limit")) query = query.limit(parseInt(params.get("limit")));
-    // Handle filters like plataforma=eq.shopee
-    for(const [k,v] of params.entries()){
-      if(v && v.startsWith("eq.")){
-        query = query.eq(k, decodeURIComponent(v.slice(3)));
-      }
-    }
-    const {data,error} = await query;
-    if(error) throw new Error(error.message);
-    return data;
-  } else if(method==="POST"){
-    const {data,error} = await sb.from(table).insert(body).select();
-    if(error) throw new Error(error.message);
-    return data;
-  }
-  return null;
-}
+let TAREFAS=[];
+let EVENTOS=[];
+let calMes=new Date().getMonth();
+let calAno=new Date().getFullYear();
 
+// ── API ────────────────────────────────────────────────────────────────────────
 function setSyncing(v){
-  const dot=document.getElementById("sync-dot");
-  const txt=document.getElementById("sync-text");
+  const dot=document.getElementById("sync-dot"),txt=document.getElementById("sync-text");
   if(v){dot.className="sync-dot syncing";txt.textContent="salvando...";}
   else{dot.className="sync-dot";txt.textContent="sincronizado";}
 }
@@ -352,150 +424,134 @@ function setSyncing(v){
 function platAtual(){return PLATS.find(p=>p.id===st.plat)}
 function setCSSVars(cor,cor10){
   document.documentElement.style.setProperty("--plat-cor",cor);
-  document.documentElement.style.setProperty("--plat-cor-10",cor10);
+  document.documentElement.style.setProperty("--plat-cor-10",cor10||"#F5F5F5");
 }
 
-async function carregarLojas(){
-  const data=await api("lojas?select=plataforma,nome&order=nome");
-  st.lojas={shopee:[],shein:[],mlivre:[],tiktok:[]};
-  data.forEach(({plataforma,nome})=>{if(st.lojas[plataforma])st.lojas[plataforma].push(nome);});
-}
-
-async function carregarHistorico(platId=null,lojaFiltro=null){
-  let path="historico?select=*&order=created_at.desc&limit=500";
-  if(platId) path+="&plataforma=eq."+platId;
-  if(lojaFiltro) path+="&loja=eq."+encodeURIComponent(lojaFiltro);
-  return api(path);
-}
-
+// ── INICIALIZAR ────────────────────────────────────────────────────────────────
 async function inicializar(){
   try{
     await carregarLojas();
     st.geralHistorico=await carregarHistorico();
-    setSyncing(false);
-    renderSidebar();
-    renderGeralCards();
-    renderGeralTabela();
+    document.getElementById("sync-dot").className="sync-dot";
+    document.getElementById("sync-text").textContent="sincronizado";
+    renderTodosSelects();
+    renderSidebar();renderGeralCards();renderGeralTabela();
   }catch(e){
+    document.getElementById("sync-dot").className="sync-dot err";
     document.getElementById("sync-text").textContent="erro de conexão";
-    document.getElementById("sync-dot").style.background="#f44336";
-    showToast("⚠️ Erro ao conectar. Verifique a configuração.");
     console.error(e);
   }
 }
 
+async function carregarLojas(){
+  const {data}=await sb.from("lojas").select("plataforma,nome").order("nome");
+  st.lojas={shopee:[],shein:[],mlivre:[],tiktok:[]};
+  (data||[]).forEach(({plataforma,nome})=>{if(st.lojas[plataforma])st.lojas[plataforma].push(nome);});
+}
+
+async function carregarHistorico(platId=null,lojaFiltro=null){
+  let q=sb.from("historico").select("*").order("created_at",{ascending:false}).limit(500);
+  if(platId) q=q.eq("plataforma",platId);
+  if(lojaFiltro) q=q.eq("loja",lojaFiltro);
+  const {data}=await q;
+  return data||[];
+}
+
+// ── SIDEBAR ────────────────────────────────────────────────────────────────────
 function renderSidebar(){
   const p=platAtual();
   const totalGeral=st.geralHistorico.length;
   document.getElementById("nav-geral-count").textContent=totalGeral||"";
-  document.getElementById("nav-geral").className="nav-item"+(st.view==="geral"?" active":"");
 
   document.getElementById("plat-list").innerHTML=PLATS.map(pl=>{
     const total=st.geralHistorico.filter(r=>r.plataforma===pl.id).length;
     const isActive=st.view==="plat"&&pl.id===st.plat;
     return`<div class="nav-item${isActive?" active":""}" style="--plat-cor:${pl.cor}" onclick="selecionarPlat('${pl.id}')">
-      <span class="nav-dot" style="background:${pl.cor}"></span>
-      <span>${pl.label}</span>
-      <span class="nav-count">${total||""}</span>
+      <span style="width:8px;height:8px;border-radius:50%;background:${pl.cor};display:inline-block;flex-shrink:0"></span>
+      <span>${pl.label}</span><span class="nav-count">${total||""}</span>
     </div>`;
   }).join("");
 
   const lojas=st.lojas[st.plat]||[];
   document.getElementById("lojas-list").innerHTML=lojas.map(l=>`
-    <div style="display:flex;align-items:center;gap:4px;padding:2px 4px">
+    <div style="display:flex;align-items:center;gap:3px;padding:1px 3px">
       <button class="loja-btn${st.lojaSelecionadas.includes(l)?" active":""}" style="--plat-cor:${p.cor};flex:1" onclick="toggleLoja('${l}')">
-        <span class="loja-dot"></span><span class="loja-nome-text">${l}</span>
-        ${st.lojaSelecionadas.includes(l)?'<span style="margin-left:auto;font-size:10px;opacity:.7">✓</span>':""}
+        <span class="loja-dot"></span>${l}${st.lojaSelecionadas.includes(l)?'<span style="margin-left:auto;font-size:9px">✓</span>':""}
       </button>
-      <button onclick="editarLoja('${l}')" title="Editar nome" style="padding:3px 6px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--text3);font-size:11px;flex-shrink:0" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='transparent'">✏️</button>
-    </div>`).join("")||`<p style="font-size:11px;color:var(--text3);padding:4px 10px">Nenhuma loja</p>`;
-  
-  // Update loja counter badge
-  const count = st.lojaSelecionadas.length;
-  const badge = document.getElementById("lojas-section-badge");
-  if(badge) badge.textContent = count > 0 ? st.lojaSelecionadas[0] : "selecione uma loja";
+      <button onclick="editarLoja('${l}')" style="padding:2px 5px;border-radius:5px;border:none;background:transparent;cursor:pointer;color:var(--text3);font-size:10px">✏️</button>
+    </div>`).join("")||`<p style="font-size:10px;color:var(--text3);padding:3px 8px">Nenhuma loja</p>`;
 
+  const badge=document.getElementById("lojas-section-badge");
+  if(badge) badge.textContent=st.lojaSelecionadas.length>0?st.lojaSelecionadas[0]:"selecione";
+
+  let totalR=0;Object.values(st.dados||{}).forEach(a=>totalR+=a.length);
   let totalL=0;Object.values(st.lojas).forEach(a=>totalL+=a.length);
   document.getElementById("stat-total").textContent=totalGeral;
   document.getElementById("stat-lojas").textContent=totalL;
 }
 
+// ── VISÃO GERAL ────────────────────────────────────────────────────────────────
 function renderGeralCards(){
   document.getElementById("ov-cards").innerHTML=PLATS.map(pl=>{
     const total=st.geralHistorico.filter(r=>r.plataforma===pl.id).length;
     const lojas=(st.lojas[pl.id]||[]).length;
     return`<div class="ov-card">
       <div class="ov-card-top"><span class="ov-dot" style="background:${pl.cor}"></span><span class="ov-label">${pl.label}</span></div>
-      <div class="ov-num">${total}</div>
-      <div class="ov-sub">${lojas} loja${lojas!==1?"s":""}</div>
+      <div class="ov-num">${total}</div><div class="ov-sub">${lojas} loja${lojas!==1?"s":""}</div>
     </div>`;
   }).join("")+`<div class="ov-card">
     <div class="ov-card-top"><span class="ov-dot" style="background:#888"></span><span class="ov-label">Total</span></div>
-    <div class="ov-num">${st.geralHistorico.length}</div>
-    <div class="ov-sub">todos os registros</div>
+    <div class="ov-num">${st.geralHistorico.length}</div><div class="ov-sub">todos os registros</div>
   </div>`;
 }
 
 function renderGeralTabela(){
   let regs=[...st.geralHistorico];
-  const sl=document.getElementById("geral-search-loja").value.toLowerCase().trim();
-  const fp=document.getElementById("geral-filter-plat").value;
-  const ft=document.getElementById("geral-filter-tipo").value;
-  const dataIni=document.getElementById("geral-filter-data-ini").value;
-  const dataFim=document.getElementById("geral-filter-data-fim").value;
+  const sl=document.getElementById("geral-search-loja")?.value.toLowerCase().trim();
+  const fp=document.getElementById("geral-filter-plat")?.value;
+  const ft=document.getElementById("geral-filter-tipo")?.value;
+  const di=document.getElementById("geral-filter-data-ini")?.value;
+  const df=document.getElementById("geral-filter-data-fim")?.value;
   if(sl) regs=regs.filter(r=>r.loja.toLowerCase().includes(sl));
   if(fp) regs=regs.filter(r=>r.plataforma===fp);
   if(ft) regs=regs.filter(r=>r.tipo===ft);
-  if(dataIni) regs=regs.filter(r=>{
-    const d=new Date(r.created_at||r.data_registro?.split("/").reverse().join("-"));
-    return d>=new Date(dataIni);
-  });
-  if(dataFim) regs=regs.filter(r=>{
-    const d=new Date(r.created_at||r.data_registro?.split("/").reverse().join("-"));
-    return d<=new Date(dataFim+"T23:59:59");
-  });
+  if(di) regs=regs.filter(r=>new Date(r.created_at)>=new Date(di));
+  if(df) regs=regs.filter(r=>new Date(r.created_at)<=new Date(df+"T23:59:59"));
   document.getElementById("geral-count").textContent=regs.length+" registro"+(regs.length!==1?"s":"");
-  if(!regs.length){
-    document.getElementById("geral-tbody").innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro encontrado</div></div></td></tr>`;
-    return;
-  }
   const platMap=Object.fromEntries(PLATS.map(p=>[p.id,p]));
-  document.getElementById("geral-tbody").innerHTML=regs.map((r,i)=>{
-    const pl=platMap[r.plataforma]||{label:r.plataforma,cor:"#888"};
-    const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
-    const hr=r.hora_registro||new Date(r.created_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-    return`<tr>
-      <td class="td-mono td-muted">${regs.length-i}</td>
-      <td><span class="plat-pill" style="background:${pl.cor};color:${pl.fc||"#fff"}">${pl.label}</span></td>
-      <td class="loja-mono">${r.loja}</td>
-      <td class="td-mono">${dt}<br><span style="color:var(--text3)">${hr}</span></td>
-      <td style="font-weight:500">${r.colaborador}</td>
-      <td><span class="tipo-tag">${r.tipo}</span></td>
-      <td style="max-width:140px;color:var(--text2);font-size:11px">${r.detalhes||"—"}</td>
-      <td class="td-muted">${r.antes||"—"}</td>
-      <td style="font-weight:500">${r.depois||"—"}</td>
-      <td><span class="badge ${STATUS_CLASS[r.status]||""}">${r.status}</span></td>
-    </tr>`;
-  }).join("");
+  document.getElementById("geral-tbody").innerHTML=!regs.length
+    ?`<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro</div></div></td></tr>`
+    :regs.map((r,i)=>{
+      const pl=platMap[r.plataforma]||{label:r.plataforma,cor:"#888"};
+      const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
+      const hr=r.hora_registro||new Date(r.created_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+      return`<tr>
+        <td class="td-mono td-muted">${regs.length-i}</td>
+        <td><span class="plat-pill" style="background:${pl.cor};color:${pl.fc||"#fff"}">${pl.label}</span></td>
+        <td class="loja-mono">${r.loja}</td>
+        <td class="td-mono">${dt}<br><span style="color:var(--text3)">${hr}</span></td>
+        <td style="font-weight:500">${r.colaborador}</td>
+        <td><span class="tipo-tag">${r.tipo}</span></td>
+        <td style="max-width:130px;color:var(--text2);font-size:10px">${r.detalhes||"—"}</td>
+        <td class="td-muted">${r.antes||"—"}</td>
+        <td style="font-weight:500">${r.depois||"—"}</td>
+        <td><span class="badge ${STATUS_CLASS[r.status]||""}">${r.status}</span></td>
+        <td>${st.adminMode?`<button class="edit-row-btn" onclick="abrirModalEditar('${r.id}')">✏️</button>`:""}</td>
+      </tr>`;
+    }).join("");
 }
 
 function limparFiltrosGeral(){
-  document.getElementById("geral-search-loja").value="";
-  document.getElementById("geral-filter-plat").value="";
-  document.getElementById("geral-filter-tipo").value="";
-  document.getElementById("geral-filter-data-ini").value="";
-  document.getElementById("geral-filter-data-fim").value="";
+  ["geral-search-loja","geral-filter-plat","geral-filter-tipo","geral-filter-data-ini","geral-filter-data-fim"]
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   renderGeralTabela();
 }
 
+// ── PLATAFORMA ─────────────────────────────────────────────────────────────────
 function renderHeader(){
   const p=platAtual();
   document.getElementById("plat-title").textContent=p.label;
-  const selCount=st.lojaSelecionadas.length;
-  document.getElementById("plat-sub").textContent=
-    selCount===0?"todas as lojas":
-    selCount===1?`loja: ${st.lojaSelecionadas[0]}`:
-    `${selCount} lojas selecionadas`;
+  document.getElementById("plat-sub").textContent=st.lojaSelecionadas.length?`loja: ${st.lojaSelecionadas[0]}`:"todas as lojas";
   document.getElementById("plat-badge").textContent=p.label;
   document.getElementById("plat-badge").style.background=p.cor;
   document.getElementById("plat-badge").style.color=p.fc||"#fff";
@@ -505,7 +561,7 @@ function renderHeader(){
 function renderFiltros(){
   document.getElementById("filtros-tipo").innerHTML=
     [`<button class="filtro-chip${!st.filtroTipo?" active":""}" onclick="filtrarTipo('')">Todos</button>`]
-    .concat(TIPOS.map(t=>`<button class="filtro-chip${st.filtroTipo===t?" active":""}" onclick="filtrarTipo('${t}')">${t}</button>`))
+    .concat(TIPOS_LIST.map(t=>`<button class="filtro-chip${st.filtroTipo===t?" active":""}" onclick="filtrarTipo('${t}')">${t}</button>`))
     .join("");
 }
 
@@ -513,194 +569,64 @@ function renderTabela(){
   let regs=[...st.historico];
   if(st.lojaSelecionadas.length>0) regs=regs.filter(r=>st.lojaSelecionadas.includes(r.loja));
   if(st.filtroTipo) regs=regs.filter(r=>r.tipo===st.filtroTipo);
-  const s=document.getElementById("search").value.toLowerCase();
+  const s=document.getElementById("search")?.value.toLowerCase();
   if(s) regs=regs.filter(r=>r.colaborador.toLowerCase().includes(s));
   document.getElementById("count-pill").textContent=regs.length+" registro"+(regs.length!==1?"s":"");
-  if(!regs.length){
-    document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro ainda</div></div></td></tr>`;
-    return;
-  }
-  document.getElementById("tbody").innerHTML=regs.map((r,i)=>{
-    const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
-    const hr=r.hora_registro||new Date(r.created_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-    return`<tr>
-      <td class="td-mono td-muted">${regs.length-i}</td>
-      <td class="td-mono">${dt}<br><span style="color:var(--text3)">${hr}</span></td>
-      <td style="font-weight:500">${r.colaborador}</td>
-      <td class="loja-mono">${r.loja}</td>
-      <td><span class="tipo-tag">${r.tipo}</span></td>
-      <td style="max-width:140px;color:var(--text2);font-size:11px">${r.detalhes||"—"}</td>
-      <td class="td-muted">${r.antes||"—"}</td>
-      <td style="font-weight:500">${r.depois||"—"}</td>
-      <td><span class="badge ${STATUS_CLASS[r.status]||""}">${r.status}</span></td>
-      <td>${st.adminMode?`<button class="edit-row-btn" onclick="abrirModalEditar('${r.id}')">✏️</button>`:""}</td>
-    </tr>`;
-  }).join("");
+  document.getElementById("tbody").innerHTML=!regs.length
+    ?`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro</div></div></td></tr>`
+    :regs.map((r,i)=>{
+      const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
+      const hr=r.hora_registro||new Date(r.created_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+      return`<tr>
+        <td class="td-mono td-muted">${regs.length-i}</td>
+        <td class="td-mono">${dt}<br><span style="color:var(--text3)">${hr}</span></td>
+        <td style="font-weight:500">${r.colaborador}</td>
+        <td class="loja-mono">${r.loja}</td>
+        <td><span class="tipo-tag">${r.tipo}</span></td>
+        <td style="max-width:130px;color:var(--text2);font-size:10px">${r.detalhes||"—"}</td>
+        <td class="td-muted">${r.antes||"—"}</td>
+        <td style="font-weight:500">${r.depois||"—"}</td>
+        <td><span class="badge ${STATUS_CLASS[r.status]||""}">${r.status}</span></td>
+        <td>${st.adminMode?`<button class="edit-row-btn" onclick="abrirModalEditar('${r.id}')">✏️</button>`:""}</td>
+      </tr>`;
+    }).join("");
 }
 
 function filtrarTipo(t){st.filtroTipo=t;renderFiltros();renderTabela();}
 
-async function irParaGeral(){
-  st.view="geral";
-  document.getElementById("page-geral").className="page active";
-  document.getElementById("page-plat").className="page";
-  setCSSVars("#1A1916","#F0EFEC");
-  setSyncing(true);
-  st.geralHistorico=await carregarHistorico();
-  setSyncing(false);
-  renderSidebar();renderGeralCards();renderGeralTabela();
+// ── FORM HELPERS ───────────────────────────────────────────────────────────────
+function renderTodosSelects(){
+  renderFormPlats();renderTiposCheckboxes();renderColabSelect();renderLojaSelect();
+  // Populate tipo filter in geral
+  const sel=document.getElementById("geral-filter-tipo");
+  if(sel&&sel.options.length<=1) TIPOS_LIST.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;sel.appendChild(o);});
 }
 
-async function selecionarPlat(id){
-  st.view="plat";st.plat=id;st.loja="";st.lojaSelecionadas=[];st.filtroTipo="";
-  const p=PLATS.find(x=>x.id===id);
-  setCSSVars(p.cor,p.cor10);
-  document.getElementById("page-geral").className="page";
-  document.getElementById("page-plat").className="page active";
-  document.getElementById("search").value="";
-  document.getElementById("tbody").innerHTML=`<tr><td colspan="9"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr>`;
-  renderFormPlats();
-  renderTiposCheckboxes();
-  renderSidebar();renderHeader();renderFiltros();
-  setSyncing(true);
-  st.historico=await carregarHistorico(id);
-  setSyncing(false);
-  renderTabela();
+function renderFormPlats(){
+  const container=document.getElementById("form-plats");
+  if(!container) return;
+  container.innerHTML=PLATS.map(pl=>{
+    const sel=st.platsSelecionadas.includes(pl.id);
+    return`<button type="button" onclick="togglePlatForm('${pl.id}')" style="
+      padding:4px 10px;border-radius:999px;font-size:11px;font-weight:500;
+      border:1.5px solid ${sel?pl.cor:"var(--border)"};
+      background:${sel?pl.cor:"var(--surface)"};
+      color:${sel?(pl.fc||"#fff"):"var(--text2)"};
+      cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif"
+    >${pl.label}</button>`;
+  }).join("");
+  const count=st.platsSelecionadas.length;
+  const badge=document.getElementById("plat-form-count");
+  if(badge) badge.textContent=count>0?`(${count} selecionada${count>1?"s":""})` :"";
 }
 
-function selecionarLoja(l){
-  st.loja=st.loja===l?"":l;
-  renderSidebar();renderHeader();renderTabela();
+function togglePlatForm(id){
+  const idx=st.platsSelecionadas.indexOf(id);
+  if(idx>=0) st.platsSelecionadas.splice(idx,1);
+  else st.platsSelecionadas.push(id);
+  if(st.platsSelecionadas.length>0){st.plat=st.platsSelecionadas[0];}
+  renderFormPlats();renderSidebar();renderHeader();renderLojaSelect();
 }
-
-function toggleLoja(l){
-  // Single selection — click same to deselect
-  if(st.lojaSelecionadas.includes(l)){
-    st.lojaSelecionadas=[];
-    st.loja="";
-  } else {
-    st.lojaSelecionadas=[l];
-    st.loja=l;
-  }
-  renderSidebar();renderHeader();renderTabela();
-}
-
-async function adicionarLoja(){
-  const inp=document.getElementById("nova-loja");
-  const nome=inp.value.trim();
-  if(!nome)return;
-  if((st.lojas[st.plat]||[]).includes(nome)){showToast("⚠️ Loja já existe");return;}
-  try{
-    setSyncing(true);
-    await api("lojas","POST",{plataforma:st.plat,nome});
-    st.lojas[st.plat]=[...(st.lojas[st.plat]||[]),nome];
-    inp.value="";
-    setSyncing(false);
-    renderSidebar();
-    showToast("✓ Loja '"+nome+"' adicionada!");
-  }catch(e){setSyncing(false);showToast("⚠️ Erro ao adicionar loja");}
-}
-
-async function salvar(){
-  const colab=document.getElementById("f-colab").value;
-  if(!colab){showToast("⚠️ Selecione o colaborador");return;}
-  if(st.tiposSelecionados.length===0){showToast("⚠️ Selecione ao menos um tipo de alteração");return;}
-  if(st.platsSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma plataforma");return;}
-  if(st.lojaSelecionadas.length===0){showToast("⚠️ Selecione uma loja no menu lateral");return;}
-  const btn=document.getElementById("btn-save");
-  const totalRegs=st.platsSelecionadas.length*st.tiposSelecionados.length;
-  btn.disabled=true;btn.innerHTML=`💾 Salvando ${totalRegs} registro${totalRegs>1?"s":""}...`;
-  const now=new Date();
-  const base={
-    colaborador:colab,
-    detalhes:document.getElementById("f-obs").value.trim(),
-    antes:document.getElementById("f-antes").value.trim(),
-    depois:document.getElementById("f-depois").value.trim(),
-    status:document.getElementById("f-status").value,
-    data_registro:now.toLocaleDateString("pt-BR"),
-    hora_registro:now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
-  };
-  try{
-    setSyncing(true);
-    // Create one record per plataforma x tipo
-    const loja=st.lojaSelecionadas[0];
-    const registros=[];
-    for(const plat of st.platsSelecionadas){
-      for(const tipo of st.tiposSelecionados){
-        registros.push({...base,plataforma:plat,loja,tipo});
-      }
-    }
-    const {data:saved,error}=await sb.from("historico").insert(registros).select();
-    if(error) throw error;
-    saved.forEach(r=>{st.historico.unshift(r);st.geralHistorico.unshift(r);});
-    st.tiposSelecionados=[];
-    renderTiposCheckboxes();
-    document.getElementById("f-obs").value="";
-    document.getElementById("f-antes").value="";
-    document.getElementById("f-depois").value="";
-    setSyncing(false);
-    renderSidebar();renderTabela();renderGeralCards();
-    showToast(`✓ ${saved.length} registro${saved.length>1?"s salvo":"s salvo"}s com sucesso!`);
-  }catch(e){
-    setSyncing(false);
-    showToast("⚠️ Erro ao salvar. Tente novamente.");
-    console.error(e);
-  }
-  btn.disabled=false;btn.innerHTML="💾 Salvar registro";
-}
-
-async function editarLoja(nomeAtual){
-  const novoNome = prompt("Editar nome da loja:", nomeAtual);
-  if(!novoNome || novoNome.trim()===nomeAtual) return;
-  const nome = novoNome.trim();
-  if((st.lojas[st.plat]||[]).includes(nome)){showToast("⚠️ Já existe uma loja com esse nome");return;}
-  
-  try{
-    setSyncing(true);
-    // Update loja name in Supabase
-    const {error: errLoja} = await sb.from("lojas")
-      .update({nome})
-      .eq("plataforma", st.plat)
-      .eq("nome", nomeAtual);
-    if(errLoja) throw new Error(errLoja.message);
-
-    // Update all historico records with old name
-    const {error: errHist} = await sb.from("historico")
-      .update({loja: nome})
-      .eq("plataforma", st.plat)
-      .eq("loja", nomeAtual);
-    if(errHist) throw new Error(errHist.message);
-
-    // Update local state
-    const idx = st.lojas[st.plat].indexOf(nomeAtual);
-    if(idx>=0) st.lojas[st.plat][idx] = nome;
-    if(st.loja===nomeAtual) st.loja = nome;
-
-    // Update historico local cache
-    st.historico = st.historico.map(r=>r.loja===nomeAtual?{...r,loja:nome}:r);
-    st.geralHistorico = st.geralHistorico.map(r=>(r.loja===nomeAtual&&r.plataforma===st.plat)?{...r,loja:nome}:r);
-
-    setSyncing(false);
-    renderSidebar();
-    renderTabela();
-    showToast("✓ Loja renomeada para '"+nome+"'!");
-  }catch(e){
-    setSyncing(false);
-    showToast("⚠️ Erro ao renomear loja");
-    console.error(e);
-  }
-}
-
-function showToast(msg){
-  const t=document.getElementById("toast");
-  t.textContent=msg;t.classList.add("show");
-  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove("show"),2800);
-}
-
-document.getElementById("nova-loja").addEventListener("keydown",e=>{if(e.key==="Enter")adicionarLoja();});
-
-// Admin mode
-const TIPOS_LIST=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
 
 function renderTiposCheckboxes(){
   const container=document.getElementById("tipos-checkboxes");
@@ -721,209 +647,572 @@ function toggleTipo(t){
   renderTiposCheckboxes();
 }
 
-function renderFormPlats(){
-  const container=document.getElementById("form-plats");
-  if(!container) return;
-  container.innerHTML=PLATS.map(pl=>{
-    const sel=st.platsSelecionadas.includes(pl.id);
-    return`<button type="button" onclick="togglePlatForm('${pl.id}')" style="
-      padding:5px 12px;border-radius:999px;font-size:12px;font-weight:500;
-      border:1.5px solid ${sel?pl.cor:'"var(--border)"'};
-      background:${sel?pl.cor:'"var(--surface)"'};
-      color:${sel?(pl.fc||'"#fff"'):'"var(--text2)"'};
-      cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif"
-    >${pl.label}</button>`;
-  }).join("");
-}
-
-function togglePlatForm(id){
-  const idx=st.platsSelecionadas.indexOf(id);
-  if(idx>=0) st.platsSelecionadas.splice(idx,1);
-  else st.platsSelecionadas.push(id);
-  // Update loja list based on first selected plat
-  if(st.platsSelecionadas.length>0){
-    st.plat=st.platsSelecionadas[0];
-    st.lojaSelecionadas=[];
-  }
-  renderFormPlats();
-  renderSidebar();
-  renderHeader();
-}
-
 function renderColabSelect(){
   const sel=document.getElementById("f-colab");
   if(!sel) return;
   const val=sel.value;
-  sel.innerHTML='<option value="">Selecione...</option>'+
-    COLABORADORES.map(c=>`<option value="${c}"${c===val?" selected":""}>${c}</option>`).join("");
+  sel.innerHTML='<option value="">Selecione...</option>'+COLABORADORES.map(c=>`<option value="${c}"${c===val?" selected":""}>${c}</option>`).join("");
+  // Also update checklist filter
+  const cf=document.getElementById("check-filter-colab");
+  if(cf){cf.innerHTML='<option value="">Todos colaboradores</option>'+COLABORADORES.map(c=>`<option value="${c}">${c}</option>`).join("");}
 }
 
+function renderLojaSelect(){
+  const sel=document.getElementById("f-loja");
+  if(!sel) return;
+  const platLojas=st.platsSelecionadas.length===1?st.lojas[st.platsSelecionadas[0]]||[]:
+    [...new Set(st.platsSelecionadas.flatMap(p=>st.lojas[p]||[]))];
+  sel.innerHTML='<option value="">Selecione a loja...</option>'+platLojas.map(l=>`<option value="${l}">${l}</option>`).join("");
+}
+
+// ── NAVEGAÇÃO ──────────────────────────────────────────────────────────────────
+function setNavActive(id){document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));document.getElementById(id)?.classList.add("active");}
+function setPageActive(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id)?.classList.add("active");}
+
+async function irParaGeral(){
+  st.view="geral";setNavActive("nav-geral");setPageActive("page-geral");
+  setCSSVars("#1A1916","#F0EFEC");setSyncing(true);
+  st.geralHistorico=await carregarHistorico();setSyncing(false);
+  renderSidebar();renderGeralCards();renderGeralTabela();
+}
+
+async function selecionarPlat(id){
+  st.view="plat";st.plat=id;st.loja="";st.lojaSelecionadas=[];st.tiposSelecionados=[];
+  if(!st.platsSelecionadas.includes(id)) st.platsSelecionadas=[id];
+  const p=PLATS.find(x=>x.id===id);
+  setCSSVars(p.cor,p.cor10);setNavActive("");setPageActive("page-plat");
+  document.getElementById("search").value="";
+  document.getElementById("tbody").innerHTML=`<tr><td colspan="10"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr>`;
+  renderTodosSelects();renderSidebar();renderHeader();renderFiltros();
+  setSyncing(true);st.historico=await carregarHistorico(id);setSyncing(false);
+  renderTabela();
+}
+
+function toggleLoja(l){
+  st.loja=st.lojaSelecionadas.includes(l)?"":l;
+  st.lojaSelecionadas=st.loja?[st.loja]:[];
+  renderSidebar();renderHeader();renderTabela();
+}
+
+async function adicionarLoja(){
+  const inp=document.getElementById("nova-loja");
+  const nome=inp.value.trim();if(!nome)return;
+  if((st.lojas[st.plat]||[]).includes(nome)){showToast("⚠️ Loja já existe");return;}
+  try{
+    setSyncing(true);
+    await sb.from("lojas").insert({plataforma:st.plat,nome});
+    st.lojas[st.plat]=[...(st.lojas[st.plat]||[]),nome];
+    inp.value="";setSyncing(false);
+    renderSidebar();renderLojaSelect();
+    showToast("✓ Loja '"+nome+"' adicionada!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao adicionar loja");}
+}
+
+async function editarLoja(nomeAtual){
+  const novoNome=prompt("Editar nome da loja:",nomeAtual);
+  if(!novoNome||novoNome.trim()===nomeAtual) return;
+  const nome=novoNome.trim();
+  try{
+    setSyncing(true);
+    await sb.from("lojas").update({nome}).eq("plataforma",st.plat).eq("nome",nomeAtual);
+    await sb.from("historico").update({loja:nome}).eq("plataforma",st.plat).eq("loja",nomeAtual);
+    const idx=st.lojas[st.plat].indexOf(nomeAtual);
+    if(idx>=0) st.lojas[st.plat][idx]=nome;
+    if(st.loja===nomeAtual) st.loja=nome;
+    st.historico=st.historico.map(r=>r.loja===nomeAtual?{...r,loja:nome}:r);
+    st.geralHistorico=st.geralHistorico.map(r=>(r.loja===nomeAtual&&r.plataforma===st.plat)?{...r,loja:nome}:r);
+    setSyncing(false);renderSidebar();renderTabela();renderLojaSelect();
+    showToast("✓ Loja renomeada!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao renomear");}
+}
+
+// ── SALVAR REGISTRO ────────────────────────────────────────────────────────────
+async function salvar(){
+  const colab=document.getElementById("f-colab").value;
+  const loja=document.getElementById("f-loja").value;
+  if(!colab){showToast("⚠️ Selecione o colaborador");return;}
+  if(st.platsSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma plataforma");return;}
+  if(!loja){showToast("⚠️ Selecione a loja");return;}
+  if(st.tiposSelecionados.length===0){showToast("⚠️ Selecione ao menos um tipo de alteração");return;}
+  const btn=document.getElementById("btn-save");
+  const total=st.platsSelecionadas.length*st.tiposSelecionados.length;
+  btn.disabled=true;btn.innerHTML=`💾 Salvando ${total} registro${total>1?"s":""}...`;
+  const now=new Date();
+  const base={colaborador:colab,loja,
+    detalhes:document.getElementById("f-obs").value.trim(),
+    antes:document.getElementById("f-antes").value.trim(),
+    depois:document.getElementById("f-depois").value.trim(),
+    status:document.getElementById("f-status").value,
+    data_registro:now.toLocaleDateString("pt-BR"),
+    hora_registro:now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
+  };
+  try{
+    setSyncing(true);
+    const registros=[];
+    for(const plat of st.platsSelecionadas)
+      for(const tipo of st.tiposSelecionados)
+        registros.push({...base,plataforma:plat,tipo});
+    const {data:saved,error}=await sb.from("historico").insert(registros).select();
+    if(error) throw error;
+    saved.forEach(r=>{st.historico.unshift(r);st.geralHistorico.unshift(r);});
+    st.tiposSelecionados=[];
+    document.getElementById("f-obs").value="";
+    document.getElementById("f-antes").value="";
+    document.getElementById("f-depois").value="";
+    renderTiposCheckboxes();setSyncing(false);
+    renderSidebar();renderTabela();renderGeralCards();
+    showToast(`✓ ${saved.length} registro${saved.length>1?"s salvos":"salvo"}!`);
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao salvar");console.error(e);}
+  btn.disabled=false;btn.innerHTML="💾 Salvar registro";
+}
+
+// ── COLABORADORES ──────────────────────────────────────────────────────────────
 function abrirGerenciarColab(){
-  const overlay=document.createElement("div");
-  overlay.className="modal-overlay";
-  overlay.id="modal-colab";
-  overlay.innerHTML=`
-    <div class="modal">
-      <div class="modal-title">⚙️ Gerenciar colaboradores</div>
-      <div class="modal-sub">Adicione ou remova colaboradores da lista</div>
-      <div id="colab-lista" style="margin-bottom:1rem"></div>
-      <div style="display:flex;gap:8px">
-        <input id="novo-colab-input" type="text" placeholder="Nome do novo colaborador..." style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px"/>
-        <button onclick="adicionarColab()" style="padding:8px 14px;border-radius:8px;border:none;background:var(--plat-cor);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">Adicionar</button>
-      </div>
-      <div class="modal-actions">
-        <button class="modal-btn modal-btn-cancel" onclick="fecharModalColab()">Fechar</button>
-      </div>
-    </div>`;
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-colab";
+  overlay.innerHTML=`<div class="modal">
+    <div class="modal-title">⚙️ Gerenciar colaboradores</div>
+    <div class="modal-sub">Adicione ou remova colaboradores</div>
+    <div id="colab-lista" style="margin-bottom:1rem"></div>
+    <div style="display:flex;gap:7px">
+      <input id="novo-colab-input" type="text" placeholder="Nome do novo colaborador..." style="flex:1;padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:12px"/>
+      <button onclick="adicionarColab()" style="padding:7px 14px;border-radius:7px;border:none;background:var(--plat-cor);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">Adicionar</button>
+    </div>
+    <div class="modal-actions"><button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-colab').remove()">Fechar</button></div>
+  </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)fecharModalColab();});
-  renderColabLista();
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  renderColabListaModal();
 }
 
-function renderColabLista(){
-  document.getElementById("colab-lista").innerHTML=COLABORADORES.map(c=>`
+function renderColabListaModal(){
+  const el=document.getElementById("colab-lista");if(!el)return;
+  el.innerHTML=COLABORADORES.map(c=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:13px">${c}</span>
-      <button onclick="removerColab('${c}')" style="padding:3px 8px;border-radius:6px;border:none;background:#FFEBEE;color:#C62828;cursor:pointer;font-size:11px">Remover</button>
+      <span style="font-size:12px">${c}</span>
+      <button onclick="removerColab('${c}')" style="padding:2px 7px;border-radius:5px;border:none;background:#FFEBEE;color:#C62828;cursor:pointer;font-size:10px">Remover</button>
     </div>`).join("");
 }
 
 function adicionarColab(){
   const inp=document.getElementById("novo-colab-input");
-  const nome=inp.value.trim();
-  if(!nome) return;
+  const nome=inp.value.trim();if(!nome)return;
   if(COLABORADORES.includes(nome)){showToast("⚠️ Colaborador já existe");return;}
   COLABORADORES.push(nome);
-  salvarColaboradores();
-  inp.value="";
-  renderColabLista();
-  renderColabSelect();
-  showToast("✓ Colaborador '"+nome+"' adicionado!");
+  localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
+  inp.value="";renderColabListaModal();renderColabSelect();
+  showToast("✓ '"+nome+"' adicionado!");
 }
 
 function removerColab(nome){
-  if(!confirm("Remover '"+nome+"' da lista?")) return;
+  if(!confirm("Remover '"+nome+"'?")) return;
   COLABORADORES=COLABORADORES.filter(c=>c!==nome);
-  salvarColaboradores();
-  renderColabLista();
-  renderColabSelect();
+  localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
+  renderColabListaModal();renderColabSelect();
 }
 
-function fecharModalColab(){
-  const m=document.getElementById("modal-colab");
-  if(m) m.remove();
-}
-
+// ── ADMIN ──────────────────────────────────────────────────────────────────────
 function toggleAdmin(){
-  if(st.adminMode){
-    st.adminMode=false;
-    document.getElementById("admin-btn").className="admin-btn";
-    document.getElementById("admin-btn").innerHTML="🔒 Modo Admin";
-    renderTabela();renderGeralTabela();
-    showToast("Modo Admin desativado");
-    return;
-  }
-  const senha=prompt("Digite a senha de administrador:");
-  if(senha==="091603"){
-    st.adminMode=true;
-    document.getElementById("admin-btn").className="admin-btn ativo";
-    document.getElementById("admin-btn").innerHTML="🔓 Admin Ativo";
-    renderTabela();renderGeralTabela();
-    showToast("✓ Modo Admin ativado!");
-  } else if(senha!==null){
-    showToast("⚠️ Senha incorreta");
-  }
+  if(st.adminMode){st.adminMode=false;document.getElementById("admin-btn").className="admin-btn";document.getElementById("admin-btn").innerHTML="🔒 Modo Admin";renderTabela();renderGeralTabela();showToast("Modo Admin desativado");return;}
+  const senha=prompt("Senha de administrador:");
+  if(senha==="091603"){st.adminMode=true;document.getElementById("admin-btn").className="admin-btn ativo";document.getElementById("admin-btn").innerHTML="🔓 Admin Ativo";renderTabela();renderGeralTabela();showToast("✓ Modo Admin ativado!");}
+  else if(senha!==null) showToast("⚠️ Senha incorreta");
 }
 
 function abrirModalEditar(id){
   if(!st.adminMode){showToast("⚠️ Ative o Modo Admin para editar");return;}
-  // Find record
-  const reg = st.geralHistorico.find(r=>r.id===id) || st.historico.find(r=>r.id===id);
+  const reg=st.geralHistorico.find(r=>r.id===id)||st.historico.find(r=>r.id===id);
   if(!reg) return;
-  
-  const overlay = document.createElement("div");
-  overlay.className="modal-overlay";
-  overlay.id="modal-editar";
-  overlay.innerHTML=`
-    <div class="modal">
-      <div class="modal-title">✏️ Editar registro</div>
-      <div class="modal-sub">Apenas administradores podem editar registros</div>
-      <div class="modal-grid">
-        <div class="modal-field"><label>Colaborador</label><input id="m-colab" value="${reg.colaborador}"/></div>
-        <div class="modal-field"><label>Tipo</label>
-          <select id="m-tipo">
-            ${["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"]
-              .map(t=>`<option${t===reg.tipo?" selected":""}>${t}</option>`).join("")}
-          </select>
-        </div>
-        <div class="modal-field"><label>Antes</label><input id="m-antes" value="${reg.antes||""}"/></div>
-        <div class="modal-field"><label>Depois</label><input id="m-depois" value="${reg.depois||""}"/></div>
-        <div class="modal-field"><label>Status</label>
-          <select id="m-status">
-            ${["Concluído","Em andamento","Pendente","Revisão"].map(s=>`<option${s===reg.status?" selected":""}>${s}</option>`).join("")}
-          </select>
-        </div>
-      </div>
-      <div class="modal-field"><label>Detalhes</label><textarea id="m-obs">${reg.detalhes||""}</textarea></div>
-      <div class="modal-actions">
-        <button class="modal-btn modal-btn-delete" onclick="deletarRegistro('${id}')">🗑️ Excluir</button>
-        <button class="modal-btn modal-btn-cancel" onclick="fecharModal()">Cancelar</button>
-        <button class="modal-btn modal-btn-save" onclick="salvarEdicao('${id}')">Salvar</button>
-      </div>
-    </div>`;
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-editar";
+  overlay.innerHTML=`<div class="modal">
+    <div class="modal-title">✏️ Editar registro</div>
+    <div class="modal-sub">Somente administradores podem editar</div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>Colaborador</label><input id="m-colab" value="${reg.colaborador}"/></div>
+      <div class="modal-field"><label>Tipo</label><select id="m-tipo">${TIPOS_LIST.map(t=>`<option${t===reg.tipo?" selected":""}>${t}</option>`).join("")}</select></div>
+      <div class="modal-field"><label>Antes</label><input id="m-antes" value="${reg.antes||""}"/></div>
+      <div class="modal-field"><label>Depois</label><input id="m-depois" value="${reg.depois||""}"/></div>
+      <div class="modal-field"><label>Status</label><select id="m-status">${["Concluído","Em andamento","Pendente","Revisão"].map(s=>`<option${s===reg.status?" selected":""}>${s}</option>`).join("")}</select></div>
+    </div>
+    <div class="modal-field"><label>Detalhes</label><textarea id="m-obs">${reg.detalhes||""}</textarea></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-delete" onclick="deletarRegistro('${id}')">🗑️ Excluir</button>
+      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-editar').remove()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" onclick="salvarEdicao('${id}')">Salvar</button>
+    </div>
+  </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)fecharModal();});
-}
-
-function fecharModal(){
-  const m=document.getElementById("modal-editar");
-  if(m) m.remove();
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
 }
 
 async function salvarEdicao(id){
-  const updates={
-    colaborador:document.getElementById("m-colab").value.trim(),
-    tipo:document.getElementById("m-tipo").value,
-    antes:document.getElementById("m-antes").value.trim(),
-    depois:document.getElementById("m-depois").value.trim(),
-    status:document.getElementById("m-status").value,
-    detalhes:document.getElementById("m-obs").value.trim(),
-  };
+  const updates={colaborador:document.getElementById("m-colab").value.trim(),tipo:document.getElementById("m-tipo").value,antes:document.getElementById("m-antes").value.trim(),depois:document.getElementById("m-depois").value.trim(),status:document.getElementById("m-status").value,detalhes:document.getElementById("m-obs").value.trim()};
   try{
-    setSyncing(true);
-    const {error}=await sb.from("historico").update(updates).eq("id",id);
+    setSyncing(true);const {error}=await sb.from("historico").update(updates).eq("id",id);
     if(error) throw error;
-    // Update local cache
-    [st.historico,st.geralHistorico].forEach(arr=>{
-      const i=arr.findIndex(r=>r.id===id);
-      if(i>=0) arr[i]={...arr[i],...updates};
-    });
-    setSyncing(false);
-    fecharModal();
-    renderTabela();renderGeralTabela();renderSidebar();
-    showToast("✓ Registro atualizado!");
-  }catch(e){setSyncing(false);showToast("⚠️ Erro ao salvar");console.error(e);}
+    [st.historico,st.geralHistorico].forEach(arr=>{const i=arr.findIndex(r=>r.id===id);if(i>=0)arr[i]={...arr[i],...updates};});
+    setSyncing(false);document.getElementById("modal-editar")?.remove();
+    renderTabela();renderGeralTabela();renderSidebar();showToast("✓ Registro atualizado!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao salvar");}
 }
 
 async function deletarRegistro(id){
-  if(!confirm("Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.")) return;
+  if(!confirm("Excluir este registro? Esta ação não pode ser desfeita.")) return;
   try{
-    setSyncing(true);
-    const {error}=await sb.from("historico").delete().eq("id",id);
-    if(error) throw error;
-    st.historico=st.historico.filter(r=>r.id!==id);
-    st.geralHistorico=st.geralHistorico.filter(r=>r.id!==id);
-    setSyncing(false);
-    fecharModal();
-    renderTabela();renderGeralTabela();renderSidebar();renderGeralCards();
-    showToast("✓ Registro excluído!");
-  }catch(e){setSyncing(false);showToast("⚠️ Erro ao excluir");console.error(e);}
+    setSyncing(true);await sb.from("historico").delete().eq("id",id);
+    st.historico=st.historico.filter(r=>r.id!==id);st.geralHistorico=st.geralHistorico.filter(r=>r.id!==id);
+    setSyncing(false);document.getElementById("modal-editar")?.remove();
+    renderTabela();renderGeralTabela();renderSidebar();renderGeralCards();showToast("✓ Registro excluído!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao excluir");}
 }
-inicializar().then(()=>{
-  renderFormPlats();
-  renderColabSelect();
-  renderTiposCheckboxes();
-});
+
+// ══════════════════════════════════════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════════════════════════════════════
+async function irParaChecklist(){
+  st.view="checklist";setNavActive("nav-checklist");setPageActive("page-checklist");
+  setCSSVars("#1565C0","#E3F2FD");renderColabSelect();
+  setSyncing(true);await carregarTarefas();setSyncing(false);
+  renderChecklist();
+}
+
+async function carregarTarefas(){
+  const {data}=await sb.from("tarefas").select("*").order("data_tarefa",{ascending:true});
+  TAREFAS=data||[];
+}
+
+function statusTarefa(t){
+  if(t.status_manual) return t.status_manual;
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const dataTarefa=new Date(t.data_tarefa+"T00:00:00");
+  if(hoje>dataTarefa) return"atrasado";
+  return"pendente";
+}
+
+function renderChecklist(){
+  const filterColab=document.getElementById("check-filter-colab")?.value||"";
+  const filterFreq=document.getElementById("check-filter-freq")?.value||"";
+  const filterStatus=document.getElementById("check-filter-status")?.value||"";
+  const filterSemana=document.getElementById("check-filter-semana")?.value||"semana";
+
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const inicioSemana=new Date(hoje);inicioSemana.setDate(hoje.getDate()-hoje.getDay()+1);
+  const fimSemana=new Date(inicioSemana);fimSemana.setDate(inicioSemana.getDate()+6);
+  const inicioProx=new Date(fimSemana);inicioProx.setDate(fimSemana.getDate()+1);
+  const fimProx=new Date(inicioProx);fimProx.setDate(inicioProx.getDate()+6);
+
+  let tarefas=[...TAREFAS];
+  if(filterColab) tarefas=tarefas.filter(t=>t.colaborador===filterColab);
+  if(filterFreq) tarefas=tarefas.filter(t=>t.frequencia===filterFreq);
+  if(filterStatus) tarefas=tarefas.filter(t=>statusTarefa(t)===filterStatus);
+  if(filterSemana==="semana") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioSemana&&d<=fimSemana;});
+  else if(filterSemana==="proxima") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioProx&&d<=fimProx;});
+
+  // Alertas
+  const atrasadas=TAREFAS.filter(t=>statusTarefa(t)==="atrasado");
+  const alertasEl=document.getElementById("check-alertas");
+  if(alertasEl) alertasEl.innerHTML=atrasadas.length?`<div class="alerta-box alerta-err"><span>⚠️</span><div><strong>${atrasadas.length} tarefa${atrasadas.length>1?"s atrasadas":" atrasada"}!</strong>${atrasadas.map(t=>`<br>• ${t.titulo} — ${t.colaborador} (${new Date(t.data_tarefa+"T00:00:00").toLocaleDateString("pt-BR")})`).join("")}</div></div>`:"";
+
+  // Atualiza nav count
+  const navCount=document.getElementById("nav-check-count");
+  if(navCount){navCount.textContent=atrasadas.length||"";navCount.className=atrasadas.length?"nav-count alert":"nav-count";}
+
+  // Agrupar por data
+  const porData={};
+  tarefas.forEach(t=>{
+    const k=t.data_tarefa;
+    if(!porData[k]) porData[k]=[];
+    porData[k].push(t);
+  });
+
+  const container=document.getElementById("checklist-container");
+  if(!container) return;
+  if(!tarefas.length){container.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Nenhuma tarefa encontrada</div></div>`;return;}
+
+  const diasSemana=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  container.innerHTML=Object.keys(porData).sort().map(data=>{
+    const items=porData[data];
+    const d=new Date(data+"T00:00:00");
+    const diaSemana=diasSemana[d.getDay()];
+    const dataFmt=d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"});
+    const isHoje=d.getTime()===hoje.getTime();
+    const cumpridas=items.filter(t=>statusTarefa(t)==="concluido").length;
+    return`<div class="check-date-group">
+      <div class="check-date-header">
+        <span class="check-date-label" style="color:${isHoje?"var(--plat-cor)":"var(--text)"}">${isHoje?"📌 HOJE — ":""}${diaSemana}, ${dataFmt}</span>
+        <span class="check-date-badge">${cumpridas}/${items.length} concluídas</span>
+      </div>
+      <div class="check-card">${items.map(t=>{
+        const st2=statusTarefa(t);
+        return`<div class="check-item status-${st2}" onclick="ciclarStatusTarefa('${t.id}')">
+          <div class="check-status-dot ${st2}" title="Clique para alterar status">
+            ${st2==="concluido"?"✓":st2==="andamento"?"◑":st2==="atrasado"?"!":""}
+          </div>
+          <div style="flex:1">
+            <div class="check-title ${st2==="concluido"?"concluido":""}">${t.titulo}</div>
+            <div style="font-size:10px;color:var(--text3)">${t.colaborador}</div>
+          </div>
+          <span class="freq-badge freq-${t.frequencia}">${t.frequencia==="diaria"?"Diária":"Semanal"}</span>
+          <span class="status-badge-check sb-${st2}">${st2==="concluido"?"Concluído":st2==="andamento"?"Em andamento":st2==="atrasado"?"Atrasado":"Pendente"}</span>
+          ${st.adminMode?`<button class="ev-btn" onclick="event.stopPropagation();deletarTarefa('${t.id}')" style="color:#C62828">🗑️</button>`:""}
+        </div>`;
+      }).join("")}</div>
+    </div>`;
+  }).join("");
+}
+
+async function ciclarStatusTarefa(id){
+  const t=TAREFAS.find(x=>x.id===id);if(!t) return;
+  const atual=statusTarefa(t);
+  const ciclo={"pendente":"andamento","andamento":"concluido","concluido":"pendente","atrasado":"andamento"};
+  const novoStatus=ciclo[atual]||"andamento";
+  const {error}=await sb.from("tarefas").update({status_manual:novoStatus}).eq("id",id);
+  if(!error){t.status_manual=novoStatus;renderChecklist();
+    const labels={andamento:"Em andamento",concluido:"Concluído",pendente:"Pendente"};
+    showToast(`→ ${labels[novoStatus]||novoStatus}`);
+  }
+}
+
+async function deletarTarefa(id){
+  if(!confirm("Excluir esta tarefa?")) return;
+  await sb.from("tarefas").delete().eq("id",id);
+  TAREFAS=TAREFAS.filter(t=>t.id!==id);renderChecklist();showToast("✓ Tarefa excluída");
+}
+
+function abrirModalTarefa(){
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-tarefa";
+  // Sugerir próxima segunda se for sexta
+  const hoje=new Date();
+  const ehSexta=hoje.getDay()===5;
+  const dataDefault=ehSexta?new Date(hoje.getTime()+3*86400000):hoje;
+  const dataStr=dataDefault.toISOString().split("T")[0];
+  overlay.innerHTML=`<div class="modal">
+    <div class="modal-title">✅ Nova tarefa</div>
+    <div class="modal-sub">Adicione uma tarefa ao checklist${ehSexta?" — você está programando para a próxima semana 📅":""}</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1"><label>Título da tarefa</label><input id="nt-titulo" placeholder="Ex: Atualizar preços na Shopee"/></div>
+      <div class="modal-field"><label>Colaborador</label><select id="nt-colab"><option value="">Selecione...</option>${COLABORADORES.map(c=>`<option>${c}</option>`).join("")}</select></div>
+      <div class="modal-field"><label>Frequência</label><select id="nt-freq"><option value="diaria">Diária</option><option value="semanal">Semanal</option></select></div>
+      <div class="modal-field"><label>Data da tarefa</label><input type="date" id="nt-data" value="${dataStr}"/></div>
+      <div class="modal-field"><label>Status inicial</label><select id="nt-status"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-tarefa').remove()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" style="background:#1565C0" onclick="salvarTarefa()">Salvar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+}
+
+async function salvarTarefa(){
+  const titulo=document.getElementById("nt-titulo").value.trim();
+  const colaborador=document.getElementById("nt-colab").value;
+  const frequencia=document.getElementById("nt-freq").value;
+  const data_tarefa=document.getElementById("nt-data").value;
+  const status_manual=document.getElementById("nt-status").value;
+  if(!titulo||!colaborador||!data_tarefa){showToast("⚠️ Preencha todos os campos");return;}
+  const {data,error}=await sb.from("tarefas").insert({titulo,colaborador,frequencia,data_tarefa,status_manual}).select();
+  if(!error&&data){TAREFAS.push(data[0]);TAREFAS.sort((a,b)=>a.data_tarefa.localeCompare(b.data_tarefa));document.getElementById("modal-tarefa").remove();renderChecklist();showToast("✓ Tarefa adicionada!");}
+  else showToast("⚠️ Erro ao salvar tarefa");
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CALENDÁRIO
+// ══════════════════════════════════════════════════════════════════
+async function irParaCalendario(){
+  st.view="calendario";setNavActive("nav-calendar");setPageActive("page-calendario");
+  setCSSVars("#6A1B9A","#F3E5F5");
+  setSyncing(true);await carregarEventos();setSyncing(false);
+  renderCalendario();
+}
+
+async function carregarEventos(){
+  const {data}=await sb.from("eventos").select("*").order("data_inicio",{ascending:true});
+  EVENTOS=data||[];
+}
+
+function statusEvento(e){
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const fim=new Date(e.data_fim+"T00:00:00");
+  const inicio=new Date(e.data_inicio+"T00:00:00");
+  if(hoje>fim) return"vencido";
+  const diff=Math.floor((fim-hoje)/(86400000));
+  if(diff<=1) return"reagendar";
+  if(hoje>=inicio) return"ativo";
+  return"agendado";
+}
+
+function mudarMes(delta){calMes+=delta;if(calMes>11){calMes=0;calAno++;}if(calMes<0){calMes=11;calAno--;}renderCalendario();}
+
+function renderCalendario(){
+  const filterPlat=document.getElementById("cal-filter-plat")?.value||"";
+  const filterTipo=document.getElementById("cal-filter-tipo")?.value||"";
+  const filterStatus=document.getElementById("cal-filter-status")?.value||"";
+
+  let eventos=[...EVENTOS];
+  if(filterPlat) eventos=eventos.filter(e=>e.plataforma===filterPlat);
+  if(filterTipo) eventos=eventos.filter(e=>e.tipo===filterTipo);
+  if(filterStatus) eventos=eventos.filter(e=>statusEvento(e)===filterStatus);
+
+  // Alertas
+  const vencendo=EVENTOS.filter(e=>statusEvento(e)==="reagendar"||statusEvento(e)==="vencido");
+  const alertasEl=document.getElementById("cal-alertas");
+  if(alertasEl) alertasEl.innerHTML=vencendo.length?`<div class="alerta-box alerta-warn"><span>🔔</span><div><strong>${vencendo.length} campanha${vencendo.length>1?"s":""}  vencendo ou vencida${vencendo.length>1?"s":""}!</strong>${vencendo.map(e=>`<br>• ${e.titulo} — até ${new Date(e.data_fim+"T00:00:00").toLocaleDateString("pt-BR")}`).join("")}</div></div>`:"";
+
+  const urgentes=EVENTOS.filter(e=>statusEvento(e)==="reagendar"||statusEvento(e)==="vencido").length;
+  const navCount=document.getElementById("nav-cal-count");
+  if(navCount){navCount.textContent=urgentes||"";navCount.className=urgentes?"nav-count alert":"nav-count";}
+
+  // Render calendar grid
+  const meses=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const tituloEl=document.getElementById("cal-mes-titulo");
+  if(tituloEl) tituloEl.textContent=`${meses[calMes]} ${calAno}`;
+
+  const headerEl=document.getElementById("cal-grid-header");
+  if(headerEl) headerEl.innerHTML=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"].map(d=>`<div class="cal-header-day">${d}</div>`).join("");
+
+  const gridEl=document.getElementById("cal-grid");
+  if(gridEl){
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const primeiroDia=new Date(calAno,calMes,1);
+    const ultimoDia=new Date(calAno,calMes+1,0);
+    let startDow=primeiroDia.getDay();startDow=startDow===0?6:startDow-1; // Seg=0
+    const cells=[];
+    // Dias do mês anterior
+    for(let i=startDow-1;i>=0;i--){
+      const d=new Date(calAno,calMes,0-i);
+      cells.push({date:d,otherMonth:true});
+    }
+    // Dias do mês atual
+    for(let d=1;d<=ultimoDia.getDate();d++) cells.push({date:new Date(calAno,calMes,d),otherMonth:false});
+    // Completar até 42 células
+    while(cells.length%7!==0||cells.length<35) cells.push({date:new Date(calAno,calMes+1,cells.length-ultimoDia.getDate()-startDow+1),otherMonth:true});
+
+    const platMap=Object.fromEntries(PLATS.map(p=>[p.id,p]));
+    gridEl.innerHTML=cells.map(({date,otherMonth})=>{
+      const isToday=date.getTime()===hoje.getTime();
+      const dateStr=date.toISOString().split("T")[0];
+      const evsDia=EVENTOS.filter(e=>e.data_inicio<=dateStr&&e.data_fim>=dateStr);
+      const dotsHtml=evsDia.slice(0,3).map(e=>{
+        const pl=platMap[e.plataforma]||{cor:"#888"};
+        return`<div class="cal-event-dot" style="background:${pl.cor}22;color:${pl.cor};border:1px solid ${pl.cor}44">${e.titulo}</div>`;
+      }).join("")+(evsDia.length>3?`<div style="font-size:9px;color:var(--text3)">+${evsDia.length-3} mais</div>`:"");
+      return`<div class="cal-cell${otherMonth?" other-month":""}${isToday?" today":""}" onclick="abrirModalEvento({data_inicio:'${dateStr}',data_fim:'${dateStr}'})">
+        <div class="cal-day-num">${date.getDate()}</div>
+        ${dotsHtml}
+      </div>`;
+    }).join("");
+  }
+
+  // Lista de eventos
+  const platMap2=Object.fromEntries(PLATS.map(p=>[p.id,p]));
+  const tipoLabel={cupom:"Cupom",desconto:"Desconto",promocao:"Promoção",campanha:"Campanha",oferta:"Oferta Relâmpago"};
+  const statusLabel={ativo:"Ativo",agendado:"Agendado",vencido:"Vencido",reagendar:"Vencendo em breve"};
+  const statusCls={ativo:"ev-ativo",agendado:"ev-agendado",vencido:"ev-vencido",reagendar:"ev-reagendar"};
+  const listaEl=document.getElementById("calendario-lista");
+  if(listaEl){
+    listaEl.innerHTML=!eventos.length
+      ?`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Nenhum agendamento</div></div>`
+      :eventos.map(e=>{
+        const pl=platMap2[e.plataforma]||{cor:"#888",label:e.plataforma||"—"};
+        const st2=statusEvento(e);
+        const ini=new Date(e.data_inicio+"T00:00:00").toLocaleDateString("pt-BR");
+        const fim=new Date(e.data_fim+"T00:00:00").toLocaleDateString("pt-BR");
+        return`<div class="evento-card">
+          <div class="evento-strip" style="background:${pl.cor}"></div>
+          <div>
+            <div class="evento-titulo">${e.titulo}</div>
+            <div class="evento-meta">
+              <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${pl.cor};display:inline-block"></span>${pl.label}</span>
+              <span>🏪 ${e.loja||"—"}</span>
+              <span>📌 ${tipoLabel[e.tipo]||e.tipo||"—"}</span>
+              <span>📆 ${ini} → ${fim}</span>
+            </div>
+            ${e.observacao?`<div style="font-size:11px;color:var(--text2)">${e.observacao}</div>`:""}
+          </div>
+          <div class="evento-actions">
+            <span class="evento-status ${statusCls[st2]}">${statusLabel[st2]}</span>
+            <button class="ev-btn" onclick="abrirModalEvento(${JSON.stringify({...e}).replace(/"/g,"'")})" style="color:#1565C0">✏️</button>
+            ${st2==="vencido"||st2==="reagendar"?`<button class="ev-btn" onclick="reagendarEvento('${e.id}')" style="background:var(--orange-bg);color:var(--orange);border-color:#FFB74D">🔄 Reagendar</button>`:""}
+            ${st.adminMode?`<button class="ev-btn" onclick="deletarEvento('${e.id}')" style="color:var(--red)">🗑️</button>`:""}
+          </div>
+        </div>`;
+      }).join("");
+  }
+}
+
+function abrirModalEvento(prefill={}){
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-evento";
+  const allLojas=[...new Set(Object.values(st.lojas).flat())];
+  const lojaOpts=allLojas.map(l=>`<option value="${l}"${prefill.loja===l?" selected":""}>${l}</option>`).join("");
+  overlay.innerHTML=`<div class="modal" style="max-width:500px">
+    <div class="modal-title">📅 ${prefill.id?"Editar":"Novo"} agendamento</div>
+    <div class="modal-sub">Agende cupons, descontos e promoções</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1"><label>Título</label><input id="ne-titulo" value="${prefill.titulo||""}" placeholder="Ex: Cupom 20% OFF Shopee"/></div>
+      <div class="modal-field"><label>Plataforma</label><select id="ne-plat">${PLATS.map(p=>`<option value="${p.id}"${prefill.plataforma===p.id?" selected":""}>${p.label}</option>`).join("")}</select></div>
+      <div class="modal-field"><label>Tipo</label><select id="ne-tipo">
+        <option value="cupom"${prefill.tipo==="cupom"?" selected":""}>Cupom</option>
+        <option value="desconto"${prefill.tipo==="desconto"?" selected":""}>Desconto</option>
+        <option value="promocao"${prefill.tipo==="promocao"?" selected":""}>Promoção</option>
+        <option value="campanha"${prefill.tipo==="campanha"?" selected":""}>Campanha</option>
+        <option value="oferta"${prefill.tipo==="oferta"?" selected":""}>Oferta Relâmpago</option>
+      </select></div>
+      <div class="modal-field"><label>Loja</label><select id="ne-loja"><option value="">Selecione a loja...</option>${lojaOpts}</select></div>
+      <div class="modal-field"><label>Data de início</label><input type="date" id="ne-inicio" value="${prefill.data_inicio||""}"/></div>
+      <div class="modal-field"><label>Data de fim</label><input type="date" id="ne-fim" value="${prefill.data_fim||""}"/></div>
+      <div class="modal-field" style="grid-column:1/-1"><label>Observação</label><textarea id="ne-obs" placeholder="Detalhes da campanha...">${prefill.observacao||""}</textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-evento').remove()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" style="background:#6A1B9A" onclick="salvarEvento('${prefill.id||""}')">Salvar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+}
+
+async function salvarEvento(idExistente=""){
+  const titulo=document.getElementById("ne-titulo").value.trim();
+  const plataforma=document.getElementById("ne-plat").value;
+  const tipo=document.getElementById("ne-tipo").value;
+  const loja=document.getElementById("ne-loja").value;
+  const data_inicio=document.getElementById("ne-inicio").value;
+  const data_fim=document.getElementById("ne-fim").value;
+  const observacao=document.getElementById("ne-obs").value.trim();
+  if(!titulo||!data_inicio||!data_fim){showToast("⚠️ Preencha título e datas");return;}
+  if(data_fim<data_inicio){showToast("⚠️ Data fim deve ser após data início");return;}
+  const payload={titulo,plataforma,tipo,loja,data_inicio,data_fim,observacao};
+  if(idExistente){
+    const {error}=await sb.from("eventos").update(payload).eq("id",idExistente);
+    if(!error){const idx=EVENTOS.findIndex(e=>e.id===idExistente);if(idx>=0)EVENTOS[idx]={...EVENTOS[idx],...payload};document.getElementById("modal-evento").remove();renderCalendario();showToast("✓ Atualizado!");}
+  }else{
+    const {data,error}=await sb.from("eventos").insert(payload).select();
+    if(!error&&data){EVENTOS.push(data[0]);EVENTOS.sort((a,b)=>a.data_inicio.localeCompare(b.data_inicio));document.getElementById("modal-evento").remove();renderCalendario();showToast("✓ Agendamento salvo!");}
+    else showToast("⚠️ Erro ao salvar");
+  }
+}
+
+function reagendarEvento(id){
+  const e=EVENTOS.find(x=>x.id===id);if(!e) return;
+  abrirModalEvento({...e,data_inicio:"",data_fim:""});
+}
+
+async function deletarEvento(id){
+  if(!confirm("Excluir este agendamento?")) return;
+  await sb.from("eventos").delete().eq("id",id);
+  EVENTOS=EVENTOS.filter(e=>e.id!==id);renderCalendario();showToast("✓ Excluído!");
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
+document.getElementById("nova-loja").addEventListener("keydown",e=>{if(e.key==="Enter")adicionarLoja();});
+inicializar();
 </script>
 </body>
 </html>
