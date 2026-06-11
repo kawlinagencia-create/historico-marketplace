@@ -167,7 +167,10 @@ tr:hover .edit-row-btn{opacity:1}
 .cal-cell.today{border-color:var(--plat-cor);border-width:2px}
 .cal-day-num{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:3px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:50%}
 .cal-cell.today .cal-day-num{background:var(--plat-cor);color:#fff;font-weight:600}
-.cal-event-dot{font-size:10px;padding:1px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.cal-event-dot{font-size:10px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;cursor:pointer;transition:opacity .15s}
+.cal-event-dot:hover{opacity:.8}
+.cal-event-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;margin-bottom:.5rem;border-left:4px solid #888;transition:box-shadow .15s}
+.cal-event-card:hover{box-shadow:var(--shadow-md)}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 .cal-nav-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px}
 .cal-nav-btn:hover{background:var(--bg)}
@@ -195,6 +198,15 @@ tr:hover .edit-row-btn{opacity:1}
 .sync-dot.err{background:#f44336}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 /* TOAST */
+.cfg-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.cfg-item:last-child{border-bottom:none}
+.cfg-remove{padding:2px 8px;border-radius:5px;border:none;background:#FFEBEE;color:#C62828;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif}
+.cfg-remove:hover{background:#FFCDD2}
+.plat-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.plat-toggle:last-child{border-bottom:none}
+.toggle-switch{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;transition:background .2s;position:relative;flex-shrink:0}
+.toggle-switch.on{background:#1B5E20}
+.toggle-switch.off{background:var(--border2)}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:9px 14px;border-radius:9px;font-size:12px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(max-width:768px){
@@ -218,6 +230,7 @@ tr:hover .edit-row-btn{opacity:1}
     <div class="nav-item active" id="nav-geral" onclick="irParaGeral()" style="--plat-cor:#1A1916"><span>📊</span>Visão Geral<span class="nav-count" id="nav-geral-count"></span></div>
     <div class="nav-item" id="nav-checklist" onclick="irParaChecklist()" style="--plat-cor:#1565C0"><span>✅</span>Checklist<span class="nav-count" id="nav-check-count"></span></div>
     <div class="nav-item" id="nav-calendar" onclick="irParaCalendario()" style="--plat-cor:#6A1B9A"><span>📅</span>Calendário<span class="nav-count" id="nav-cal-count"></span></div>
+    <div class="nav-item" id="nav-config" onclick="irParaConfig()" style="--plat-cor:#37474F"><span>⚙️</span>Configurações</div>
     <div class="sb-section" style="margin-top:.4rem">Plataformas</div>
     <div id="plat-list"></div>
     <div class="sb-section" style="margin-top:.4rem;display:flex;align-items:center;justify-content:space-between">
@@ -285,9 +298,7 @@ tr:hover .edit-row-btn{opacity:1}
               <button onclick="abrirGerenciarColab()" title="Gerenciar" style="padding:5px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:12px">⚙️</button>
             </div>
           </div>
-          <div class="field"><label>Loja</label>
-            <select id="f-loja"><option value="">Selecione...</option></select>
-          </div>
+
         </div>
         <div class="field" style="margin-bottom:10px"><label>Plataformas <span id="plat-form-count" style="color:var(--text3);font-weight:400"></span></label>
           <div id="form-plats" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"></div>
@@ -380,6 +391,72 @@ tr:hover .edit-row-btn{opacity:1}
       </div>
       <div id="calendario-lista"></div>
     </div>
+    <!-- CONFIGURAÇÕES -->
+    <div class="page" id="page-config">
+      <div class="main-header">
+        <div><div class="main-title">Configurações</div><div class="main-sub">gerencie colaboradores, tipos de alteração e plataformas</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+
+        <!-- COLABORADORES -->
+        <div class="form-card" style="margin-bottom:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem">
+            <div class="form-card-title" style="margin-bottom:0">👥 Colaboradores</div>
+            <span style="font-size:10px;color:var(--text3)" id="cfg-colab-count"></span>
+          </div>
+          <div id="cfg-colab-lista" style="margin-bottom:.75rem;max-height:240px;overflow-y:auto"></div>
+          <div style="display:flex;gap:6px">
+            <input id="cfg-colab-input" type="text" placeholder="Nome do colaborador..." style="flex:1;padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:12px" onkeydown="if(event.key==='Enter')cfgAdicionarColab()"/>
+            <button onclick="cfgAdicionarColab()" style="padding:7px 14px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">+ Adicionar</button>
+          </div>
+        </div>
+
+        <!-- TIPOS DE ALTERAÇÃO -->
+        <div class="form-card" style="margin-bottom:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem">
+            <div class="form-card-title" style="margin-bottom:0">📝 Tipos de Alteração</div>
+            <span style="font-size:10px;color:var(--text3)" id="cfg-tipos-count"></span>
+          </div>
+          <div id="cfg-tipos-lista" style="margin-bottom:.75rem;max-height:240px;overflow-y:auto"></div>
+          <div style="display:flex;gap:6px">
+            <input id="cfg-tipo-input" type="text" placeholder="Ex: Banner principal..." style="flex:1;padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:12px" onkeydown="if(event.key==='Enter')cfgAdicionarTipo()"/>
+            <button onclick="cfgAdicionarTipo()" style="padding:7px 14px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">+ Adicionar</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+        <!-- PLATAFORMAS (visível) -->
+        <div class="form-card" style="margin-bottom:0">
+          <div class="form-card-title">🛒 Plataformas ativas</div>
+          <div id="cfg-plats-lista"></div>
+          <p style="font-size:11px;color:var(--text3);margin-top:.75rem">As plataformas padrão são Shopee, Shein, M. Livre e TikTok. Você pode ocultar/mostrar cada uma.</p>
+        </div>
+
+        <!-- LOJAS POR PLATAFORMA -->
+        <div class="form-card" style="margin-bottom:0">
+          <div class="form-card-title">🏪 Lojas por plataforma</div>
+          <div style="margin-bottom:.75rem">
+            <select id="cfg-loja-plat" class="filter-sel" style="width:100%;margin-bottom:.6rem" onchange="cfgRenderLojas()">
+              <option value="shopee">Shopee</option>
+              <option value="shein">Shein</option>
+              <option value="mlivre">M. Livre</option>
+              <option value="tiktok">TikTok</option>
+            </select>
+            <div id="cfg-lojas-lista" style="max-height:160px;overflow-y:auto;margin-bottom:.75rem"></div>
+            <div style="display:flex;gap:6px">
+              <input id="cfg-loja-input" type="text" placeholder="Nome da nova loja..." style="flex:1;padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:12px" onkeydown="if(event.key==='Enter')cfgAdicionarLoja()"/>
+              <button onclick="cfgAdicionarLoja()" style="padding:7px 14px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer">+ Adicionar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </main>
 </div>
 <div class="toast" id="toast"></div>
@@ -596,7 +673,7 @@ function filtrarTipo(t){st.filtroTipo=t;renderFiltros();renderTabela();}
 
 // ── FORM HELPERS ───────────────────────────────────────────────────────────────
 function renderTodosSelects(){
-  renderFormPlats();renderTiposCheckboxes();renderColabSelect();renderLojaSelect();
+  renderFormPlats();renderTiposCheckboxes();renderColabSelect();
   // Populate tipo filter in geral
   const sel=document.getElementById("geral-filter-tipo");
   if(sel&&sel.options.length<=1) TIPOS_LIST.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;sel.appendChild(o);});
@@ -671,6 +748,7 @@ function setPageActive(id){document.querySelectorAll(".page").forEach(p=>p.class
 
 async function irParaGeral(){
   st.view="geral";setNavActive("nav-geral");setPageActive("page-geral");
+  document.getElementById("page-config")?.classList.remove("active");
   setCSSVars("#1A1916","#F0EFEC");setSyncing(true);
   st.geralHistorico=await carregarHistorico();setSyncing(false);
   renderSidebar();renderGeralCards();renderGeralTabela();
@@ -729,10 +807,10 @@ async function editarLoja(nomeAtual){
 // ── SALVAR REGISTRO ────────────────────────────────────────────────────────────
 async function salvar(){
   const colab=document.getElementById("f-colab").value;
-  const loja=document.getElementById("f-loja").value;
   if(!colab){showToast("⚠️ Selecione o colaborador");return;}
   if(st.platsSelecionadas.length===0){showToast("⚠️ Selecione ao menos uma plataforma");return;}
-  if(!loja){showToast("⚠️ Selecione a loja");return;}
+  if(st.lojaSelecionadas.length===0){showToast("⚠️ Selecione uma loja no menu lateral");return;}
+  const loja=st.lojaSelecionadas[0];
   if(st.tiposSelecionados.length===0){showToast("⚠️ Selecione ao menos um tipo de alteração");return;}
   const btn=document.getElementById("btn-save");
   const total=st.platsSelecionadas.length*st.tiposSelecionados.length;
@@ -949,7 +1027,10 @@ function renderChecklist(){
           </div>
           <div style="flex:1">
             <div class="check-title ${st2==="concluido"?"concluido":""}">${t.titulo}</div>
-            <div style="font-size:10px;color:var(--text3)">${t.colaborador}</div>
+            <div style="font-size:10px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap">
+              <span>${t.colaborador}</span>
+              ${t.data_limite?`<span style="color:${new Date(t.data_limite+'T00:00:00')<new Date()?'var(--red)':'var(--orange)'};font-weight:500">⏰ Limite: ${new Date(t.data_limite+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:""}
+            </div>
           </div>
           <span class="freq-badge freq-${t.frequencia}">${t.frequencia==="diaria"?"Diária":"Semanal"}</span>
           <span class="status-badge-check sb-${st2}">${st2==="concluido"?"Concluído":st2==="andamento"?"Em andamento":st2==="atrasado"?"Atrasado":"Pendente"}</span>
@@ -993,6 +1074,7 @@ function abrirModalTarefa(){
       <div class="modal-field"><label>Colaborador</label><select id="nt-colab"><option value="">Selecione...</option>${COLABORADORES.map(c=>`<option>${c}</option>`).join("")}</select></div>
       <div class="modal-field"><label>Frequência</label><select id="nt-freq"><option value="diaria">Diária</option><option value="semanal">Semanal</option></select></div>
       <div class="modal-field"><label>Data da tarefa</label><input type="date" id="nt-data" value="${dataStr}"/></div>
+      <div class="modal-field"><label>Data limite ⚠️</label><input type="date" id="nt-limite" value=""/></div>
       <div class="modal-field"><label>Status inicial</label><select id="nt-status"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option></select></div>
     </div>
     <div class="modal-actions">
@@ -1010,8 +1092,11 @@ async function salvarTarefa(){
   const frequencia=document.getElementById("nt-freq").value;
   const data_tarefa=document.getElementById("nt-data").value;
   const status_manual=document.getElementById("nt-status").value;
-  if(!titulo||!colaborador||!data_tarefa){showToast("⚠️ Preencha todos os campos");return;}
-  const {data,error}=await sb.from("tarefas").insert({titulo,colaborador,frequencia,data_tarefa,status_manual}).select();
+  if(!titulo){showToast("⚠️ Preencha o título da tarefa");return;}
+  if(!colaborador){showToast("⚠️ Selecione o colaborador");return;}
+  if(!data_tarefa){showToast("⚠️ Informe a data da tarefa");return;}
+  const data_limite=document.getElementById("nt-limite").value||null;
+  const {data,error}=await sb.from("tarefas").insert({titulo,colaborador,frequencia,data_tarefa,status_manual,data_limite}).select();
   if(!error&&data){TAREFAS.push(data[0]);TAREFAS.sort((a,b)=>a.data_tarefa.localeCompare(b.data_tarefa));document.getElementById("modal-tarefa").remove();renderChecklist();showToast("✓ Tarefa adicionada!");}
   else showToast("⚠️ Erro ao salvar tarefa");
 }
@@ -1093,10 +1178,12 @@ function renderCalendario(){
       const isToday=date.getTime()===hoje.getTime();
       const dateStr=date.toISOString().split("T")[0];
       const evsDia=EVENTOS.filter(e=>e.data_inicio<=dateStr&&e.data_fim>=dateStr);
-      const dotsHtml=evsDia.slice(0,3).map(e=>{
+      const dotsHtml=evsDia.slice(0,2).map(e=>{
         const pl=platMap[e.plataforma]||{cor:"#888"};
-        return`<div class="cal-event-dot" style="background:${pl.cor}22;color:${pl.cor};border:1px solid ${pl.cor}44">${e.titulo}</div>`;
-      }).join("")+(evsDia.length>3?`<div style="font-size:9px;color:var(--text3)">+${evsDia.length-3} mais</div>`:"");
+        return`<div class="cal-event-dot" style="background:${pl.cor}22;color:${pl.cor};border:1px solid ${pl.cor}44" title="${e.titulo} — ${e.loja||''}">
+          <span style="font-weight:600">${pl.label.substring(0,4)}</span> ${e.loja?'· '+e.loja.substring(0,8):''}
+        </div>`;
+      }).join("")+(evsDia.length>2?`<div style="font-size:9px;color:var(--text3);padding:1px 4px">+${evsDia.length-2} mais</div>`:"");
       return`<div class="cal-cell${otherMonth?" other-month":""}${isToday?" today":""}" onclick="abrirModalEvento({data_inicio:'${dateStr}',data_fim:'${dateStr}'})">
         <div class="cal-day-num">${date.getDate()}</div>
         ${dotsHtml}
@@ -1111,30 +1198,48 @@ function renderCalendario(){
   const statusCls={ativo:"ev-ativo",agendado:"ev-agendado",vencido:"ev-vencido",reagendar:"ev-reagendar"};
   const listaEl=document.getElementById("calendario-lista");
   if(listaEl){
+    // Agrupar por mês
+    const porMes={};
+    eventos.forEach(e=>{
+      const k=e.data_inicio.substring(0,7);
+      if(!porMes[k]) porMes[k]=[];
+      porMes[k].push(e);
+    });
+    const mesesNome=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
     listaEl.innerHTML=!eventos.length
       ?`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Nenhum agendamento</div></div>`
-      :eventos.map(e=>{
+      :Object.keys(porMes).sort().map(mesKey=>{
+        const [ano,mes]=mesKey.split("-");
+        const mesNome=mesesNome[parseInt(mes)-1];
+        return`<div>
+          <div style="font-size:12px;font-weight:600;color:var(--text2);padding:.5rem 0;margin-bottom:.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px">
+            📅 ${mesNome} ${ano} <span style="font-size:10px;font-weight:400;color:var(--text3)">${porMes[mesKey].length} campanha${porMes[mesKey].length>1?"s":""}</span>
+          </div>
+          ${porMes[mesKey].map(e=>{
         const pl=platMap2[e.plataforma]||{cor:"#888",label:e.plataforma||"—"};
         const st2=statusEvento(e);
         const ini=new Date(e.data_inicio+"T00:00:00").toLocaleDateString("pt-BR");
         const fim=new Date(e.data_fim+"T00:00:00").toLocaleDateString("pt-BR");
-        return`<div class="evento-card">
-          <div class="evento-strip" style="background:${pl.cor}"></div>
-          <div>
-            <div class="evento-titulo">${e.titulo}</div>
-            <div class="evento-meta">
-              <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${pl.cor};display:inline-block"></span>${pl.label}</span>
-              <span>🏪 ${e.loja||"—"}</span>
-              <span>📌 ${tipoLabel[e.tipo]||e.tipo||"—"}</span>
-              <span>📆 ${ini} → ${fim}</span>
+        return`<div class="cal-event-card" style="border-left-color:${pl.cor}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+                <span class="plat-pill" style="background:${pl.cor};color:${pl.fc||'#fff'}">${pl.label}</span>
+                <span class="evento-status ${statusCls[st2]}">${statusLabel[st2]}</span>
+                <span style="font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text2)">${tipoLabel[e.tipo]||e.tipo||"—"}</span>
+              </div>
+              <div class="evento-titulo">${e.titulo}</div>
+              <div class="evento-meta" style="margin-top:4px">
+                <span style="font-weight:500;color:var(--text)">🏪 ${e.loja||"Loja não informada"}</span>
+                <span>📆 ${ini} → ${fim}</span>
+              </div>
+              ${e.observacao?`<div style="font-size:11px;color:var(--text2);margin-top:4px;background:var(--bg);padding:4px 8px;border-radius:6px">${e.observacao}</div>`:""}
             </div>
-            ${e.observacao?`<div style="font-size:11px;color:var(--text2)">${e.observacao}</div>`:""}
-          </div>
-          <div class="evento-actions">
-            <span class="evento-status ${statusCls[st2]}">${statusLabel[st2]}</span>
-            <button class="ev-btn" onclick="abrirModalEvento(${JSON.stringify({...e}).replace(/"/g,"'")})" style="color:#1565C0">✏️</button>
-            ${st2==="vencido"||st2==="reagendar"?`<button class="ev-btn" onclick="reagendarEvento('${e.id}')" style="background:var(--orange-bg);color:var(--orange);border-color:#FFB74D">🔄 Reagendar</button>`:""}
-            ${st.adminMode?`<button class="ev-btn" onclick="deletarEvento('${e.id}')" style="color:var(--red)">🗑️</button>`:""}
+            <div class="evento-actions" style="flex-shrink:0">
+              <button class="ev-btn" onclick="abrirModalEvento(${JSON.stringify({...e}).replace(/"/g,"'")})" style="color:#1565C0">✏️ Editar</button>
+              ${st2==="vencido"||st2==="reagendar"?`<button class="ev-btn" onclick="reagendarEvento('${e.id}')" style="background:var(--orange-bg);color:var(--orange);border-color:#FFB74D">🔄 Reagendar</button>`:""}
+              ${st.adminMode?`<button class="ev-btn" onclick="deletarEvento('${e.id}')" style="color:var(--red)">🗑️</button>`:""}
+            </div>
           </div>
         </div>`;
       }).join("");
@@ -1180,7 +1285,11 @@ async function salvarEvento(idExistente=""){
   const data_inicio=document.getElementById("ne-inicio").value;
   const data_fim=document.getElementById("ne-fim").value;
   const observacao=document.getElementById("ne-obs").value.trim();
-  if(!titulo||!data_inicio||!data_fim){showToast("⚠️ Preencha título e datas");return;}
+  if(!titulo){showToast("⚠️ Preencha o título");return;}
+  if(!plataforma){showToast("⚠️ Selecione a plataforma");return;}
+  if(!loja){showToast("⚠️ Selecione a loja");return;}
+  if(!data_inicio){showToast("⚠️ Preencha a data de início");return;}
+  if(!data_fim){showToast("⚠️ Preencha a data de fim");return;}
   if(data_fim<data_inicio){showToast("⚠️ Data fim deve ser após data início");return;}
   const payload={titulo,plataforma,tipo,loja,data_inicio,data_fim,observacao};
   if(idExistente){
@@ -1212,6 +1321,134 @@ function showToast(msg){
 
 // ── INIT ───────────────────────────────────────────────────────────────────────
 document.getElementById("nova-loja").addEventListener("keydown",e=>{if(e.key==="Enter")adicionarLoja();});
+
+// ══════════════════════════════════════════════════════════════════
+// CONFIGURAÇÕES
+// ══════════════════════════════════════════════════════════════════
+const TIPOS_KEY="tipos_alteracao_v2";
+const PLATS_HIDDEN_KEY="plats_hidden";
+// Load tipos from localStorage (pode ser customizado)
+let TIPOS_CUSTOM=JSON.parse(localStorage.getItem(TIPOS_KEY)||JSON.stringify(TIPOS_LIST));
+// Overwrite TIPOS_LIST with custom
+TIPOS_LIST.length=0;TIPOS_CUSTOM.forEach(t=>TIPOS_LIST.push(t));
+
+function irParaConfig(){
+  st.view="config";setNavActive("nav-config");setPageActive("page-config");
+  setCSSVars("#37474F","#ECEFF1");
+  renderConfigColabs();renderConfigTipos();renderConfigPlats();cfgRenderLojas();
+}
+
+function renderConfigColabs(){
+  const lista=document.getElementById("cfg-colab-lista");
+  const count=document.getElementById("cfg-colab-count");
+  if(count) count.textContent=COLABORADORES.length+" cadastrado"+(COLABORADORES.length!==1?"s":"");
+  if(!lista) return;
+  lista.innerHTML=COLABORADORES.map(c=>`
+    <div class="cfg-item">
+      <span>👤 ${c}</span>
+      <button class="cfg-remove" onclick="cfgRemoverColab('${c}')">Remover</button>
+    </div>`).join("")||`<p style="font-size:11px;color:var(--text3)">Nenhum colaborador</p>`;
+}
+
+function cfgAdicionarColab(){
+  const inp=document.getElementById("cfg-colab-input");
+  const nome=inp.value.trim();if(!nome)return;
+  if(COLABORADORES.includes(nome)){showToast("⚠️ Já existe");return;}
+  COLABORADORES.push(nome);
+  localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
+  inp.value="";renderConfigColabs();renderColabSelect();
+  showToast("✓ '"+nome+"' adicionado!");
+}
+
+function cfgRemoverColab(nome){
+  if(!confirm("Remover '"+nome+"'?")) return;
+  COLABORADORES=COLABORADORES.filter(c=>c!==nome);
+  localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
+  renderConfigColabs();renderColabSelect();
+  showToast("✓ Removido!");
+}
+
+function renderConfigTipos(){
+  const lista=document.getElementById("cfg-tipos-lista");
+  const count=document.getElementById("cfg-tipos-count");
+  if(count) count.textContent=TIPOS_LIST.length+" tipo"+(TIPOS_LIST.length!==1?"s":"");
+  if(!lista) return;
+  lista.innerHTML=TIPOS_LIST.map(t=>`
+    <div class="cfg-item">
+      <span>📝 ${t}</span>
+      <button class="cfg-remove" onclick="cfgRemoverTipo('${t}')">Remover</button>
+    </div>`).join("")||`<p style="font-size:11px;color:var(--text3)">Nenhum tipo</p>`;
+}
+
+function cfgAdicionarTipo(){
+  const inp=document.getElementById("cfg-tipo-input");
+  const nome=inp.value.trim();if(!nome)return;
+  if(TIPOS_LIST.includes(nome)){showToast("⚠️ Já existe");return;}
+  TIPOS_LIST.push(nome);
+  localStorage.setItem(TIPOS_KEY,JSON.stringify([...TIPOS_LIST]));
+  inp.value="";renderConfigTipos();renderTiposCheckboxes();renderFiltros();
+  showToast("✓ '"+nome+"' adicionado!");
+}
+
+function cfgRemoverTipo(nome){
+  if(!confirm("Remover o tipo '"+nome+"'?")) return;
+  const idx=TIPOS_LIST.indexOf(nome);
+  if(idx>=0) TIPOS_LIST.splice(idx,1);
+  localStorage.setItem(TIPOS_KEY,JSON.stringify([...TIPOS_LIST]));
+  renderConfigTipos();renderTiposCheckboxes();renderFiltros();
+  showToast("✓ Removido!");
+}
+
+function renderConfigPlats(){
+  const lista=document.getElementById("cfg-plats-lista");
+  if(!lista) return;
+  lista.innerHTML=PLATS.map(p=>`
+    <div class="plat-toggle">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${p.cor};display:inline-block"></span>
+        <span style="font-size:13px;font-weight:500">${p.label}</span>
+      </div>
+      <span style="font-size:11px;color:var(--text3)">${(st.lojas[p.id]||[]).length} loja${(st.lojas[p.id]||[]).length!==1?"s":""}</span>
+    </div>`).join("");
+}
+
+function cfgRenderLojas(){
+  const plat=document.getElementById("cfg-loja-plat")?.value||"shopee";
+  const lista=document.getElementById("cfg-lojas-lista");if(!lista)return;
+  const lojas=st.lojas[plat]||[];
+  lista.innerHTML=lojas.map(l=>`
+    <div class="cfg-item">
+      <span>🏪 ${l}</span>
+      <button class="cfg-remove" onclick="cfgRemoverLoja('${plat}','${l}')">Remover</button>
+    </div>`).join("")||`<p style="font-size:11px;color:var(--text3)">Nenhuma loja</p>`;
+}
+
+async function cfgAdicionarLoja(){
+  const plat=document.getElementById("cfg-loja-plat")?.value;
+  const inp=document.getElementById("cfg-loja-input");
+  const nome=inp.value.trim();if(!nome||!plat)return;
+  if((st.lojas[plat]||[]).includes(nome)){showToast("⚠️ Loja já existe");return;}
+  try{
+    setSyncing(true);
+    await sb.from("lojas").insert({plataforma:plat,nome});
+    st.lojas[plat]=[...(st.lojas[plat]||[]),nome];
+    inp.value="";setSyncing(false);
+    cfgRenderLojas();renderSidebar();renderLojaSelect();renderConfigPlats();
+    showToast("✓ Loja '"+nome+"' adicionada!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao adicionar");}
+}
+
+async function cfgRemoverLoja(plat,nome){
+  if(!confirm("Remover loja '"+nome+"' da plataforma? Os registros históricos desta loja serão mantidos.")) return;
+  try{
+    setSyncing(true);
+    await sb.from("lojas").delete().eq("plataforma",plat).eq("nome",nome);
+    st.lojas[plat]=(st.lojas[plat]||[]).filter(l=>l!==nome);
+    setSyncing(false);cfgRenderLojas();renderSidebar();renderLojaSelect();renderConfigPlats();
+    showToast("✓ Loja removida!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao remover");}
+}
+
 inicializar();
 </script>
 </body>
