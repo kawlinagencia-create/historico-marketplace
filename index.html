@@ -161,7 +161,7 @@ tr:hover .edit-row-btn{opacity:1}
 /* CALENDAR */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1rem}
 .cal-header-day{text-align:center;font-size:10px;font-weight:600;color:var(--text3);padding:6px 0;text-transform:uppercase;letter-spacing:.05em}
-.cal-cell{min-height:90px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;cursor:pointer;transition:all .12s}
+.cal-cell{min-height:110px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px;cursor:pointer;transition:all .12s}
 .cal-cell:hover{border-color:var(--plat-cor);box-shadow:0 0 0 2px var(--plat-cor-10)}
 .cal-cell.other-month{background:var(--bg);opacity:.5}
 .cal-cell.today{border-color:var(--plat-cor);border-width:2px}
@@ -207,6 +207,39 @@ tr:hover .edit-row-btn{opacity:1}
 .toggle-switch{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;transition:background .2s;position:relative;flex-shrink:0}
 .toggle-switch.on{background:#1B5E20}
 .toggle-switch.off{background:var(--border2)}
+.pri-alta{background:#FFEBEE;color:#C62828;border:1px solid #FFCDD2}
+.pri-media{background:#FFF8E1;color:#F57F17;border:1px solid #FFE082}
+.pri-baixa{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7}
+.pri-badge{font-size:9px;padding:2px 7px;border-radius:999px;font-weight:600;white-space:nowrap}
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:.5rem;overflow:hidden;transition:box-shadow .15s;box-shadow:var(--shadow)}
+.task-card:hover{box-shadow:var(--shadow-md)}
+.task-card.status-atrasado{border-left:4px solid var(--red)}
+.task-card.status-andamento{border-left:4px solid var(--orange)}
+.task-card.status-concluido{border-left:4px solid var(--green)}
+.task-card.status-pendente{border-left:4px solid var(--border2)}
+.task-body{padding:.875rem 1rem;display:flex;align-items:flex-start;gap:10px}
+.task-check{width:20px;height:20px;border-radius:6px;flex-shrink:0;border:2px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s;margin-top:1px}
+.task-check.concluido{background:var(--green);border-color:var(--green);color:#fff}
+.task-check.andamento{background:var(--orange);border-color:var(--orange);color:#fff}
+.task-check.atrasado{background:var(--red);border-color:var(--red);color:#fff}
+.task-info{flex:1}
+.task-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.task-title.done{text-decoration:line-through;color:var(--text3)}
+.task-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:10px;color:var(--text3)}
+.task-actions{display:flex;gap:5px;flex-shrink:0}
+.task-footer{padding:6px 1rem;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;width:100px}
+.progress-fill{height:100%;border-radius:2px;transition:width .3s}
+.colab-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1rem;overflow:hidden}
+.colab-header{padding:.875rem 1.25rem;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.colab-name{font-size:13px;font-weight:600}
+.colab-progress{display:flex;align-items:center;gap:8px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.875rem;box-shadow:var(--shadow)}
+.kpi-num{font-size:24px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:-1px}
+.kpi-label{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.kpi-sub{font-size:10px;margin-top:3px}
+.cal-evento-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:.75rem;display:flex;gap:1rem;align-items:flex-start;box-shadow:var(--shadow);transition:box-shadow .15s;border-left:4px solid #888}
+.cal-evento-card:hover{box-shadow:var(--shadow-md)}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:9px 14px;border-radius:9px;font-size:12px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(max-width:768px){
@@ -335,43 +368,67 @@ tr:hover .edit-row-btn{opacity:1}
     <!-- CHECKLIST -->
     <div class="page" id="page-checklist">
       <div class="main-header">
-        <div><div class="main-title">Checklist de Tarefas</div><div class="main-sub">tarefas diárias e semanais por colaborador</div></div>
+        <div><div class="main-title">Gestão de Tarefas</div><div class="main-sub">checklist operacional por colaborador</div></div>
         <button onclick="abrirModalTarefa()" style="padding:7px 16px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Nova tarefa</button>
       </div>
+
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem" id="check-kpis"></div>
+
+      <!-- Alertas -->
       <div id="check-alertas"></div>
+
+      <!-- Filtros -->
       <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
         <select id="check-filter-colab" class="filter-sel" onchange="renderChecklist()"><option value="">Todos colaboradores</option></select>
+        <select id="check-filter-prioridade" class="filter-sel" onchange="renderChecklist()">
+          <option value="">Todas prioridades</option>
+          <option value="alta">🔴 Alta</option><option value="media">🟡 Média</option><option value="baixa">🟢 Baixa</option>
+        </select>
         <select id="check-filter-freq" class="filter-sel" onchange="renderChecklist()">
-          <option value="">Diária e Semanal</option><option value="diaria">Somente Diária</option><option value="semanal">Somente Semanal</option>
+          <option value="">Todas frequências</option><option value="diaria">Diária</option><option value="semanal">Semanal</option><option value="unica">Única</option>
         </select>
         <select id="check-filter-status" class="filter-sel" onchange="renderChecklist()">
-          <option value="">Todos os status</option><option value="concluido">Concluído</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="pendente">Pendente</option>
+          <option value="">Todos os status</option><option value="concluido">✅ Concluído</option>
+          <option value="andamento">🟠 Em andamento</option><option value="atrasado">🔴 Atrasado</option><option value="pendente">⚪ Pendente</option>
         </select>
-        <select id="check-filter-semana" class="filter-sel" onchange="renderChecklist()">
-          <option value="semana">Esta semana</option><option value="proxima">Próxima semana</option><option value="todas">Todas as datas</option>
+        <select id="check-filter-periodo" class="filter-sel" onchange="renderChecklist()">
+          <option value="hoje">Hoje</option><option value="semana">Esta semana</option>
+          <option value="proxima">Próxima semana</option><option value="todas">Todas as datas</option>
         </select>
       </div>
+
       <div id="checklist-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
     </div>
 
     <!-- CALENDÁRIO -->
     <div class="page" id="page-calendario">
       <div class="main-header">
-        <div><div class="main-title">Calendário de Campanhas</div><div class="main-sub">cupons, descontos e promoções agendadas</div></div>
-        <button onclick="abrirModalEvento()" style="padding:7px 16px;border-radius:7px;border:none;background:#6A1B9A;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Novo agendamento</button>
+        <div><div class="main-title">Calendário de Campanhas</div><div class="main-sub">planejamento de cupons, promoções e campanhas</div></div>
+        <button onclick="abrirModalEvento({})" style="padding:7px 16px;border-radius:7px;border:none;background:#6A1B9A;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Novo agendamento</button>
       </div>
+
+      <!-- KPIs calendário -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.25rem" id="cal-kpis"></div>
+
+      <!-- Alertas -->
       <div id="cal-alertas"></div>
-      <!-- Calendário visual -->
-      <div class="form-card" style="padding:1rem">
+
+      <!-- Grade calendário -->
+      <div class="form-card" style="padding:1rem;margin-bottom:1rem">
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="mudarMes(-1)">← Anterior</button>
-          <span class="cal-month-title" id="cal-mes-titulo"></span>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="cal-month-title" id="cal-mes-titulo"></span>
+            <button class="cal-nav-btn" onclick="irParaHoje()" style="font-size:11px">Hoje</button>
+          </div>
           <button class="cal-nav-btn" onclick="mudarMes(1)">Próximo →</button>
         </div>
         <div class="cal-grid" id="cal-grid-header"></div>
         <div class="cal-grid" id="cal-grid"></div>
       </div>
-      <!-- Filtros e lista -->
+
+      <!-- Filtros -->
       <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
         <select id="cal-filter-plat" class="filter-sel" onchange="renderCalendario()">
           <option value="">Todas plataformas</option>
@@ -388,7 +445,12 @@ tr:hover .edit-row-btn{opacity:1}
           <option value="ativo">Ativo</option><option value="agendado">Agendado</option>
           <option value="vencido">Vencido</option><option value="reagendar">Vencendo em breve</option>
         </select>
+        <input type="text" id="cal-search" class="search-big" placeholder="Buscar campanha..." style="max-width:200px" oninput="renderCalendario()"/>
       </div>
+
+      <!-- Legenda de lojas -->
+      <div id="cal-legenda" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem"></div>
+      <!-- Lista de eventos -->
       <div id="calendario-lista"></div>
     </div>
     <!-- CONFIGURAÇÕES -->
@@ -966,6 +1028,14 @@ function statusTarefa(t){
   return"pendente";
 }
 
+function renderLimite(data_limite){
+  if(!data_limite) return "";
+  const d=new Date(data_limite+"T00:00:00");
+  const vencido=d<new Date();
+  const fmt=d.toLocaleDateString("pt-BR");
+  return`<span style="color:${vencido?"var(--red)":"var(--orange)"};font-weight:500">⏰ Limite: ${fmt}</span>`;
+}
+
 function renderChecklist(){
   const filterColab=document.getElementById("check-filter-colab")?.value||"";
   const filterFreq=document.getElementById("check-filter-freq")?.value||"";
@@ -1029,7 +1099,7 @@ function renderChecklist(){
             <div class="check-title ${st2==="concluido"?"concluido":""}">${t.titulo}</div>
             <div style="font-size:10px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap">
               <span>${t.colaborador}</span>
-              ${t.data_limite?`<span style="color:${new Date(t.data_limite+'T00:00:00')<new Date()?'var(--red)':'var(--orange)'};font-weight:500">⏰ Limite: ${new Date(t.data_limite+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:""}
+              ${renderLimite(t.data_limite)}
             </div>
           </div>
           <span class="freq-badge freq-${t.frequencia}">${t.frequencia==="diaria"?"Diária":"Semanal"}</span>
@@ -1128,16 +1198,65 @@ function statusEvento(e){
 }
 
 function mudarMes(delta){calMes+=delta;if(calMes>11){calMes=0;calAno++;}if(calMes<0){calMes=11;calAno--;}renderCalendario();}
+function irParaHoje(){calMes=new Date().getMonth();calAno=new Date().getFullYear();renderCalendario();}
+
+const LOJA_CORES=[
+  "#1565C0","#6A1B9A","#2E7D32","#C62828","#EF6C00","#00838F",
+  "#4527A0","#558B2F","#D84315","#0277BD","#6D4C41","#37474F",
+  "#AD1457","#00695C","#F57F17","#4E342E","#283593","#1B5E20",
+];
+const _lojaCorCache={};
+
+function getLojaCorMap(){
+  const allLojas=[...new Set(Object.values(st.lojas).flat())];
+  allLojas.forEach((l,i)=>{
+    if(!_lojaCorCache[l]) _lojaCorCache[l]=LOJA_CORES[i%LOJA_CORES.length];
+  });
+  return _lojaCorCache;
+}
+
+function renderCalKPIs(){
+  const el=document.getElementById("cal-kpis");if(!el)return;
+  const ativos=EVENTOS.filter(e=>statusEvento(e)==="ativo").length;
+  const agendados=EVENTOS.filter(e=>statusEvento(e)==="agendado").length;
+  const vencendo=EVENTOS.filter(e=>statusEvento(e)==="reagendar").length;
+  const vencidos=EVENTOS.filter(e=>statusEvento(e)==="vencido").length;
+  el.innerHTML=[
+    {n:EVENTOS.length,l:"Total de campanhas",c:"var(--text2)"},
+    {n:ativos,l:"Ativas agora",c:"var(--green)"},
+    {n:agendados,l:"Agendadas",c:"var(--blue)"},
+    {n:vencendo,l:"Vencendo em breve",c:"var(--orange)"},
+    {n:vencidos,l:"Vencidas",c:"var(--red)"},
+  ].map(k=>`<div class="kpi-card">
+    <div class="kpi-num" style="color:${k.c}">${k.n}</div>
+    <div class="kpi-label">${k.l}</div>
+  </div>`).join("");
+}
 
 function renderCalendario(){
+  renderCalKPIs();
+  // Render loja color legend
+  const legendaEl=document.getElementById("cal-legenda");
+  if(legendaEl){
+    const lojaCorMap2=getLojaCorMap();
+    const lojasComEventos=[...new Set(EVENTOS.map(e=>e.loja).filter(Boolean))];
+    legendaEl.innerHTML=lojasComEventos.length?
+      `<span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;align-self:center">Lojas:</span>`+
+      lojasComEventos.map(l=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:999px;background:${lojaCorMap2[l]||'#888'}18;border:1px solid ${lojaCorMap2[l]||'#888'}55;color:${lojaCorMap2[l]||'#888'};font-weight:500">
+        <span style="width:8px;height:8px;border-radius:50%;background:${lojaCorMap2[l]||'#888'};display:inline-block"></span>${l}
+      </span>`).join("")
+      :"";
+  }
   const filterPlat=document.getElementById("cal-filter-plat")?.value||"";
   const filterTipo=document.getElementById("cal-filter-tipo")?.value||"";
   const filterStatus=document.getElementById("cal-filter-status")?.value||"";
+  const search=document.getElementById("cal-search")?.value.toLowerCase().trim()||"";
 
   let eventos=[...EVENTOS];
   if(filterPlat) eventos=eventos.filter(e=>e.plataforma===filterPlat);
   if(filterTipo) eventos=eventos.filter(e=>e.tipo===filterTipo);
   if(filterStatus) eventos=eventos.filter(e=>statusEvento(e)===filterStatus);
+  if(search) eventos=eventos.filter(e=>(e.titulo||"").toLowerCase().includes(search)||(e.loja||"").toLowerCase().includes(search));
 
   // Alertas
   const vencendo=EVENTOS.filter(e=>statusEvento(e)==="reagendar"||statusEvento(e)==="vencido");
@@ -1178,12 +1297,27 @@ function renderCalendario(){
       const isToday=date.getTime()===hoje.getTime();
       const dateStr=date.toISOString().split("T")[0];
       const evsDia=EVENTOS.filter(e=>e.data_inicio<=dateStr&&e.data_fim>=dateStr);
-      const dotsHtml=evsDia.slice(0,2).map(e=>{
-        const pl=platMap[e.plataforma]||{cor:"#888"};
-        return`<div class="cal-event-dot" style="background:${pl.cor}22;color:${pl.cor};border:1px solid ${pl.cor}44" title="${e.titulo} — ${e.loja||''}">
-          <span style="font-weight:600">${pl.label.substring(0,4)}</span> ${e.loja?'· '+e.loja.substring(0,8):''}
+      const lojaCorMap=getLojaCorMap();
+      const tipoIconMap={cupom:"🎫",desconto:"💰",promocao:"🎯",campanha:"📣",oferta:"⚡"};
+      const dotsHtml=evsDia.slice(0,3).map(e=>{
+        const pl=platMap[e.plataforma]||{cor:"#888",label:"?"};
+        const lojaCor=lojaCorMap[e.loja]||pl.cor;
+        const icon=tipoIconMap[e.tipo]||"📌";
+        const st2=statusEvento(e);
+        const borderStyle=st2==="vencido"?"2px dashed "+lojaCor:"1px solid "+lojaCor+"88";
+        return`<div onclick="event.stopPropagation();editarEvento('${e.id}')" style="
+          font-size:9px;padding:2px 5px;border-radius:4px;margin-bottom:2px;
+          background:${lojaCor}18;color:${lojaCor};border:${borderStyle};
+          cursor:pointer;transition:opacity .15s;line-height:1.4;
+          opacity:${st2==='vencido'?'0.6':'1'}
+        " title="${e.titulo}&#10;Loja: ${e.loja||'—'}&#10;${e.data_inicio} → ${e.data_fim}">
+          <div style="display:flex;align-items:center;gap:2px;font-weight:600;margin-bottom:1px">
+            ${icon} <span style="background:${pl.cor};color:${pl.fc||'#fff'};border-radius:2px;padding:0 3px;font-size:8px">${pl.label.substring(0,4)}</span>
+            <span style="font-size:8px;font-weight:600;color:${lojaCor}">${({cupom:"Cupom",desconto:"Desconto",promocao:"Promoção",campanha:"Campanha",oferta:"Oferta"})[e.tipo]||e.tipo||""}</span>
+          </div>
+          <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;color:var(--text);font-size:9px">${e.loja||e.titulo}</div>
         </div>`;
-      }).join("")+(evsDia.length>2?`<div style="font-size:9px;color:var(--text3);padding:1px 4px">+${evsDia.length-2} mais</div>`:"");
+      }).join("")+(evsDia.length>3?`<div style="font-size:9px;color:var(--text3);font-weight:500;padding:1px 4px;background:var(--bg);border-radius:3px;text-align:center">+${evsDia.length-3} mais</div>`:"");
       return`<div class="cal-cell${otherMonth?" other-month":""}${isToday?" today":""}" onclick="abrirModalEvento({data_inicio:'${dateStr}',data_fim:'${dateStr}'})">
         <div class="cal-day-num">${date.getDate()}</div>
         ${dotsHtml}
@@ -1206,67 +1340,105 @@ function renderCalendario(){
       porMes[k].push(e);
     });
     const mesesNome=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-    listaEl.innerHTML=!eventos.length
-      ?`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Nenhum agendamento</div></div>`
-      :Object.keys(porMes).sort().map(mesKey=>{
-        const [ano,mes]=mesKey.split("-");
-        const mesNome=mesesNome[parseInt(mes)-1];
-        return`<div>
-          <div style="font-size:12px;font-weight:600;color:var(--text2);padding:.5rem 0;margin-bottom:.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px">
-            📅 ${mesNome} ${ano} <span style="font-size:10px;font-weight:400;color:var(--text3)">${porMes[mesKey].length} campanha${porMes[mesKey].length>1?"s":""}</span>
-          </div>
-          ${porMes[mesKey].map(e=>{
-        const pl=platMap2[e.plataforma]||{cor:"#888",label:e.plataforma||"—"};
-        const st2=statusEvento(e);
-        const ini=new Date(e.data_inicio+"T00:00:00").toLocaleDateString("pt-BR");
-        const fim=new Date(e.data_fim+"T00:00:00").toLocaleDateString("pt-BR");
-        return`<div class="cal-event-card" style="border-left-color:${pl.cor}">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">
-            <div style="flex:1">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
-                <span class="plat-pill" style="background:${pl.cor};color:${pl.fc||'#fff'}">${pl.label}</span>
-                <span class="evento-status ${statusCls[st2]}">${statusLabel[st2]}</span>
-                <span style="font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text2)">${tipoLabel[e.tipo]||e.tipo||"—"}</span>
-              </div>
-              <div class="evento-titulo">${e.titulo}</div>
-              <div class="evento-meta" style="margin-top:4px">
-                <span style="font-weight:500;color:var(--text)">🏪 ${e.loja||"Loja não informada"}</span>
-                <span>📆 ${ini} → ${fim}</span>
-              </div>
-              ${e.observacao?`<div style="font-size:11px;color:var(--text2);margin-top:4px;background:var(--bg);padding:4px 8px;border-radius:6px">${e.observacao}</div>`:""}
-            </div>
-            <div class="evento-actions" style="flex-shrink:0">
-              <button class="ev-btn" onclick="abrirModalEvento(${JSON.stringify({...e}).replace(/"/g,"'")})" style="color:#1565C0">✏️ Editar</button>
-              ${st2==="vencido"||st2==="reagendar"?`<button class="ev-btn" onclick="reagendarEvento('${e.id}')" style="background:var(--orange-bg);color:var(--orange);border-color:#FFB74D">🔄 Reagendar</button>`:""}
-              ${st.adminMode?`<button class="ev-btn" onclick="deletarEvento('${e.id}')" style="color:var(--red)">🗑️</button>`:""}
-            </div>
-          </div>
-        </div>`;
-      }).join("");
+    if(!eventos.length){
+      listaEl.innerHTML=`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Nenhum agendamento</div></div>`;
+    } else {
+      const mesesNome2=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+      let html="";
+      Object.keys(porMes).sort().forEach(function(mesKey){
+        const parts=mesKey.split("-");
+        const mesNome2=mesesNome2[parseInt(parts[1])-1];
+        html+='<div style="font-size:12px;font-weight:600;color:var(--text2);padding:.5rem 0;margin-bottom:.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px">📅 '+mesNome2+' '+parts[0]+' <span style="font-size:10px;font-weight:400;color:var(--text3)">'+porMes[mesKey].length+' campanha'+(porMes[mesKey].length>1?'s':'')+'</span></div>';
+        porMes[mesKey].forEach(function(e){
+          const pl=platMap2[e.plataforma]||{cor:"#888",label:e.plataforma||"—"};
+          const st2=statusEvento(e);
+          const ini=new Date(e.data_inicio+"T00:00:00").toLocaleDateString("pt-BR");
+          const fim=new Date(e.data_fim+"T00:00:00").toLocaleDateString("pt-BR");
+          const statusLabelMap={ativo:"Ativo",agendado:"Agendado",vencido:"Vencido",reagendar:"Vencendo em breve"};
+          const statusClsMap={ativo:"ev-ativo",agendado:"ev-agendado",vencido:"ev-vencido",reagendar:"ev-reagendar"};
+          const tipoLabelMap={cupom:"Cupom",desconto:"Desconto",promocao:"Promoção",campanha:"Campanha",oferta:"Oferta Relâmpago"};
+          html+='<div class="cal-event-card" style="border-left-color:'+pl.cor+'">';
+          html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">';
+          html+='<div style="flex:1">';
+          html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">';
+          html+='<span class="plat-pill" style="background:'+pl.cor+';color:'+(pl.fc||"#fff")+'">'+pl.label+'</span>';
+          html+='<span class="evento-status '+statusClsMap[st2]+'">'+statusLabelMap[st2]+'</span>';
+          html+='<span style="font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--text2)">'+(tipoLabelMap[e.tipo]||e.tipo||"—")+'</span>';
+          html+='</div>';
+          html+='<div class="evento-titulo">'+e.titulo+'</div>';
+          html+='<div class="evento-meta" style="margin-top:4px">';
+          html+='<span style="font-weight:500;color:var(--text)">🏪 '+(e.loja||"Loja não informada")+'</span>';
+          html+='<span>📆 '+ini+' → '+fim+'</span>';
+          html+='</div>';
+          if(e.observacao) html+='<div style="font-size:11px;color:var(--text2);margin-top:4px;background:var(--bg);padding:4px 8px;border-radius:6px">'+e.observacao+'</div>';
+          html+='</div>';
+          html+='<div class="evento-actions" style="flex-shrink:0">';
+          html+='<button class="ev-btn" onclick="abrirModalEvento({id:\''+(e.id||'')+'\',...EVENTOS.find(function(x){return x.id===\''+e.id+'\'})||{}})" style="color:#1565C0">✏️ Editar</button>';
+          if(st2==="vencido"||st2==="reagendar") html+='<button class="ev-btn" onclick="reagendarEvento(\''+e.id+'\')" style="background:var(--orange-bg);color:var(--orange);border-color:#FFB74D">🔄 Reagendar</button>';
+          if(st.adminMode) html+='<button class="ev-btn" onclick="deletarEvento(\''+e.id+'\')" style="color:var(--red)">🗑️</button>';
+          html+='</div></div></div>';
+        });
+      });
+      listaEl.innerHTML=html;
+    }
   }
+}
+
+function editarEvento(id){
+  const e=EVENTOS.find(x=>x.id===id);
+  if(e) abrirModalEvento(e);
 }
 
 function abrirModalEvento(prefill={}){
   const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-evento";
   const allLojas=[...new Set(Object.values(st.lojas).flat())];
   const lojaOpts=allLojas.map(l=>`<option value="${l}"${prefill.loja===l?" selected":""}>${l}</option>`).join("");
-  overlay.innerHTML=`<div class="modal" style="max-width:500px">
-    <div class="modal-title">📅 ${prefill.id?"Editar":"Novo"} agendamento</div>
-    <div class="modal-sub">Agende cupons, descontos e promoções</div>
+  overlay.innerHTML=`<div class="modal" style="max-width:520px">
+    <div class="modal-title">📅 ${prefill.id?"Editar agendamento":"Novo agendamento"}</div>
+    <div class="modal-sub">${prefill.id?"Atualize os dados da campanha":"Agende uma campanha, cupom ou promoção"}</div>
     <div class="modal-grid">
-      <div class="modal-field" style="grid-column:1/-1"><label>Título</label><input id="ne-titulo" value="${prefill.titulo||""}" placeholder="Ex: Cupom 20% OFF Shopee"/></div>
-      <div class="modal-field"><label>Plataforma</label><select id="ne-plat">${PLATS.map(p=>`<option value="${p.id}"${prefill.plataforma===p.id?" selected":""}>${p.label}</option>`).join("")}</select></div>
-      <div class="modal-field"><label>Tipo</label><select id="ne-tipo">
-        <option value="cupom"${prefill.tipo==="cupom"?" selected":""}>Cupom</option>
-        <option value="desconto"${prefill.tipo==="desconto"?" selected":""}>Desconto</option>
-        <option value="promocao"${prefill.tipo==="promocao"?" selected":""}>Promoção</option>
-        <option value="campanha"${prefill.tipo==="campanha"?" selected":""}>Campanha</option>
-        <option value="oferta"${prefill.tipo==="oferta"?" selected":""}>Oferta Relâmpago</option>
-      </select></div>
-      <div class="modal-field"><label>Loja</label><select id="ne-loja"><option value="">Selecione a loja...</option>${lojaOpts}</select></div>
-      <div class="modal-field"><label>Data de início</label><input type="date" id="ne-inicio" value="${prefill.data_inicio||""}"/></div>
-      <div class="modal-field"><label>Data de fim</label><input type="date" id="ne-fim" value="${prefill.data_fim||""}"/></div>
-      <div class="modal-field" style="grid-column:1/-1"><label>Observação</label><textarea id="ne-obs" placeholder="Detalhes da campanha...">${prefill.observacao||""}</textarea></div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Título *</label>
+        <input id="ne-titulo" value="${prefill.titulo||""}" placeholder="Ex: Cupom 20% OFF Shopee — Mês de Junho"/>
+      </div>
+      <div class="modal-field">
+        <label>Plataforma *</label>
+        <select id="ne-plat">${PLATS.map(p=>`<option value="${p.id}"${prefill.plataforma===p.id?" selected":""}>${p.label}</option>`).join("")}</select>
+      </div>
+      <div class="modal-field">
+        <label>Tipo *</label>
+        <select id="ne-tipo">
+          <option value="cupom"${prefill.tipo==="cupom"?" selected":""}>🎫 Cupom</option>
+          <option value="desconto"${prefill.tipo==="desconto"?" selected":""}>💰 Desconto</option>
+          <option value="promocao"${prefill.tipo==="promocao"?" selected":""}>🎯 Promoção</option>
+          <option value="campanha"${prefill.tipo==="campanha"?" selected":""}>📣 Campanha</option>
+          <option value="oferta"${prefill.tipo==="oferta"?" selected":""}>⚡ Oferta Relâmpago</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Loja *</label>
+        <select id="ne-loja"><option value="">Selecione a loja...</option>${lojaOpts}</select>
+      </div>
+      <div class="modal-field">
+        <label>Responsável</label>
+        <select id="ne-resp"><option value="">Selecione...</option>${COLABORADORES.map(c=>`<option value="${c}"${prefill.responsavel===c?" selected":""}>${c}</option>`).join("")}</select>
+      </div>
+      <div class="modal-field">
+        <label>Data de início *</label>
+        <input type="date" id="ne-inicio" value="${prefill.data_inicio||""}"/>
+      </div>
+      <div class="modal-field">
+        <label>Data de fim *</label>
+        <input type="date" id="ne-fim" value="${prefill.data_fim||""}"/>
+      </div>
+      <div class="modal-field">
+        <label>Valor / Desconto</label>
+        <input id="ne-valor" value="${prefill.valor||""}" placeholder="Ex: 20% ou R$ 50,00"/>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Observações / Detalhes</label>
+        <textarea id="ne-obs" placeholder="Regras do cupom, público-alvo, links...">${prefill.observacao||""}</textarea>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-evento').remove()">Cancelar</button>
@@ -1291,7 +1463,9 @@ async function salvarEvento(idExistente=""){
   if(!data_inicio){showToast("⚠️ Preencha a data de início");return;}
   if(!data_fim){showToast("⚠️ Preencha a data de fim");return;}
   if(data_fim<data_inicio){showToast("⚠️ Data fim deve ser após data início");return;}
-  const payload={titulo,plataforma,tipo,loja,data_inicio,data_fim,observacao};
+  const responsavel=document.getElementById("ne-resp")?.value||"";
+  const valor=document.getElementById("ne-valor")?.value.trim()||"";
+  const payload={titulo,plataforma,tipo,loja,data_inicio,data_fim,observacao,responsavel,valor};
   if(idExistente){
     const {error}=await sb.from("eventos").update(payload).eq("id",idExistente);
     if(!error){const idx=EVENTOS.findIndex(e=>e.id===idExistente);if(idx>=0)EVENTOS[idx]={...EVENTOS[idx],...payload};document.getElementById("modal-evento").remove();renderCalendario();showToast("✓ Atualizado!");}
