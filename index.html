@@ -246,6 +246,13 @@ tr:hover .edit-row-btn{opacity:1}
 .painel-task-item{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px}
 .painel-task-item:last-child{border-bottom:none}
 .painel-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.banco-loja-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:.75rem;overflow:hidden;box-shadow:var(--shadow)}
+.banco-loja-header{padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg);cursor:pointer}
+.banco-task-row{display:flex;align-items:center;gap:10px;padding:8px 1rem;border-bottom:1px solid var(--border);transition:background .12s}
+.banco-task-row:last-child{border-bottom:none}
+.banco-task-row:hover{background:#FAFAF8}
+.btn-atribuir{padding:3px 10px;border-radius:6px;border:1px solid #1565C0;background:transparent;color:#1565C0;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s}
+.btn-atribuir:hover{background:#1565C0;color:#fff}
 .lt-loja-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1rem;overflow:hidden;box-shadow:var(--shadow)}
 .lt-loja-header{padding:.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);cursor:pointer}
 .lt-loja-header:hover{background:var(--bg)}
@@ -281,7 +288,7 @@ tr:hover .edit-row-btn{opacity:1}
     <div class="sb-section">Visão</div>
     <div class="nav-item active" id="nav-geral" onclick="irParaGeral()" style="--plat-cor:#1A1916"><span>📊</span>Visão Geral<span class="nav-count" id="nav-geral-count"></span></div>
     <div class="nav-item" id="nav-checklist" onclick="irParaChecklist()" style="--plat-cor:#1565C0"><span>✅</span>Checklist<span class="nav-count" id="nav-check-count"></span></div>
-    <div class="nav-item" id="nav-lojas-tasks" onclick="irParaLojasTasks()" style="--plat-cor:#00695C"><span>🏪</span>Tarefas por Loja</div>
+
     <div class="nav-item" id="nav-calendar" onclick="irParaCalendario()" style="--plat-cor:#6A1B9A"><span>📅</span>Calendário<span class="nav-count" id="nav-cal-count"></span></div>
     <div class="nav-item" id="nav-config" onclick="irParaConfig()" style="--plat-cor:#37474F"><span>⚙️</span>Configurações</div>
     <div class="sb-section" style="margin-top:.4rem">Plataformas</div>
@@ -383,39 +390,6 @@ tr:hover .edit-row-btn{opacity:1}
           <tbody id="tbody"><tr><td colspan="10"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr></tbody></table>
         </div>
       </div>
-    </div>
-
-    <!-- TAREFAS POR LOJA -->
-    <div class="page" id="page-lojas-tasks">
-      <div class="main-header">
-        <div>
-          <div class="main-title">Tarefas por Loja</div>
-          <div class="main-sub">planeje e atribua tarefas a cada loja</div>
-        </div>
-        <button onclick="abrirModalTarefa({})" style="padding:7px 16px;border-radius:7px;border:none;background:#00695C;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Nova tarefa</button>
-      </div>
-
-      <!-- Filtros -->
-      <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center">
-        <select id="lt-filter-plat" class="filter-sel" onchange="renderLojasTasks()">
-          <option value="">Todas plataformas</option>
-          <option value="shopee">Shopee</option><option value="shein">Shein</option>
-          <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
-        </select>
-        <select id="lt-filter-status" class="filter-sel" onchange="renderLojasTasks()">
-          <option value="">Todos os status</option>
-          <option value="pendente">⚪ Pendente</option>
-          <option value="andamento">🟠 Em andamento</option>
-          <option value="concluido">✅ Concluído</option>
-          <option value="atrasado">🔴 Atrasado</option>
-        </select>
-        <select id="lt-filter-colab" class="filter-sel" onchange="renderLojasTasks()">
-          <option value="">Todos colaboradores</option>
-        </select>
-        <input type="text" id="lt-search" class="search-big" placeholder="Buscar tarefa..." style="max-width:200px" oninput="renderLojasTasks()"/>
-      </div>
-
-      <div id="lojas-tasks-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
     </div>
 
     <!-- CHECKLIST -->
@@ -1068,12 +1042,165 @@ async function irParaChecklist(){
   st.view="checklist";setNavActive("nav-checklist");setPageActive("page-checklist");
   setCSSVars("#1565C0","#E3F2FD");renderColabSelect();
   setSyncing(true);await carregarTarefas();setSyncing(false);
-  renderChecklist();
+  renderBancoTarefas();renderChecklist();
 }
 
 async function carregarTarefas(){
-  const {data}=await sb.from("tarefas").select("*").order("data_tarefa",{ascending:true});
+  const {data}=await sb.from("tarefas").select("*").order("created_at",{ascending:true});
   TAREFAS=data||[];
+}
+
+// BANCO DE TAREFAS (sem colaborador)
+function renderBancoTarefas(){
+  const el=document.getElementById("banco-tarefas-container");if(!el)return;
+  const filterPlat=document.getElementById("banco-filter-plat")?.value||"";
+  const lojaCorMap2=getLojaCorMap();
+  const platMap4=Object.fromEntries(PLATS.map(p=>[p.id,p]));
+
+  // Tarefas sem colaborador = banco
+  const bancoTarefas=TAREFAS.filter(t=>!t.colaborador||t.colaborador==="");
+
+  let todasLojas=filterPlat?(st.lojas[filterPlat]||[]):[...new Set(Object.values(st.lojas).flat())].sort();
+
+  if(!bancoTarefas.length){
+    el.innerHTML=`<div style="background:var(--surface);border:1px dashed var(--border2);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;color:var(--text3);font-size:12px">
+      Nenhuma tarefa no banco ainda. Clique em <strong>🏪 + Tarefa por loja</strong> para adicionar.
+    </div>`;
+    return;
+  }
+
+  // Agrupar por loja
+  const porLoja={};
+  bancoTarefas.forEach(t=>{
+    const k=t.loja||"Sem loja";
+    if(!porLoja[k]) porLoja[k]=[];
+    porLoja[k].push(t);
+  });
+
+  let html="";
+  Object.keys(porLoja).sort().forEach(function(loja){
+    const tarefas=porLoja[loja];
+    const lojaCor=lojaCorMap2[loja]||"#888";
+    const platsLoja=Object.entries(st.lojas).filter(([p,ls])=>ls.includes(loja)).map(([p])=>p);
+
+    html+=`<div class="banco-loja-card">
+      <div class="banco-loja-header" onclick="toggleBancoLoja('${loja.replace(/'/g,"\'").replace(/\s/g,"_")}')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:10px;height:10px;border-radius:50%;background:${lojaCor};display:inline-block"></span>
+          <span style="font-size:13px;font-weight:600">${loja}</span>
+          ${platsLoja.map(p=>`<span style="font-size:9px;padding:1px 6px;border-radius:999px;background:${platMap4[p]?.cor||'#888'};color:${platMap4[p]?.fc||'#fff'};font-weight:600">${platMap4[p]?.label||p}</span>`).join("")}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--text3)">${tarefas.length} tarefa${tarefas.length!==1?"s":""} pendente${tarefas.length!==1?"s":""}</span>
+          <span id="banco-arrow-${loja.replace(/\s/g,"_").replace(/'/g,"_")}">▼</span>
+        </div>
+      </div>
+      <div id="banco-section-${loja.replace(/\s/g,"_").replace(/'/g,"_")}">
+        ${tarefas.map(t=>{
+          const priIcon={alta:"🔴",media:"🟡",baixa:"🟢"};
+          return`<div class="banco-task-row">
+            <span style="font-size:16px">${priIcon[t.prioridade]||"⚪"}</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:500;color:var(--text)">${t.titulo}</div>
+              ${t.descricao?`<div style="font-size:10px;color:var(--text3)">${t.descricao.substring(0,80)}</div>`:""}
+              <div style="display:flex;gap:5px;margin-top:2px">
+                ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${{diaria:"Diária",semanal:"Semanal",unica:"Única"}[t.frequencia]||""}</span>`:""}
+              </div>
+            </div>
+            <button class="btn-atribuir" onclick="atribuirTarefa('${t.id}')">👤 Atribuir</button>
+            ${st.adminMode?`<button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:3px 6px">✏️</button>
+            <button class="ev-btn" onclick="deletarTarefaBanco('${t.id}')" style="color:var(--red);padding:3px 6px">🗑️</button>`:""}
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML=html;
+}
+
+function toggleBancoLoja(lojaId){
+  const el=document.getElementById("banco-section-"+lojaId);
+  const arrow=document.getElementById("banco-arrow-"+lojaId);
+  if(!el)return;
+  if(el.style.display==="none"){el.style.display="";if(arrow)arrow.textContent="▼";}
+  else{el.style.display="none";if(arrow)arrow.textContent="▶";}
+}
+
+async function deletarTarefaBanco(id){
+  if(!confirm("Excluir esta tarefa do banco?")) return;
+  await sb.from("tarefas").delete().eq("id",id);
+  TAREFAS=TAREFAS.filter(t=>t.id!==id);
+  renderBancoTarefas();renderChecklist();showToast("✓ Tarefa excluída");
+}
+
+function atribuirTarefa(id){
+  const t=TAREFAS.find(x=>x.id===id);if(!t)return;
+  // Open modal pre-filled with task data, but clear colaborador
+  abrirModalTarefa({...t,id:null,colaborador:"",status_manual:"pendente"});
+}
+
+function abrirModalBancoTarefa(prefill={}){
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-banco-tarefa";
+  const allLojas=[...new Set(Object.values(st.lojas).flat())].sort();
+  overlay.innerHTML=`<div class="modal">
+    <div class="modal-title">🏪 Tarefa por loja</div>
+    <div class="modal-sub">Adicione uma tarefa ao banco — atribua a um colaborador depois</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Título da tarefa *</label>
+        <input id="nb-titulo" value="${prefill.titulo||""}" placeholder="Ex: Atualizar fotos de capa"/>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Descrição</label>
+        <textarea id="nb-desc" placeholder="Detalhes da tarefa...">${prefill.descricao||""}</textarea>
+      </div>
+      <div class="modal-field">
+        <label>Loja *</label>
+        <select id="nb-loja"><option value="">Selecione...</option>${allLojas.map(l=>`<option value="${l}"${prefill.loja===l?" selected":""}>${l}</option>`).join("")}</select>
+      </div>
+      <div class="modal-field">
+        <label>Prioridade</label>
+        <select id="nb-pri">
+          <option value="media"${prefill.prioridade==="media"?" selected":""}>🟡 Média</option>
+          <option value="alta"${prefill.prioridade==="alta"?" selected":""}>🔴 Alta</option>
+          <option value="baixa"${prefill.prioridade==="baixa"?" selected":""}>🟢 Baixa</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Frequência</label>
+        <select id="nb-freq">
+          <option value="unica"${prefill.frequencia==="unica"?" selected":""}>Única</option>
+          <option value="diaria"${prefill.frequencia==="diaria"?" selected":""}>Diária</option>
+          <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>Semanal</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-banco-tarefa').remove()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" style="background:#00695C" onclick="salvarBancoTarefa()">Salvar no banco</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+}
+
+async function salvarBancoTarefa(){
+  const titulo=document.getElementById("nb-titulo").value.trim();
+  const loja=document.getElementById("nb-loja").value;
+  const prioridade=document.getElementById("nb-pri").value;
+  const frequencia=document.getElementById("nb-freq").value;
+  const descricao=document.getElementById("nb-desc").value.trim();
+  if(!titulo){showToast("⚠️ Preencha o título");return;}
+  if(!loja){showToast("⚠️ Selecione a loja");return;}
+  const payload={titulo,loja,prioridade,frequencia,descricao,colaborador:"",status_manual:"pendente"};
+  const {data,error}=await sb.from("tarefas").insert(payload).select();
+  if(!error&&data){
+    TAREFAS.push(data[0]);
+    document.getElementById("modal-banco-tarefa").remove();
+    renderBancoTarefas();renderChecklist();
+    showToast("✓ Tarefa adicionada ao banco!");
+  } else showToast("⚠️ Erro ao salvar");
 }
 
 function statusTarefa(t){
