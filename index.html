@@ -246,6 +246,19 @@ tr:hover .edit-row-btn{opacity:1}
 .painel-task-item{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px}
 .painel-task-item:last-child{border-bottom:none}
 .painel-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.lt-loja-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1rem;overflow:hidden;box-shadow:var(--shadow)}
+.lt-loja-header{padding:.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);cursor:pointer}
+.lt-loja-header:hover{background:var(--bg)}
+.lt-loja-title{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
+.lt-loja-stats{display:flex;align-items:center;gap:8px}
+.lt-task-row{display:grid;grid-template-columns:24px 1fr auto auto auto auto;gap:8px;align-items:center;padding:10px 1.25rem;border-bottom:1px solid var(--border);transition:background .12s}
+.lt-task-row:last-child{border-bottom:none}
+.lt-task-row:hover{background:#FAFAF8}
+.lt-task-row.atrasado{background:#FFF8F8;border-left:3px solid var(--red)}
+.lt-task-row.andamento{border-left:3px solid var(--orange)}
+.lt-task-row.concluido{border-left:3px solid var(--green);opacity:.75}
+.lt-add-row{padding:8px 1.25rem;border-top:1px solid var(--border);background:var(--bg)}
+.lt-empty{padding:1.5rem;text-align:center;color:var(--text3);font-size:12px}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:9px 14px;border-radius:9px;font-size:12px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(max-width:768px){
@@ -268,6 +281,7 @@ tr:hover .edit-row-btn{opacity:1}
     <div class="sb-section">Visão</div>
     <div class="nav-item active" id="nav-geral" onclick="irParaGeral()" style="--plat-cor:#1A1916"><span>📊</span>Visão Geral<span class="nav-count" id="nav-geral-count"></span></div>
     <div class="nav-item" id="nav-checklist" onclick="irParaChecklist()" style="--plat-cor:#1565C0"><span>✅</span>Checklist<span class="nav-count" id="nav-check-count"></span></div>
+    <div class="nav-item" id="nav-lojas-tasks" onclick="irParaLojasTasks()" style="--plat-cor:#00695C"><span>🏪</span>Tarefas por Loja</div>
     <div class="nav-item" id="nav-calendar" onclick="irParaCalendario()" style="--plat-cor:#6A1B9A"><span>📅</span>Calendário<span class="nav-count" id="nav-cal-count"></span></div>
     <div class="nav-item" id="nav-config" onclick="irParaConfig()" style="--plat-cor:#37474F"><span>⚙️</span>Configurações</div>
     <div class="sb-section" style="margin-top:.4rem">Plataformas</div>
@@ -369,6 +383,39 @@ tr:hover .edit-row-btn{opacity:1}
           <tbody id="tbody"><tr><td colspan="10"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr></tbody></table>
         </div>
       </div>
+    </div>
+
+    <!-- TAREFAS POR LOJA -->
+    <div class="page" id="page-lojas-tasks">
+      <div class="main-header">
+        <div>
+          <div class="main-title">Tarefas por Loja</div>
+          <div class="main-sub">planeje e atribua tarefas a cada loja</div>
+        </div>
+        <button onclick="abrirModalTarefa({})" style="padding:7px 16px;border-radius:7px;border:none;background:#00695C;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Nova tarefa</button>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center">
+        <select id="lt-filter-plat" class="filter-sel" onchange="renderLojasTasks()">
+          <option value="">Todas plataformas</option>
+          <option value="shopee">Shopee</option><option value="shein">Shein</option>
+          <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
+        </select>
+        <select id="lt-filter-status" class="filter-sel" onchange="renderLojasTasks()">
+          <option value="">Todos os status</option>
+          <option value="pendente">⚪ Pendente</option>
+          <option value="andamento">🟠 Em andamento</option>
+          <option value="concluido">✅ Concluído</option>
+          <option value="atrasado">🔴 Atrasado</option>
+        </select>
+        <select id="lt-filter-colab" class="filter-sel" onchange="renderLojasTasks()">
+          <option value="">Todos colaboradores</option>
+        </select>
+        <input type="text" id="lt-search" class="search-big" placeholder="Buscar tarefa..." style="max-width:200px" oninput="renderLojasTasks()"/>
+      </div>
+
+      <div id="lojas-tasks-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
     </div>
 
     <!-- CHECKLIST -->
@@ -1497,6 +1544,156 @@ async function deletarEvento(id){
 }
 
 // ── TOAST ──────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// TAREFAS POR LOJA
+// ══════════════════════════════════════════════════════════════════
+async function irParaLojasTasks(){
+  st.view="lojas-tasks";setNavActive("nav-lojas-tasks");setPageActive("page-lojas-tasks");
+  setCSSVars("#00695C","#E0F2F1");
+  // Populate colab filter
+  const cf=document.getElementById("lt-filter-colab");
+  if(cf&&cf.options.length<=1) COLABORADORES.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;cf.appendChild(o);});
+  setSyncing(true);await carregarTarefas();setSyncing(false);
+  renderLojasTasks();
+}
+
+function renderLojasTasks(){
+  const filterPlat=document.getElementById("lt-filter-plat")?.value||"";
+  const filterStatus=document.getElementById("lt-filter-status")?.value||"";
+  const filterColab=document.getElementById("lt-filter-colab")?.value||"";
+  const search=document.getElementById("lt-search")?.value.toLowerCase().trim()||"";
+
+  const container=document.getElementById("lojas-tasks-container");
+  if(!container) return;
+
+  // Get all lojas from system
+  let todasLojas=[];
+  if(filterPlat){
+    todasLojas=[...(st.lojas[filterPlat]||[])];
+  } else {
+    todasLojas=[...new Set(Object.values(st.lojas).flat())].sort();
+  }
+
+  if(!todasLojas.length){
+    container.innerHTML=`<div class="empty-state"><div class="empty-icon">🏪</div><div class="empty-text">Nenhuma loja cadastrada</div></div>`;
+    return;
+  }
+
+  const lojaCorMap2=getLojaCorMap();
+  const corStatus={concluido:"var(--green)",andamento:"var(--orange)",atrasado:"var(--red)",pendente:"var(--border2)"};
+  const iconStatus={concluido:"✅",andamento:"🟠",atrasado:"🔴",pendente:"⚪"};
+  const labelStatus={concluido:"Concluído",andamento:"Em andamento",atrasado:"Atrasado",pendente:"Pendente"};
+  const labelPri={alta:"🔴",media:"🟡",baixa:"🟢"};
+
+  let html="";
+  todasLojas.forEach(function(loja){
+    let tarefas=TAREFAS.filter(t=>t.loja===loja);
+    if(filterStatus) tarefas=tarefas.filter(t=>statusTarefa(t)===filterStatus);
+    if(filterColab) tarefas=tarefas.filter(t=>t.colaborador===filterColab);
+    if(search) tarefas=tarefas.filter(t=>(t.titulo||"").toLowerCase().includes(search)||(t.colaborador||"").toLowerCase().includes(search));
+
+    const total=tarefas.length;
+    const concluidas=tarefas.filter(t=>statusTarefa(t)==="concluido").length;
+    const atrasadas=tarefas.filter(t=>statusTarefa(t)==="atrasado").length;
+    const pendentes=tarefas.filter(t=>statusTarefa(t)==="pendente"||statusTarefa(t)==="andamento").length;
+    const pct=total>0?Math.round(concluidas/total*100):0;
+    const lojaCor=lojaCorMap2[loja]||"#888";
+    const barCor=atrasadas>0?"var(--red)":pct===100?"var(--green)":"var(--orange)";
+
+    // Plataformas que têm essa loja
+    const platsComLoja=Object.entries(st.lojas).filter(([p,ls])=>ls.includes(loja)).map(([p])=>p);
+    const platMap3=Object.fromEntries(PLATS.map(p=>[p.id,p]));
+
+    html+=`<div class="lt-loja-section">
+      <div class="lt-loja-header" onclick="toggleLojaSection('${loja.replace(/'/g,"\'")}')">
+        <div class="lt-loja-title">
+          <span style="width:12px;height:12px;border-radius:50%;background:${lojaCor};display:inline-block;flex-shrink:0"></span>
+          <span>${loja}</span>
+          <div style="display:flex;gap:4px">
+            ${platsComLoja.map(p=>`<span style="font-size:9px;padding:1px 6px;border-radius:999px;background:${platMap3[p]?.cor||'#888'};color:${platMap3[p]?.fc||'#fff'};font-weight:600">${platMap3[p]?.label||p}</span>`).join("")}
+          </div>
+        </div>
+        <div class="lt-loja-stats">
+          ${atrasadas>0?`<span style="font-size:10px;background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:999px;font-weight:600">⚠️ ${atrasadas} atrasada${atrasadas>1?"s":""}</span>`:""}
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:${pct}%;background:${barCor}"></div></div>
+            <span style="font-size:11px;font-weight:600;color:${barCor}">${pct}%</span>
+          </div>
+          <span style="font-size:11px;color:var(--text3)">${concluidas}/${total}</span>
+          <span style="font-size:12px;color:var(--text3);margin-left:4px" id="arrow-${loja.replace(/\s/g,'_')}">▼</span>
+        </div>
+      </div>
+      <div id="section-${loja.replace(/\s/g,'_').replace(/'/g,'_')}">`;
+
+    if(!total){
+      html+=`<div class="lt-empty">Nenhuma tarefa para esta loja ainda</div>`;
+    } else {
+      // Header das colunas
+      html+=`<div style="display:grid;grid-template-columns:24px 1fr auto auto auto auto;gap:8px;padding:6px 1.25rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)">
+        <div></div><div>Tarefa</div><div>Colaborador</div><div>Prazo</div><div>Status</div><div></div>
+      </div>`;
+
+      // Ordenar: atrasadas primeiro, depois por data
+      const ordenadas=[
+        ...tarefas.filter(t=>statusTarefa(t)==="atrasado"),
+        ...tarefas.filter(t=>statusTarefa(t)==="andamento"),
+        ...tarefas.filter(t=>statusTarefa(t)==="pendente"),
+        ...tarefas.filter(t=>statusTarefa(t)==="concluido"),
+      ];
+
+      ordenadas.forEach(function(t){
+        const st2=statusTarefa(t);
+        const dataLimite=t.data_limite?new Date(t.data_limite+"T00:00:00").toLocaleDateString("pt-BR"):"—";
+        const hoje3=new Date();hoje3.setHours(0,0,0,0);
+        const limiteVencido=t.data_limite&&new Date(t.data_limite+"T00:00:00")<hoje3;
+        html+=`<div class="lt-task-row ${st2}">
+          <div style="display:flex;align-items:center;justify-content:center">
+            <div class="task-check ${st2}" onclick="ciclarStatusTarefa('${t.id}')" style="width:18px;height:18px;font-size:10px">${{concluido:"✓",andamento:"◑",atrasado:"!",pendente:"○"}[st2]||"○"}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:500;color:var(--text);${st2==="concluido"?"text-decoration:line-through;color:var(--text3)":""}">${t.titulo}</div>
+            ${t.descricao?`<div style="font-size:10px;color:var(--text3);margin-top:1px">${t.descricao.substring(0,60)}${t.descricao.length>60?"...":""}</div>`:""}
+            <div style="display:flex;gap:4px;margin-top:2px">
+              ${t.prioridade?`<span class="pri-badge pri-${t.prioridade}">${labelPri[t.prioridade]||""} ${t.prioridade.charAt(0).toUpperCase()+t.prioridade.slice(1)}</span>`:""}
+              ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${{diaria:"Diária",semanal:"Semanal",unica:"Única"}[t.frequencia]||""}</span>`:""}
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text2);white-space:nowrap">
+            ${t.colaborador?`<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:18px;height:18px;border-radius:50%;background:#E3F2FD;color:#1565C0;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0">${(t.colaborador||"?").charAt(0)}</span>${t.colaborador}</span>`:`<span style="color:var(--text3)">Não atribuído</span>`}
+          </div>
+          <div style="font-size:10px;color:${limiteVencido?"var(--red)":t.data_limite?"var(--orange)":"var(--text3)"};white-space:nowrap;font-weight:${t.data_limite?"500":"400"}">${t.data_limite?"⏰ "+dataLimite:"—"}</div>
+          <div><span style="font-size:10px;padding:2px 7px;border-radius:999px;background:${corStatus[st2]}22;color:${corStatus[st2]};font-weight:500;white-space:nowrap">${iconStatus[st2]} ${labelStatus[st2]}</span></div>
+          <div style="display:flex;gap:4px">
+            ${st.adminMode?`<button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:3px 6px">✏️</button>
+            <button class="ev-btn" onclick="deletarTarefa('${t.id}')" style="color:var(--red);padding:3px 6px">🗑️</button>`:""}
+          </div>
+        </div>`;
+      });
+    }
+
+    html+=`<div class="lt-add-row">
+      <button onclick="abrirModalTarefaParaLoja('${loja.replace(/'/g,"\'")}'))" style="font-size:11px;color:#00695C;background:transparent;border:1px dashed #00695C;border-radius:6px;padding:4px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:background .15s" onmouseover="this.style.background='#E0F2F1'" onmouseout="this.style.background='transparent'">+ Adicionar tarefa para ${loja}</button>
+    </div>
+    </div></div>`;
+  });
+
+  container.innerHTML=html;
+}
+
+function toggleLojaSection(loja){
+  const id="section-"+loja.replace(/\s/g,"_").replace(/'/g,"_");
+  const arrowId="arrow-"+loja.replace(/\s/g,"_").replace(/'/g,"_");
+  const el=document.getElementById(id);
+  const arrow=document.getElementById(arrowId);
+  if(!el) return;
+  if(el.style.display==="none"){el.style.display="";if(arrow)arrow.textContent="▼";}
+  else{el.style.display="none";if(arrow)arrow.textContent="▶";}
+}
+
+function abrirModalTarefaParaLoja(loja){
+  abrirModalTarefa({loja:loja});
+}
+
 function showToast(msg){
   const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
   clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove("show"),2800);
