@@ -1423,32 +1423,90 @@ async function deletarTarefa(id){
   TAREFAS=TAREFAS.filter(t=>t.id!==id);renderChecklist();showToast("✓ Tarefa excluída");
 }
 
-function abrirModalTarefa(){
+function abrirModalTarefa(prefill={}){
   const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-tarefa";
-  // Sugerir próxima segunda se for sexta
   const hoje=new Date();
   const ehSexta=hoje.getDay()===5;
   const dataDefault=ehSexta?new Date(hoje.getTime()+3*86400000):hoje;
-  const dataStr=dataDefault.toISOString().split("T")[0];
+  const dataStr=prefill.data_tarefa||dataDefault.toISOString().split("T")[0];
+  const allLojas=[...new Set(Object.values(st.lojas).flat())].sort();
+  const bancoPendentes=TAREFAS.filter(t=>!t.colaborador||t.colaborador==="");
   overlay.innerHTML=`<div class="modal">
-    <div class="modal-title">✅ Nova tarefa</div>
-    <div class="modal-sub">Adicione uma tarefa ao checklist${ehSexta?" — você está programando para a próxima semana 📅":""}</div>
+    <div class="modal-title">${prefill.id?"✏️ Editar tarefa":"👤 Atribuir tarefa"}</div>
+    <div class="modal-sub">${prefill.id?"Atualize os dados da tarefa":"Atribua uma tarefa a um colaborador"}${!prefill.id&&ehSexta?" — programando para a próxima semana 📅":""}</div>
     <div class="modal-grid">
-      <div class="modal-field" style="grid-column:1/-1"><label>Título da tarefa</label><input id="nt-titulo" placeholder="Ex: Atualizar preços na Shopee"/></div>
-      <div class="modal-field"><label>Colaborador</label><select id="nt-colab"><option value="">Selecione...</option>${COLABORADORES.map(c=>`<option>${c}</option>`).join("")}</select></div>
-      <div class="modal-field"><label>Frequência</label><select id="nt-freq"><option value="diaria">Diária</option><option value="semanal">Semanal</option></select></div>
-      <div class="modal-field"><label>Data da tarefa</label><input type="date" id="nt-data" value="${dataStr}"/></div>
-      <div class="modal-field"><label>Data limite ⚠️</label><input type="date" id="nt-limite" value=""/></div>
-      <div class="modal-field"><label>Status inicial</label><select id="nt-status"><option value="pendente">Pendente</option><option value="andamento">Em andamento</option></select></div>
+      ${!prefill.id&&bancoPendentes.length>0?`
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>📋 Puxar do banco de tarefas</label>
+        <select id="nt-banco" onchange="preencherDoBanco(this.value)" style="border-color:#00695C">
+          <option value="">— Selecione do banco ou preencha abaixo —</option>
+          ${bancoPendentes.map(t=>`<option value="${t.id}">[${t.loja||"Sem loja"}] ${t.titulo}</option>`).join("")}
+        </select>
+      </div>`:""}
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Título da tarefa *</label>
+        <input id="nt-titulo" value="${prefill.titulo||""}" placeholder="Ex: Atualizar preços na Shopee"/>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Descrição / Observação</label>
+        <textarea id="nt-desc" placeholder="Detalhes da tarefa...">${prefill.descricao||""}</textarea>
+      </div>
+      <div class="modal-field">
+        <label>Colaborador *</label>
+        <select id="nt-colab">
+          <option value="">Selecione...</option>
+          ${COLABORADORES.map(c=>`<option value="${c}"${(prefill.colaborador||"")=== c?" selected":""}>${c}</option>`).join("")}
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Loja</label>
+        <select id="nt-loja">
+          <option value="">Selecione a loja...</option>
+          ${allLojas.map(l=>`<option value="${l}"${(prefill.loja||"")=== l?" selected":""}>${l}</option>`).join("")}
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Prioridade</label>
+        <select id="nt-pri">
+          <option value="media"${(prefill.prioridade||"media")==="media"?" selected":""}>🟡 Média</option>
+          <option value="alta"${prefill.prioridade==="alta"?" selected":""}>🔴 Alta</option>
+          <option value="baixa"${prefill.prioridade==="baixa"?" selected":""}>🟢 Baixa</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Frequência</label>
+        <select id="nt-freq">
+          <option value="diaria"${(prefill.frequencia||"")==="diaria"?" selected":""}>Diária</option>
+          <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>Semanal</option>
+          <option value="unica"${(!prefill.frequencia||prefill.frequencia==="unica")?" selected":""}>Única</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Status</label>
+        <select id="nt-status">
+          <option value="pendente"${(!prefill.status_manual||prefill.status_manual==="pendente")?" selected":""}>⚪ Pendente</option>
+          <option value="andamento"${prefill.status_manual==="andamento"?" selected":""}>🟠 Em andamento</option>
+          <option value="concluido"${prefill.status_manual==="concluido"?" selected":""}>✅ Concluído</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data da tarefa *</label>
+        <input type="date" id="nt-data" value="${dataStr}"/>
+      </div>
+      <div class="modal-field">
+        <label>Data limite ⚠️</label>
+        <input type="date" id="nt-limite" value="${prefill.data_limite||""}"/>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-tarefa').remove()">Cancelar</button>
-      <button class="modal-btn modal-btn-save" style="background:#1565C0" onclick="salvarTarefa()">Salvar</button>
+      <button class="modal-btn modal-btn-save" style="background:#1565C0" onclick="salvarTarefa('${prefill.id||""}')">Salvar</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);
   overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
 }
+
 
 async function salvarTarefa(){
   const titulo=document.getElementById("nt-titulo").value.trim();
