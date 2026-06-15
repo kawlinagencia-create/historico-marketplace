@@ -1146,6 +1146,7 @@ function renderBancoTarefas(){
               ${t.descricao?`<div style="font-size:10px;color:var(--text3)">${t.descricao.substring(0,80)}</div>`:""}
               <div style="display:flex;gap:5px;margin-top:3px;align-items:center">
                 ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${{diaria:"Diária",semanal:"Semanal",unica:"Única"}[t.frequencia]||""}</span>`:""}
+                ${t.plataformas?t.plataformas.split(",").filter(Boolean).map(pid=>{const pp=PLATS.find(x=>x.id===pid);return pp?`<span style="font-size:9px;padding:1px 5px;border-radius:999px;background:${pp.cor};color:${pp.fc||'#fff'};font-weight:600">${pp.label}</span>`:""}).join(""):""}
                 ${t.colaborador?`<span style="font-size:10px;color:var(--text3);display:inline-flex;align-items:center;gap:3px"><span style="width:14px;height:14px;border-radius:50%;background:#E3F2FD;color:#1565C0;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">${t.colaborador.charAt(0)}</span>${t.colaborador}</span>`
                 :`<span style="font-size:10px;color:var(--orange)">Não atribuído</span>`}
                 ${t.data_limite?`<span style="font-size:10px;color:${new Date(t.data_limite+"T00:00:00")<new Date()?"var(--red)":"var(--orange)"};font-weight:500">⏰ ${new Date(t.data_limite+"T00:00:00").toLocaleDateString("pt-BR")}</span>`:""}
@@ -1172,6 +1173,27 @@ function toggleBancoLoja(lojaId){
   else{el.style.display="none";if(arrow)arrow.textContent="▶";}
 }
 
+function editarTarefa(id){
+  const t=TAREFAS.find(x=>x.id===id);
+  if(t) abrirModalTarefa(t);
+}
+
+function preencherDoBanco(id){
+  if(!id) return;
+  const t=TAREFAS.find(x=>x.id===id);if(!t)return;
+  const titulo=document.getElementById("nt-titulo");
+  const desc=document.getElementById("nt-desc");
+  const loja=document.getElementById("nt-loja");
+  const pri=document.getElementById("nt-pri");
+  const freq=document.getElementById("nt-freq");
+  if(titulo) titulo.value=t.titulo||"";
+  if(desc) desc.value=t.descricao||"";
+  if(loja) loja.value=t.loja||"";
+  if(pri) pri.value=t.prioridade||"media";
+  if(freq) freq.value=t.frequencia||"unica";
+  showToast("✓ Dados preenchidos do banco!");
+}
+
 async function deletarTarefaBanco(id){
   if(!confirm("Excluir esta tarefa do banco?")) return;
   await sb.from("tarefas").delete().eq("id",id);
@@ -1181,11 +1203,22 @@ async function deletarTarefaBanco(id){
 
 function atribuirTarefa(id){
   const t=TAREFAS.find(x=>x.id===id);if(!t)return;
-  // Open modal pre-filled with task data, but clear colaborador
-  abrirModalTarefa({...t,id:null,colaborador:"",status_manual:"pendente"});
+  // Pre-fill with task data, clear colaborador and id so it creates a new assigned task
+  abrirModalTarefa({
+    titulo:t.titulo,
+    descricao:t.descricao||"",
+    loja:t.loja||"",
+    prioridade:t.prioridade||"media",
+    frequencia:t.frequencia||"unica",
+    colaborador:"",
+    status_manual:"pendente",
+    id:null
+  });
+  setTimeout(()=>showToast("📋 Título e descrição preenchidos do banco!"),300);
 }
 
 function abrirModalBancoTarefa(prefill={}){
+  _nbPlatsSelected=prefill.plataformas?prefill.plataformas.split(",").filter(Boolean):[];
   const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-banco-tarefa";
   const allLojas=[...new Set(Object.values(st.lojas).flat())].sort();
   overlay.innerHTML=`<div class="modal">
@@ -1220,6 +1253,21 @@ function abrirModalBancoTarefa(prefill={}){
           <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>Semanal</option>
         </select>
       </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Plataformas (selecione uma ou mais)</label>
+        <div id="nb-plats-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+          ${PLATS.map(p=>{
+            const sel=(prefill.plataformas||[]).includes(p.id);
+            return`<button type="button" id="nb-plat-${p.id}" onclick="toggleNbPlat('${p.id}')" style="
+              padding:4px 12px;border-radius:999px;font-size:11px;font-weight:500;
+              border:1.5px solid ${sel?p.cor:"var(--border)"};
+              background:${sel?p.cor:"var(--surface)"};
+              color:${sel?(p.fc||"#fff"):"var(--text2)"};
+              cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif"
+            >${p.label}</button>`;
+          }).join("")}
+        </div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-banco-tarefa').remove()">Cancelar</button>
@@ -1230,6 +1278,22 @@ function abrirModalBancoTarefa(prefill={}){
   overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
 }
 
+let _nbPlatsSelected=[];
+
+function toggleNbPlat(platId){
+  const idx=_nbPlatsSelected.indexOf(platId);
+  const p=PLATS.find(x=>x.id===platId);
+  if(!p) return;
+  const btn=document.getElementById("nb-plat-"+platId);
+  if(idx>=0){
+    _nbPlatsSelected.splice(idx,1);
+    if(btn){btn.style.background="var(--surface)";btn.style.borderColor="var(--border)";btn.style.color="var(--text2)";}
+  } else {
+    _nbPlatsSelected.push(platId);
+    if(btn){btn.style.background=p.cor;btn.style.borderColor=p.cor;btn.style.color=(p.fc||"#fff");}
+  }
+}
+
 async function salvarBancoTarefa(){
   const titulo=document.getElementById("nb-titulo").value.trim();
   const loja=document.getElementById("nb-loja").value;
@@ -1238,10 +1302,12 @@ async function salvarBancoTarefa(){
   const descricao=document.getElementById("nb-desc").value.trim();
   if(!titulo){showToast("⚠️ Preencha o título");return;}
   if(!loja){showToast("⚠️ Selecione a loja");return;}
-  const payload={titulo,loja,prioridade,frequencia,descricao,colaborador:"",status_manual:"pendente"};
+  const plataformas=_nbPlatsSelected.length>0?_nbPlatsSelected.join(","):"";
+  const payload={titulo,loja,prioridade,frequencia,descricao,colaborador:"",status_manual:"pendente",plataformas};
   const {data,error}=await sb.from("tarefas").insert(payload).select();
   if(!error&&data){
     TAREFAS.push(data[0]);
+    _nbPlatsSelected=[];
     document.getElementById("modal-banco-tarefa").remove();
     renderBancoTarefas();renderChecklist();
     showToast("✓ Tarefa adicionada ao banco!");
