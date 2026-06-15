@@ -395,15 +395,45 @@ tr:hover .edit-row-btn{opacity:1}
     <!-- CHECKLIST -->
     <div class="page" id="page-checklist">
       <div class="main-header">
-        <div><div class="main-title">Gestão de Tarefas</div><div class="main-sub">checklist operacional por colaborador</div></div>
-        <button onclick="abrirModalTarefa()" style="padding:7px 16px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Nova tarefa</button>
+        <div><div class="main-title">Checklist</div><div class="main-sub">tarefas por loja e por colaborador</div></div>
+        <div style="display:flex;gap:8px">
+          <button onclick="abrirModalBancoTarefa({})" style="padding:7px 16px;border-radius:7px;border:1px solid #00695C;background:transparent;color:#00695C;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">🏪 + Tarefa por loja</button>
+          <button onclick="abrirModalTarefa({})" style="padding:7px 16px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">👤 + Atribuir</button>
+        </div>
       </div>
 
       <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem" id="check-kpis"></div>
 
-      <!-- Painel rápido por loja -->
-      <div id="check-painel-lojas" style="margin-bottom:1.25rem"></div>
+      <!-- TAREFAS POR LOJA -->
+      <div style="margin-bottom:1.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
+          <div>
+            <p style="font-size:14px;font-weight:600;color:var(--text)">🏪 Tarefas por loja</p>
+            <p style="font-size:11px;color:var(--text3);margin-top:2px">todas as tarefas organizadas por loja — clique em <strong>Atribuir</strong> para delegar a um colaborador</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <select id="banco-filter-plat" class="filter-sel" onchange="renderBancoTarefas()" style="font-size:11px">
+              <option value="">Todas plataformas</option>
+              <option value="shopee">Shopee</option><option value="shein">Shein</option>
+              <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
+            </select>
+            <select id="banco-filter-status" class="filter-sel" onchange="renderBancoTarefas()" style="font-size:11px">
+              <option value="">Todos status</option>
+              <option value="pendente">⚪ Pendente</option>
+              <option value="andamento">🟠 Em andamento</option>
+              <option value="concluido">✅ Concluído</option>
+              <option value="atrasado">🔴 Atrasado</option>
+            </select>
+          </div>
+        </div>
+        <div id="banco-tarefas-container"></div>
+      </div>
+
+      <div style="border-top:2px solid var(--border);margin-bottom:1.25rem;padding-top:.5rem">
+        <p style="font-size:14px;font-weight:600;color:var(--text)">👤 Checklist por colaborador</p>
+        <p style="font-size:11px;color:var(--text3);margin-top:2px">tarefas agendadas e atribuídas</p>
+      </div>
 
       <!-- Alertas -->
       <div id="check-alertas"></div>
