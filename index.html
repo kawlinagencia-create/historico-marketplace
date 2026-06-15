@@ -1050,31 +1050,32 @@ async function carregarTarefas(){
   TAREFAS=data||[];
 }
 
-// BANCO DE TAREFAS (sem colaborador)
+// TAREFAS POR LOJA (todas, com e sem colaborador)
 function renderBancoTarefas(){
   const el=document.getElementById("banco-tarefas-container");if(!el)return;
   const filterPlat=document.getElementById("banco-filter-plat")?.value||"";
+  const filterStatusBanco=document.getElementById("banco-filter-status")?.value||"";
   const lojaCorMap2=getLojaCorMap();
   const platMap4=Object.fromEntries(PLATS.map(p=>[p.id,p]));
 
-  // Tarefas sem colaborador = banco
-  const bancoTarefas=TAREFAS.filter(t=>!t.colaborador||t.colaborador==="");
-
+  // Todas as lojas do sistema
   let todasLojas=filterPlat?(st.lojas[filterPlat]||[]):[...new Set(Object.values(st.lojas).flat())].sort();
 
-  if(!bancoTarefas.length){
+  if(!todasLojas.length){
     el.innerHTML=`<div style="background:var(--surface);border:1px dashed var(--border2);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;color:var(--text3);font-size:12px">
-      Nenhuma tarefa no banco ainda. Clique em <strong>🏪 + Tarefa por loja</strong> para adicionar.
+      Nenhuma loja cadastrada. Adicione lojas nas Configurações.
     </div>`;
     return;
   }
 
-  // Agrupar por loja
+  // Agrupar por loja - TODAS as tarefas que têm loja associada
   const porLoja={};
-  bancoTarefas.forEach(t=>{
-    const k=t.loja||"Sem loja";
-    if(!porLoja[k]) porLoja[k]=[];
-    porLoja[k].push(t);
+  todasLojas.forEach(l=>{porLoja[l]=[];});
+  TAREFAS.forEach(t=>{
+    if(t.loja&&porLoja[t.loja]!==undefined){
+      let ts=statusTarefa(t);
+      if(!filterStatusBanco||ts===filterStatusBanco) porLoja[t.loja].push(t);
+    }
   });
 
   let html="";
@@ -1083,6 +1084,8 @@ function renderBancoTarefas(){
     const lojaCor=lojaCorMap2[loja]||"#888";
     const platsLoja=Object.entries(st.lojas).filter(([p,ls])=>ls.includes(loja)).map(([p])=>p);
 
+    // skip lojas sem nenhuma tarefa quando há filtro ativo
+    if(filterStatusBanco && tarefas.length===0) return;
     html+=`<div class="banco-loja-card">
       <div class="banco-loja-header" onclick="toggleBancoLoja('${loja.replace(/'/g,"\'").replace(/\s/g,"_")}')">
         <div style="display:flex;align-items:center;gap:8px">
@@ -1091,23 +1094,35 @@ function renderBancoTarefas(){
           ${platsLoja.map(p=>`<span style="font-size:9px;padding:1px 6px;border-radius:999px;background:${platMap4[p]?.cor||'#888'};color:${platMap4[p]?.fc||'#fff'};font-weight:600">${platMap4[p]?.label||p}</span>`).join("")}
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;color:var(--text3)">${tarefas.length} tarefa${tarefas.length!==1?"s":""} pendente${tarefas.length!==1?"s":""}</span>
+          <span style="font-size:11px;color:var(--text3)">${tarefas.filter(t=>statusTarefa(t)==="atrasado").length>0?`<span style="color:var(--red);font-weight:600">⚠️ ${tarefas.filter(t=>statusTarefa(t)==="atrasado").length} atrasada</span> · `:""} ${tarefas.filter(t=>statusTarefa(t)==="concluido").length}/${tarefas.length} concluída${tarefas.length!==1?"s":""}</span>
           <span id="banco-arrow-${loja.replace(/\s/g,"_").replace(/'/g,"_")}">▼</span>
         </div>
       </div>
       <div id="banco-section-${loja.replace(/\s/g,"_").replace(/'/g,"_")}">
-        ${tarefas.map(t=>{
+        ${tarefas.length===0
+          ? `<div style="padding:1rem;text-align:center;color:var(--text3);font-size:11px">Nenhuma tarefa para esta loja ainda
+              <button onclick="abrirModalBancoTarefa({loja:'${loja}'})" style="display:block;margin:.5rem auto 0;font-size:11px;color:#00695C;background:transparent;border:1px dashed #00695C;border-radius:6px;padding:3px 12px;cursor:pointer">+ Adicionar</button>
+            </div>`
+          : tarefas.map(t=>{
           const priIcon={alta:"🔴",media:"🟡",baixa:"🟢"};
-          return`<div class="banco-task-row">
-            <span style="font-size:16px">${priIcon[t.prioridade]||"⚪"}</span>
+          const st2=statusTarefa(t);
+          const corSt2={concluido:"var(--green)",andamento:"var(--orange)",atrasado:"var(--red)",pendente:"var(--text3)"};
+          const iconSt2={concluido:"✅",andamento:"🟠",atrasado:"🔴",pendente:"⚪"};
+          const labelSt2={concluido:"Concluído",andamento:"Em andamento",atrasado:"Atrasado",pendente:"Pendente"};
+          return`<div class="banco-task-row" style="${st2==="atrasado"?"background:#FFF8F8;border-left:3px solid var(--red)":st2==="concluido"?"opacity:.7":""}">
+            <span style="font-size:14px">${priIcon[t.prioridade]||"⚪"}</span>
             <div style="flex:1">
-              <div style="font-size:12px;font-weight:500;color:var(--text)">${t.titulo}</div>
+              <div style="font-size:12px;font-weight:500;color:var(--text);${st2==="concluido"?"text-decoration:line-through;color:var(--text3)":""}">${t.titulo}</div>
               ${t.descricao?`<div style="font-size:10px;color:var(--text3)">${t.descricao.substring(0,80)}</div>`:""}
-              <div style="display:flex;gap:5px;margin-top:2px">
+              <div style="display:flex;gap:5px;margin-top:3px;align-items:center">
                 ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${{diaria:"Diária",semanal:"Semanal",unica:"Única"}[t.frequencia]||""}</span>`:""}
+                ${t.colaborador?`<span style="font-size:10px;color:var(--text3);display:inline-flex;align-items:center;gap:3px"><span style="width:14px;height:14px;border-radius:50%;background:#E3F2FD;color:#1565C0;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">${t.colaborador.charAt(0)}</span>${t.colaborador}</span>`
+                :`<span style="font-size:10px;color:var(--orange)">Não atribuído</span>`}
+                ${t.data_limite?`<span style="font-size:10px;color:${new Date(t.data_limite+"T00:00:00")<new Date()?"var(--red)":"var(--orange)"};font-weight:500">⏰ ${new Date(t.data_limite+"T00:00:00").toLocaleDateString("pt-BR")}</span>`:""}
               </div>
             </div>
-            <button class="btn-atribuir" onclick="atribuirTarefa('${t.id}')">👤 Atribuir</button>
+            <span style="font-size:10px;padding:2px 7px;border-radius:999px;background:${corSt2[st2]}22;color:${corSt2[st2]};font-weight:500;white-space:nowrap">${iconSt2[st2]} ${labelSt2[st2]}</span>
+            ${!t.colaborador?`<button class="btn-atribuir" onclick="atribuirTarefa('${t.id}')">👤 Atribuir</button>`:""}
             ${st.adminMode?`<button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:3px 6px">✏️</button>
             <button class="ev-btn" onclick="deletarTarefaBanco('${t.id}')" style="color:var(--red);padding:3px 6px">🗑️</button>`:""}
           </div>`;
