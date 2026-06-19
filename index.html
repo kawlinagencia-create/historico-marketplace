@@ -1104,7 +1104,12 @@ function renderBancoTarefas(){
   TAREFAS.forEach(t=>{
     if(t.loja&&porLoja[t.loja]!==undefined){
       let ts=statusTarefa(t);
-      if(!filterStatusBanco||ts===filterStatusBanco) porLoja[t.loja].push(t);
+      // Por padrão, esconde tarefas concluídas da visão geral por loja
+      if(filterStatusBanco){
+        if(ts===filterStatusBanco) porLoja[t.loja].push(t);
+      } else {
+        if(ts!=="concluido") porLoja[t.loja].push(t);
+      }
     }
   });
 
