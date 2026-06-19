@@ -596,7 +596,7 @@ const PLATS=[
   {id:"tiktok",label:"TikTok",cor:"#010101",cor10:"#F0F0F0"},
 ];
 const STATUS_CLASS={"Concluído":"badge-ok","Em andamento":"badge-wip","Pendente":"badge-pend","Revisão":"badge-rev"};
-const TIPOS_LIST=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção"];
+const TIPOS_LIST=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção","Estoque","Variação/SKU","Categoria","Frete","Avaliação/Review","Atendimento ao Cliente","Devolução/Reembolso","Kit/Combo","Embalagem","Banner da Loja","Política de Troca","Brinde","Live/Transmissão"];
 const COLAB_KEY="colaboradores_v2";
 let COLABORADORES=JSON.parse(localStorage.getItem(COLAB_KEY)||'["Kaylane","Willian","Jennifer","Brenno"]');
 
@@ -1435,7 +1435,7 @@ function abrirModalTarefa(prefill={}){
     <div class="modal-title">${prefill.id?"✏️ Editar tarefa":"👤 Atribuir tarefa"}</div>
     <div class="modal-sub">${prefill.id?"Atualize os dados da tarefa":"Atribua uma tarefa a um colaborador"}${!prefill.id&&ehSexta?" — programando para a próxima semana 📅":""}</div>
     <div class="modal-grid">
-      ${!prefill.id&&bancoPendentes.length>0?`
+      ${!prefill.id&&!prefill.titulo&&bancoPendentes.length>0?`
       <div class="modal-field" style="grid-column:1/-1">
         <label>📋 Puxar do banco de tarefas</label>
         <select id="nt-banco" onchange="preencherDoBanco(this.value)" style="border-color:#00695C">
@@ -1443,6 +1443,7 @@ function abrirModalTarefa(prefill={}){
           ${bancoPendentes.map(t=>`<option value="${t.id}">[${t.loja||"Sem loja"}] ${t.titulo}</option>`).join("")}
         </select>
       </div>`:""}
+      ${prefill.titulo&&!prefill.id?`<div class="modal-field" style="grid-column:1/-1;background:var(--bg);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text2)">📋 Preenchido a partir da tarefa do banco: <strong>${prefill.titulo}</strong></div>`:""}
       <div class="modal-field" style="grid-column:1/-1">
         <label>Título da tarefa *</label>
         <input id="nt-titulo" value="${prefill.titulo||""}" placeholder="Ex: Atualizar preços na Shopee"/>
@@ -1508,19 +1509,42 @@ function abrirModalTarefa(prefill={}){
 }
 
 
-async function salvarTarefa(){
+async function salvarTarefa(idExistente=""){
   const titulo=document.getElementById("nt-titulo").value.trim();
   const colaborador=document.getElementById("nt-colab").value;
+  const loja=document.getElementById("nt-loja")?.value||"";
+  const prioridade=document.getElementById("nt-pri")?.value||"media";
   const frequencia=document.getElementById("nt-freq").value;
   const data_tarefa=document.getElementById("nt-data").value;
   const status_manual=document.getElementById("nt-status").value;
+  const descricao=document.getElementById("nt-desc")?.value.trim()||"";
+  const data_limite=document.getElementById("nt-limite").value||null;
   if(!titulo){showToast("⚠️ Preencha o título da tarefa");return;}
   if(!colaborador){showToast("⚠️ Selecione o colaborador");return;}
   if(!data_tarefa){showToast("⚠️ Informe a data da tarefa");return;}
-  const data_limite=document.getElementById("nt-limite").value||null;
-  const {data,error}=await sb.from("tarefas").insert({titulo,colaborador,frequencia,data_tarefa,status_manual,data_limite}).select();
-  if(!error&&data){TAREFAS.push(data[0]);TAREFAS.sort((a,b)=>a.data_tarefa.localeCompare(b.data_tarefa));document.getElementById("modal-tarefa").remove();renderChecklist();showToast("✓ Tarefa adicionada!");}
-  else showToast("⚠️ Erro ao salvar tarefa");
+  const payload={titulo,colaborador,loja,prioridade,frequencia,data_tarefa,status_manual,descricao,data_limite};
+  if(idExistente){
+    const {error}=await sb.from("tarefas").update(payload).eq("id",idExistente);
+    if(!error){
+      const idx=TAREFAS.findIndex(t=>t.id===idExistente);
+      if(idx>=0) TAREFAS[idx]={...TAREFAS[idx],...payload};
+      document.getElementById("modal-tarefa").remove();
+      renderBancoTarefas();renderChecklist();
+      showToast("✓ Tarefa atualizada!");
+    } else showToast("⚠️ Erro ao atualizar");
+  } else {
+    const {data,error}=await sb.from("tarefas").insert(payload).select();
+    if(!error&&data){
+      TAREFAS.push(data[0]);
+      TAREFAS.sort((a,b)=>(a.data_tarefa||"").localeCompare(b.data_tarefa||""));
+      document.getElementById("modal-tarefa").remove();
+      renderBancoTarefas();renderChecklist();
+      showToast("✓ Tarefa adicionada!");
+    } else {
+      showToast("⚠️ Erro ao salvar tarefa");
+      console.error(error);
+    }
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════
