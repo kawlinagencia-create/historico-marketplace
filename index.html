@@ -405,34 +405,10 @@ tr:hover .edit-row-btn{opacity:1}
       <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem" id="check-kpis"></div>
 
-      <!-- TAREFAS POR LOJA -->
-      <div style="margin-bottom:1.5rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
-          <div>
-            <p style="font-size:14px;font-weight:600;color:var(--text)">🏪 Tarefas por loja</p>
-            <p style="font-size:11px;color:var(--text3);margin-top:2px">todas as tarefas organizadas por loja — clique em <strong>Atribuir</strong> para delegar a um colaborador</p>
-          </div>
-          <div style="display:flex;gap:8px">
-            <select id="banco-filter-plat" class="filter-sel" onchange="renderBancoTarefas()" style="font-size:11px">
-              <option value="">Todas plataformas</option>
-              <option value="shopee">Shopee</option><option value="shein">Shein</option>
-              <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
-            </select>
-            <select id="banco-filter-status" class="filter-sel" onchange="renderBancoTarefas()" style="font-size:11px">
-              <option value="">Todos status</option>
-              <option value="pendente">⚪ Pendente</option>
-              <option value="andamento">🟠 Em andamento</option>
-              <option value="concluido">✅ Concluído</option>
-              <option value="atrasado">🔴 Atrasado</option>
-            </select>
-          </div>
-        </div>
-        <div id="banco-tarefas-container"></div>
-      </div>
-
-      <div style="border-top:2px solid var(--border);margin-bottom:1.25rem;padding-top:.5rem">
+      <!-- CHECKLIST POR COLABORADOR (TOPO) -->
+      <div style="margin-bottom:.75rem">
         <p style="font-size:14px;font-weight:600;color:var(--text)">👤 Checklist por colaborador</p>
-        <p style="font-size:11px;color:var(--text3);margin-top:2px">tarefas agendadas e atribuídas</p>
+        <p style="font-size:11px;color:var(--text3);margin-top:2px">tarefas agendadas e atribuídas — organizadas em colunas</p>
       </div>
 
       <!-- Alertas -->
@@ -459,6 +435,30 @@ tr:hover .edit-row-btn{opacity:1}
       </div>
 
       <div id="checklist-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
+
+      <div style="border-top:2px solid var(--border);margin:1.5rem 0 1.25rem;padding-top:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
+          <div>
+            <p style="font-size:14px;font-weight:600;color:var(--text)">🏪 Tarefas por loja</p>
+            <p style="font-size:11px;color:var(--text3);margin-top:2px">visão geral por loja — clique em <strong>Atribuir</strong> para delegar a um colaborador</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <select id="banco-filter-plat" class="filter-sel" onchange="renderBancoTarefas()" style="font-size:11px">
+              <option value="">Todas plataformas</option>
+              <option value="shopee">Shopee</option><option value="shein">Shein</option>
+              <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
+            </select>
+            <select id="banco-filter-status" class="filter-sel" onchange="renderBancoTarefas()" style="font-size:11px">
+              <option value="">Pendentes (oculta concluídas)</option>
+              <option value="pendente">⚪ Pendente</option>
+              <option value="andamento">🟠 Em andamento</option>
+              <option value="concluido">✅ Concluído</option>
+              <option value="atrasado">🔴 Atrasado</option>
+            </select>
+          </div>
+        </div>
+        <div id="banco-tarefas-container"></div>
+      </div>
     </div>
 
     <!-- CALENDÁRIO -->
@@ -1208,18 +1208,8 @@ async function deletarTarefaBanco(id){
 
 function atribuirTarefa(id){
   const t=TAREFAS.find(x=>x.id===id);if(!t)return;
-  // Pre-fill with task data, clear colaborador and id so it creates a new assigned task
-  abrirModalTarefa({
-    titulo:t.titulo,
-    descricao:t.descricao||"",
-    loja:t.loja||"",
-    prioridade:t.prioridade||"media",
-    frequencia:t.frequencia||"unica",
-    colaborador:"",
-    status_manual:"pendente",
-    id:null
-  });
-  setTimeout(()=>showToast("📋 Título e descrição preenchidos do banco!"),300);
+  // Atualiza a MESMA tarefa (não cria uma nova) — evita duplicação
+  abrirModalTarefa({...t,_modoAtribuir:true});
 }
 
 function abrirModalBancoTarefa(prefill={}){
@@ -1335,11 +1325,40 @@ function renderLimite(data_limite){
   return`<span style="color:${vencido?"var(--red)":"var(--orange)"};font-weight:500">⏰ Limite: ${fmt}</span>`;
 }
 
+function renderCheckKPIs(){
+  const el=document.getElementById("check-kpis");if(!el)return;
+  const total=TAREFAS.length;
+  const concluidas=TAREFAS.filter(t=>statusTarefa(t)==="concluido").length;
+  const atrasadas=TAREFAS.filter(t=>statusTarefa(t)==="atrasado").length;
+  const andamento=TAREFAS.filter(t=>statusTarefa(t)==="andamento").length;
+  const pendentes=TAREFAS.filter(t=>statusTarefa(t)==="pendente").length;
+  const pct=total>0?Math.round(concluidas/total*100):0;
+  el.innerHTML=[
+    {n:total,l:"Total de tarefas",c:"var(--text2)",s:""},
+    {n:concluidas,l:"Concluídas",c:"var(--green)",s:pct+"% do total"},
+    {n:andamento,l:"Em andamento",c:"var(--orange)",s:""},
+    {n:atrasadas,l:"Atrasadas",c:"var(--red)",s:atrasadas>0?"⚠️ Atenção":""},
+    {n:pendentes,l:"Pendentes",c:"var(--text3)",s:""},
+  ].map(k=>`<div class="kpi-card">
+    <div class="kpi-num" style="color:${k.c}">${k.n}</div>
+    <div class="kpi-label">${k.l}</div>
+    ${k.s?`<div class="kpi-sub" style="color:${k.c}">${k.s}</div>`:""}
+  </div>`).join("");
+}
+
+function priBadge(p){
+  if(!p) return"";
+  const map={alta:`<span class="pri-badge pri-alta">🔴</span>`,media:`<span class="pri-badge pri-media">🟡</span>`,baixa:`<span class="pri-badge pri-baixa">🟢</span>`};
+  return map[p]||"";
+}
+
 function renderChecklist(){
+  renderCheckKPIs();
   const filterColab=document.getElementById("check-filter-colab")?.value||"";
   const filterFreq=document.getElementById("check-filter-freq")?.value||"";
   const filterStatus=document.getElementById("check-filter-status")?.value||"";
-  const filterSemana=document.getElementById("check-filter-semana")?.value||"semana";
+  const filterPri=document.getElementById("check-filter-prioridade")?.value||"";
+  const filterPeriodo=document.getElementById("check-filter-periodo")?.value||"semana";
 
   const hoje=new Date();hoje.setHours(0,0,0,0);
   const inicioSemana=new Date(hoje);inicioSemana.setDate(hoje.getDate()-hoje.getDay()+1);
@@ -1347,67 +1366,86 @@ function renderChecklist(){
   const inicioProx=new Date(fimSemana);inicioProx.setDate(fimSemana.getDate()+1);
   const fimProx=new Date(inicioProx);fimProx.setDate(inicioProx.getDate()+6);
 
-  let tarefas=[...TAREFAS];
+  // Apenas tarefas COM colaborador entram no checklist (tarefas sem colaborador ficam só no banco por loja)
+  let tarefas=TAREFAS.filter(t=>t.colaborador&&t.colaborador!=="");
   if(filterColab) tarefas=tarefas.filter(t=>t.colaborador===filterColab);
   if(filterFreq) tarefas=tarefas.filter(t=>t.frequencia===filterFreq);
   if(filterStatus) tarefas=tarefas.filter(t=>statusTarefa(t)===filterStatus);
-  if(filterSemana==="semana") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioSemana&&d<=fimSemana;});
-  else if(filterSemana==="proxima") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioProx&&d<=fimProx;});
+  if(filterPri) tarefas=tarefas.filter(t=>t.prioridade===filterPri);
+  if(filterPeriodo==="hoje") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d.getTime()===hoje.getTime();});
+  else if(filterPeriodo==="semana") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioSemana&&d<=fimSemana;});
+  else if(filterPeriodo==="proxima") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioProx&&d<=fimProx;});
 
   // Alertas
-  const atrasadas=TAREFAS.filter(t=>statusTarefa(t)==="atrasado");
+  const atrasadas=TAREFAS.filter(t=>statusTarefa(t)==="atrasado"&&t.colaborador);
   const alertasEl=document.getElementById("check-alertas");
-  if(alertasEl) alertasEl.innerHTML=atrasadas.length?`<div class="alerta-box alerta-err"><span>⚠️</span><div><strong>${atrasadas.length} tarefa${atrasadas.length>1?"s atrasadas":" atrasada"}!</strong>${atrasadas.map(t=>`<br>• ${t.titulo} — ${t.colaborador} (${new Date(t.data_tarefa+"T00:00:00").toLocaleDateString("pt-BR")})`).join("")}</div></div>`:"";
-
-  // Atualiza nav count
+  if(alertasEl){
+    alertasEl.innerHTML=atrasadas.length?`<div class="alerta-box alerta-err">
+      <span>⚠️</span>
+      <div><strong>${atrasadas.length} tarefa${atrasadas.length>1?"s atrasadas":" atrasada"}!</strong>
+      ${atrasadas.map(t=>`<br>• <strong>${t.titulo}</strong> — ${t.colaborador} | Limite: ${t.data_limite?new Date(t.data_limite+"T00:00:00").toLocaleDateString("pt-BR"):"sem data limite"}`).join("")}</div>
+    </div>`:"";
+  }
   const navCount=document.getElementById("nav-check-count");
   if(navCount){navCount.textContent=atrasadas.length||"";navCount.className=atrasadas.length?"nav-count alert":"nav-count";}
 
-  // Agrupar por data
-  const porData={};
-  tarefas.forEach(t=>{
-    const k=t.data_tarefa;
-    if(!porData[k]) porData[k]=[];
-    porData[k].push(t);
-  });
-
   const container=document.getElementById("checklist-container");
   if(!container) return;
-  if(!tarefas.length){container.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Nenhuma tarefa encontrada</div></div>`;return;}
+  if(!tarefas.length){container.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Nenhuma tarefa atribuída para este período</div></div>`;return;}
 
-  const diasSemana=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-  container.innerHTML=Object.keys(porData).sort().map(data=>{
-    const items=porData[data];
-    const d=new Date(data+"T00:00:00");
-    const diaSemana=diasSemana[d.getDay()];
-    const dataFmt=d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"});
-    const isHoje=d.getTime()===hoje.getTime();
-    const cumpridas=items.filter(t=>statusTarefa(t)==="concluido").length;
-    return`<div class="check-date-group">
-      <div class="check-date-header">
-        <span class="check-date-label" style="color:${isHoje?"var(--plat-cor)":"var(--text)"}">${isHoje?"📌 HOJE — ":""}${diaSemana}, ${dataFmt}</span>
-        <span class="check-date-badge">${cumpridas}/${items.length} concluídas</span>
+  // Agrupar por colaborador → colunas lado a lado
+  const porColab={};
+  tarefas.forEach(t=>{if(!porColab[t.colaborador])porColab[t.colaborador]=[];porColab[t.colaborador].push(t);});
+  const colabs=Object.keys(porColab).sort();
+
+  let html=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:start">`;
+  colabs.forEach(function(colab){
+    const items=porColab[colab].sort((a,b)=>(a.data_tarefa||"").localeCompare(b.data_tarefa||""));
+    const concluidas=items.filter(t=>statusTarefa(t)==="concluido").length;
+    const atrasadasColab=items.filter(t=>statusTarefa(t)==="atrasado").length;
+    const pct=items.length>0?Math.round(concluidas/items.length*100):0;
+    const cor=atrasadasColab>0?"var(--red)":pct===100?"var(--green)":"var(--orange)";
+
+    html+=`<div class="colab-section" style="margin-bottom:0">
+      <div class="colab-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:26px;height:26px;border-radius:50%;background:#E3F2FD;color:#1565C0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">${colab.charAt(0).toUpperCase()}</span>
+          <span class="colab-name">${colab}</span>
+        </div>
+        <span style="font-size:10px;font-weight:600;color:${cor}">${pct}%</span>
       </div>
-      <div class="check-card">${items.map(t=>{
-        const st2=statusTarefa(t);
-        return`<div class="check-item status-${st2}" onclick="ciclarStatusTarefa('${t.id}')">
-          <div class="check-status-dot ${st2}" title="Clique para alterar status">
-            ${st2==="concluido"?"✓":st2==="andamento"?"◑":st2==="atrasado"?"!":""}
+      <div style="padding:4px 0">`;
+
+    items.forEach(function(t){
+      const st2=statusTarefa(t);
+      const dataLimite=t.data_limite?new Date(t.data_limite+"T00:00:00"):null;
+      const limiteVencido=dataLimite&&dataLimite<hoje;
+      const dataT=t.data_tarefa?new Date(t.data_tarefa+"T00:00:00"):null;
+      const isHoje=dataT&&dataT.getTime()===hoje.getTime();
+      const checkIcon=st2==="concluido"?"✓":st2==="andamento"?"◑":st2==="atrasado"?"!":"○";
+      const corFundo=st2==="concluido"?"var(--green-bg)":st2==="atrasado"?"var(--red-bg)":st2==="andamento"?"var(--orange-bg)":"transparent";
+      html+=`<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;margin-bottom:4px;border-radius:8px;background:${corFundo};border-left:3px solid ${st2==="concluido"?"var(--green)":st2==="atrasado"?"var(--red)":st2==="andamento"?"var(--orange)":"var(--border2)"}">
+        <div class="task-check ${st2}" onclick="ciclarStatusTarefa('${t.id}')" title="Clique para alterar status" style="margin-top:1px;flex-shrink:0">${checkIcon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:var(--text);${st2==="concluido"?"text-decoration:line-through;color:var(--text3)":""}">${priBadge(t.prioridade)} ${t.titulo}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;align-items:center">
+            ${t.loja?`<span style="font-size:9px;color:var(--text3)">🏪 ${t.loja}</span>`:""}
+            ${isHoje?`<span style="font-size:9px;color:var(--plat-cor);font-weight:600">📌 HOJE</span>`:dataT?`<span style="font-size:9px;color:var(--text3)">${dataT.toLocaleDateString("pt-BR")}</span>`:""}
+            ${dataLimite?`<span style="font-size:9px;font-weight:500;color:${limiteVencido?"var(--red)":"var(--orange)"}">⏰ ${dataLimite.toLocaleDateString("pt-BR")}</span>`:""}
           </div>
-          <div style="flex:1">
-            <div class="check-title ${st2==="concluido"?"concluido":""}">${t.titulo}</div>
-            <div style="font-size:10px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap">
-              <span>${t.colaborador}</span>
-              ${renderLimite(t.data_limite)}
-            </div>
-          </div>
-          <span class="freq-badge freq-${t.frequencia}">${t.frequencia==="diaria"?"Diária":"Semanal"}</span>
-          <span class="status-badge-check sb-${st2}">${st2==="concluido"?"Concluído":st2==="andamento"?"Em andamento":st2==="atrasado"?"Atrasado":"Pendente"}</span>
-          ${st.adminMode?`<button class="ev-btn" onclick="event.stopPropagation();deletarTarefa('${t.id}')" style="color:#C62828">🗑️</button>`:""}
-        </div>`;
-      }).join("")}</div>
-    </div>`;
-  }).join("");
+        </div>
+        <div style="display:flex;gap:3px;flex-shrink:0">
+          ${st.adminMode?`<button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:2px 5px">✏️</button>
+          <button class="ev-btn" onclick="deletarTarefa('${t.id}')" style="color:var(--red);padding:2px 5px">🗑️</button>`:""}
+        </div>
+      </div>`;
+    });
+
+    html+=`</div></div>`;
+  });
+  html+=`</div>`;
+
+  container.innerHTML=html;
 }
 
 async function ciclarStatusTarefa(id){
@@ -1437,18 +1475,18 @@ function abrirModalTarefa(prefill={}){
   const allLojas=[...new Set(Object.values(st.lojas).flat())].sort();
   const bancoPendentes=TAREFAS.filter(t=>!t.colaborador||t.colaborador==="");
   overlay.innerHTML=`<div class="modal">
-    <div class="modal-title">${prefill.id?"✏️ Editar tarefa":"👤 Atribuir tarefa"}</div>
-    <div class="modal-sub">${prefill.id?"Atualize os dados da tarefa":"Atribua uma tarefa a um colaborador"}${!prefill.id&&ehSexta?" — programando para a próxima semana 📅":""}</div>
+    <div class="modal-title">${prefill._modoAtribuir?"👤 Atribuir tarefa":prefill.id?"✏️ Editar tarefa":"👤 Nova tarefa"}</div>
+    <div class="modal-sub">${prefill._modoAtribuir?"Selecione o colaborador e a data para esta tarefa":prefill.id?"Atualize os dados da tarefa":"Crie uma nova tarefa e atribua a um colaborador"}${!prefill.id&&ehSexta?" — programando para a próxima semana 📅":""}</div>
     <div class="modal-grid">
-      ${!prefill.id&&!prefill.titulo&&bancoPendentes.length>0?`
+      ${!prefill.id&&bancoPendentes.length>0?`
       <div class="modal-field" style="grid-column:1/-1">
-        <label>📋 Puxar do banco de tarefas</label>
+        <label>📋 Puxar do banco de tarefas (opcional)</label>
         <select id="nt-banco" onchange="preencherDoBanco(this.value)" style="border-color:#00695C">
           <option value="">— Selecione do banco ou preencha abaixo —</option>
           ${bancoPendentes.map(t=>`<option value="${t.id}">[${t.loja||"Sem loja"}] ${t.titulo}</option>`).join("")}
         </select>
       </div>`:""}
-      ${prefill.titulo&&!prefill.id?`<div class="modal-field" style="grid-column:1/-1;background:var(--bg);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text2)">📋 Preenchido a partir da tarefa do banco: <strong>${prefill.titulo}</strong></div>`:""}
+      ${prefill._modoAtribuir?`<div class="modal-field" style="grid-column:1/-1;background:#E0F2F1;border-radius:8px;padding:8px 12px;font-size:11px;color:#00695C">🏪 Tarefa do banco de <strong>${prefill.loja||"loja"}</strong> — selecione o colaborador abaixo para atribuir</div>`:""}
       <div class="modal-field" style="grid-column:1/-1">
         <label>Título da tarefa *</label>
         <input id="nt-titulo" value="${prefill.titulo||""}" placeholder="Ex: Atualizar preços na Shopee"/>
