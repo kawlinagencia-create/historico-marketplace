@@ -1454,7 +1454,7 @@ async function ciclarStatusTarefa(id){
   const ciclo={"pendente":"andamento","andamento":"concluido","concluido":"pendente","atrasado":"andamento"};
   const novoStatus=ciclo[atual]||"andamento";
   const {error}=await sb.from("tarefas").update({status_manual:novoStatus}).eq("id",id);
-  if(!error){t.status_manual=novoStatus;renderChecklist();
+  if(!error){t.status_manual=novoStatus;renderChecklist();renderBancoTarefas();
     const labels={andamento:"Em andamento",concluido:"Concluído",pendente:"Pendente"};
     showToast(`→ ${labels[novoStatus]||novoStatus}`);
   }
