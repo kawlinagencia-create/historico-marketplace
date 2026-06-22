@@ -1677,7 +1677,7 @@ function renderCalendario(){
     gridEl.innerHTML=cells.map(({date,otherMonth})=>{
       const isToday=date.getTime()===hoje.getTime();
       const dateStr=date.toISOString().split("T")[0];
-      const evsDia=EVENTOS.filter(e=>e.data_inicio<=dateStr&&e.data_fim>=dateStr);
+      const evsDia=EVENTOS.filter(e=>e.data_fim===dateStr);
       const lojaCorMap=getLojaCorMap();
       const tipoIconMap={cupom:"🎫",desconto:"💰",promocao:"🎯",campanha:"📣",oferta:"⚡"};
       const dotsHtml=evsDia.slice(0,3).map(e=>{
