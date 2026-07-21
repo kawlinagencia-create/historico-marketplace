@@ -266,6 +266,17 @@ tr:hover .edit-row-btn{opacity:1}
 .lt-task-row.concluido{border-left:3px solid var(--green);opacity:.75}
 .lt-add-row{padding:8px 1.25rem;border-top:1px solid var(--border);background:var(--bg)}
 .lt-empty{padding:1.5rem;text-align:center;color:var(--text3);font-size:12px}
+.rec-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:.75rem;box-shadow:var(--shadow);transition:box-shadow .15s;border-left:4px solid #888}
+.rec-card:hover{box-shadow:var(--shadow-md)}
+.rec-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.rec-body{font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap}
+.rec-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.rec-cat{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500}
+.rec-cat-ferramenta{background:#E3F2FD;color:#0D47A1}
+.rec-cat-processo{background:#E8F5E9;color:#1B5E20}
+.rec-cat-dica{background:#FFF8E1;color:#F57F17}
+.rec-cat-politica{background:#F3E5F5;color:#6A1B9A}
+.rec-group-header{font-size:13px;font-weight:600;color:var(--text);margin:1rem 0 .5rem;padding-bottom:.4rem;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;padding:9px 14px;border-radius:9px;font-size:12px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(max-width:768px){
@@ -290,6 +301,7 @@ tr:hover .edit-row-btn{opacity:1}
     <div class="nav-item" id="nav-checklist" onclick="irParaChecklist()" style="--plat-cor:#1565C0"><span>✅</span>Checklist<span class="nav-count" id="nav-check-count"></span></div>
 
     <div class="nav-item" id="nav-calendar" onclick="irParaCalendario()" style="--plat-cor:#6A1B9A"><span>📅</span>Calendário<span class="nav-count" id="nav-cal-count"></span></div>
+    <div class="nav-item" id="nav-recursos" onclick="irParaRecursos()" style="--plat-cor:#00796B"><span>📚</span>Recursos</div>
     <div class="nav-item" id="nav-config" onclick="irParaConfig()" style="--plat-cor:#37474F"><span>⚙️</span>Configurações</div>
     <div class="sb-section" style="margin-top:.4rem">Plataformas</div>
     <div id="plat-list"></div>
@@ -422,7 +434,7 @@ tr:hover .edit-row-btn{opacity:1}
           <option value="alta">🔴 Alta</option><option value="media">🟡 Média</option><option value="baixa">🟢 Baixa</option>
         </select>
         <select id="check-filter-freq" class="filter-sel" onchange="renderChecklist()">
-          <option value="">Todas frequências</option><option value="diaria">Diária</option><option value="semanal">Semanal</option><option value="unica">Única</option>
+          <option value="">Todas frequências</option><option value="diaria">Diária</option><option value="semanal">Semanal</option><option value="quinzenal">Quinzenal</option><option value="unica">Única</option>
         </select>
         <select id="check-filter-status" class="filter-sel" onchange="renderChecklist()">
           <option value="">Todos os status</option><option value="concluido">✅ Concluído</option>
@@ -513,6 +525,37 @@ tr:hover .edit-row-btn{opacity:1}
       <!-- Lista de eventos -->
       <div id="calendario-lista"></div>
     </div>
+    <!-- RECURSOS -->
+    <div class="page" id="page-recursos">
+      <div class="main-header">
+        <div>
+          <div class="main-title">📚 Recursos por Plataforma</div>
+          <div class="main-sub">ferramentas, processos e guias operacionais</div>
+        </div>
+        <button onclick="abrirModalRecurso({})" style="padding:7px 16px;border-radius:7px;border:none;background:#00796B;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Novo recurso</button>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center">
+        <select id="rec-filter-plat" class="filter-sel" onchange="renderRecursos()">
+          <option value="">Todas plataformas</option>
+          <option value="shopee">Shopee</option><option value="shein">Shein</option>
+          <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
+          <option value="geral">Geral (todas)</option>
+        </select>
+        <select id="rec-filter-cat" class="filter-sel" onchange="renderRecursos()">
+          <option value="">Todas categorias</option>
+          <option value="ferramenta">🔧 Ferramenta</option>
+          <option value="processo">📋 Processo</option>
+          <option value="dica">💡 Dica</option>
+          <option value="politica">📌 Política</option>
+        </select>
+        <input type="text" id="rec-search" class="search-big" placeholder="Buscar recurso..." style="max-width:250px" oninput="renderRecursos()"/>
+      </div>
+
+      <div id="recursos-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
+    </div>
+
     <!-- CONFIGURAÇÕES -->
     <div class="page" id="page-config">
       <div class="main-header">
@@ -1150,7 +1193,7 @@ function renderBancoTarefas(){
               <div style="font-size:12px;font-weight:500;color:var(--text);${st2==="concluido"?"text-decoration:line-through;color:var(--text3)":""}">${t.titulo}</div>
               ${t.descricao?`<div style="font-size:10px;color:var(--text3)">${t.descricao.substring(0,80)}</div>`:""}
               <div style="display:flex;gap:5px;margin-top:3px;align-items:center">
-                ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${{diaria:"Diária",semanal:"Semanal",unica:"Única"}[t.frequencia]||""}</span>`:""}
+                ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${({diaria:"Diária",semanal:"Semanal",quinzenal:"Quinzenal",unica:"Única"})[t.frequencia]||""}</span>`:""}
                 ${t.plataformas?t.plataformas.split(",").filter(Boolean).map(pid=>{const pp=PLATS.find(x=>x.id===pid);return pp?`<span style="font-size:9px;padding:1px 5px;border-radius:999px;background:${pp.cor};color:${pp.fc||'#fff'};font-weight:600">${pp.label}</span>`:""}).join(""):""}
                 ${t.colaborador?`<span style="font-size:10px;color:var(--text3);display:inline-flex;align-items:center;gap:3px"><span style="width:14px;height:14px;border-radius:50%;background:#E3F2FD;color:#1565C0;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">${t.colaborador.charAt(0)}</span>${t.colaborador}</span>`
                 :`<span style="font-size:10px;color:var(--orange)">Não atribuído</span>`}
@@ -1246,6 +1289,7 @@ function abrirModalBancoTarefa(prefill={}){
           <option value="unica"${prefill.frequencia==="unica"?" selected":""}>Única</option>
           <option value="diaria"${prefill.frequencia==="diaria"?" selected":""}>Diária</option>
           <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>Semanal</option>
+          <option value="quinzenal"${prefill.frequencia==="quinzenal"?" selected":""}>Quinzenal</option>
         </select>
       </div>
       <div class="modal-field" style="grid-column:1/-1">
@@ -1522,6 +1566,7 @@ function abrirModalTarefa(prefill={}){
         <select id="nt-freq">
           <option value="diaria"${(prefill.frequencia||"")==="diaria"?" selected":""}>Diária</option>
           <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>Semanal</option>
+          <option value="quinzenal"${prefill.frequencia==="quinzenal"?" selected":""}>Quinzenal</option>
           <option value="unica"${(!prefill.frequencia||prefill.frequencia==="unica")?" selected":""}>Única</option>
         </select>
       </div>
@@ -2018,7 +2063,7 @@ function renderLojasTasks(){
             ${t.descricao?`<div style="font-size:10px;color:var(--text3);margin-top:1px">${t.descricao.substring(0,60)}${t.descricao.length>60?"...":""}</div>`:""}
             <div style="display:flex;gap:4px;margin-top:2px">
               ${t.prioridade?`<span class="pri-badge pri-${t.prioridade}">${labelPri[t.prioridade]||""} ${t.prioridade.charAt(0).toUpperCase()+t.prioridade.slice(1)}</span>`:""}
-              ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${{diaria:"Diária",semanal:"Semanal",unica:"Única"}[t.frequencia]||""}</span>`:""}
+              ${t.frequencia?`<span class="freq-badge freq-${t.frequencia}" style="font-size:9px">${({diaria:"Diária",semanal:"Semanal",quinzenal:"Quinzenal",unica:"Única"})[t.frequencia]||""}</span>`:""}
             </div>
           </div>
           <div style="font-size:11px;color:var(--text2);white-space:nowrap">
@@ -2055,6 +2100,155 @@ function toggleLojaSection(loja){
 
 function abrirModalTarefaParaLoja(loja){
   abrirModalTarefa({loja:loja});
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RECURSOS
+// ══════════════════════════════════════════════════════════════════
+let RECURSOS=[];
+
+async function irParaRecursos(){
+  st.view="recursos";setNavActive("nav-recursos");setPageActive("page-recursos");
+  setCSSVars("#00796B","#E0F2F1");
+  setSyncing(true);await carregarRecursos();setSyncing(false);
+  renderRecursos();
+}
+
+async function carregarRecursos(){
+  const {data}=await sb.from("recursos").select("*").order("created_at",{ascending:false});
+  RECURSOS=data||[];
+}
+
+function renderRecursos(){
+  const filterPlat=document.getElementById("rec-filter-plat")?.value||"";
+  const filterCat=document.getElementById("rec-filter-cat")?.value||"";
+  const search=document.getElementById("rec-search")?.value.toLowerCase().trim()||"";
+  const el=document.getElementById("recursos-container");if(!el)return;
+
+  let lista=[...RECURSOS];
+  if(filterPlat) lista=lista.filter(r=>r.plataforma===filterPlat);
+  if(filterCat) lista=lista.filter(r=>r.categoria===filterCat);
+  if(search) lista=lista.filter(r=>(r.titulo||"").toLowerCase().includes(search)||(r.conteudo||"").toLowerCase().includes(search));
+
+  if(!lista.length){
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">Nenhum recurso cadastrado ainda.<br>Clique em <strong>+ Novo recurso</strong> para começar.</div></div>`;
+    return;
+  }
+
+  const platMap5=Object.fromEntries(PLATS.map(p=>[p.id,p]));
+  platMap5["geral"]={label:"Geral",cor:"#607D8B",fc:"#fff"};
+  const catLabel={ferramenta:"🔧 Ferramenta",processo:"📋 Processo",dica:"💡 Dica",politica:"📌 Política"};
+
+  // Agrupar por plataforma
+  const porPlat={};
+  lista.forEach(r=>{
+    const k=r.plataforma||"geral";
+    if(!porPlat[k]) porPlat[k]=[];
+    porPlat[k].push(r);
+  });
+
+  let html="";
+  const platOrder=["shopee","shein","mlivre","tiktok","geral"];
+  platOrder.forEach(function(platId){
+    if(!porPlat[platId]) return;
+    const pl=platMap5[platId]||{label:platId,cor:"#888"};
+    html+=`<div class="rec-group-header">
+      <span style="width:10px;height:10px;border-radius:50%;background:${pl.cor};display:inline-block"></span>
+      <span style="background:${pl.cor};color:${pl.fc||"#fff"};padding:2px 10px;border-radius:999px;font-size:11px">${pl.label}</span>
+      <span style="font-size:10px;color:var(--text3);font-weight:400">${porPlat[platId].length} recurso${porPlat[platId].length!==1?"s":""}</span>
+    </div>`;
+    porPlat[platId].forEach(function(r){
+      html+=`<div class="rec-card" style="border-left-color:${pl.cor}">
+        <div class="rec-meta">
+          <span class="rec-cat rec-cat-${r.categoria||"dica"}">${catLabel[r.categoria]||r.categoria||"—"}</span>
+          <span style="font-size:10px;color:var(--text3)">${new Date(r.created_at).toLocaleDateString("pt-BR")}</span>
+        </div>
+        <div class="rec-title">${r.titulo}</div>
+        <div class="rec-body">${r.conteudo||""}</div>
+        <div style="display:flex;gap:6px;margin-top:.75rem">
+          <button class="ev-btn" onclick="abrirModalRecurso(RECURSOS.find(x=>x.id==='${r.id}')||{})" style="color:#00796B">✏️ Editar</button>
+          ${st.adminMode?`<button class="ev-btn" onclick="deletarRecurso('${r.id}')" style="color:var(--red)">🗑️ Excluir</button>`:""}
+        </div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML=html;
+}
+
+function abrirModalRecurso(prefill={}){
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-recurso";
+  overlay.innerHTML=`<div class="modal" style="max-width:560px">
+    <div class="modal-title">${prefill.id?"✏️ Editar recurso":"📚 Novo recurso"}</div>
+    <div class="modal-sub">Documente ferramentas, processos e dicas por plataforma</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Título *</label>
+        <input id="nr-titulo" value="${prefill.titulo||""}" placeholder="Ex: Como criar cupom na Shopee"/>
+      </div>
+      <div class="modal-field">
+        <label>Plataforma</label>
+        <select id="nr-plat">
+          <option value="geral"${(prefill.plataforma||"geral")==="geral"?" selected":""}>🌐 Geral (todas)</option>
+          ${PLATS.map(p=>`<option value="${p.id}"${prefill.plataforma===p.id?" selected":""}>${p.label}</option>`).join("")}
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Categoria</label>
+        <select id="nr-cat">
+          <option value="ferramenta"${(prefill.categoria||"")==="ferramenta"?" selected":""}>🔧 Ferramenta</option>
+          <option value="processo"${prefill.categoria==="processo"?" selected":""}>📋 Processo</option>
+          <option value="dica"${prefill.categoria==="dica"?" selected":""}>💡 Dica</option>
+          <option value="politica"${prefill.categoria==="politica"?" selected":""}>📌 Política</option>
+        </select>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Conteúdo / Descrição *</label>
+        <textarea id="nr-conteudo" style="min-height:150px" placeholder="Descreva a ferramenta, passo a passo do processo, dica ou política...">${prefill.conteudo||""}</textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-recurso').remove()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" style="background:#00796B" onclick="salvarRecurso('${prefill.id||""}')">Salvar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+}
+
+async function salvarRecurso(idExistente=""){
+  const titulo=document.getElementById("nr-titulo").value.trim();
+  const conteudo=document.getElementById("nr-conteudo").value.trim();
+  const plataforma=document.getElementById("nr-plat").value;
+  const categoria=document.getElementById("nr-cat").value;
+  if(!titulo){showToast("⚠️ Preencha o título");return;}
+  if(!conteudo){showToast("⚠️ Preencha o conteúdo");return;}
+  const payload={titulo,conteudo,plataforma,categoria};
+  if(idExistente){
+    const {error}=await sb.from("recursos").update(payload).eq("id",idExistente);
+    if(!error){
+      const idx=RECURSOS.findIndex(r=>r.id===idExistente);
+      if(idx>=0) RECURSOS[idx]={...RECURSOS[idx],...payload};
+      document.getElementById("modal-recurso").remove();
+      renderRecursos();showToast("✓ Recurso atualizado!");
+    } else showToast("⚠️ Erro ao atualizar");
+  } else {
+    const {data,error}=await sb.from("recursos").insert(payload).select();
+    if(!error&&data){
+      RECURSOS.unshift(data[0]);
+      document.getElementById("modal-recurso").remove();
+      renderRecursos();showToast("✓ Recurso salvo!");
+    } else showToast("⚠️ Erro ao salvar");
+  }
+}
+
+async function deletarRecurso(id){
+  if(!confirm("Excluir este recurso?")) return;
+  const {error}=await sb.from("recursos").delete().eq("id",id);
+  if(!error){
+    RECURSOS=RECURSOS.filter(r=>r.id!==id);
+    renderRecursos();showToast("✓ Recurso excluído!");
+  }
 }
 
 function showToast(msg){
