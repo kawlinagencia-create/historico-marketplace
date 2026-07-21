@@ -1159,8 +1159,8 @@ function renderBancoTarefas(){
             </div>
             <span style="font-size:10px;padding:2px 7px;border-radius:999px;background:${corSt2[st2]}22;color:${corSt2[st2]};font-weight:500;white-space:nowrap">${iconSt2[st2]} ${labelSt2[st2]}</span>
             ${!t.colaborador?`<button class="btn-atribuir" onclick="atribuirTarefa('${t.id}')">👤 Atribuir</button>`:""}
-            ${st.adminMode?`<button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:3px 6px">✏️</button>
-            <button class="ev-btn" onclick="deletarTarefaBanco('${t.id}')" style="color:var(--red);padding:3px 6px">🗑️</button>`:""}
+            <button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:3px 8px" title="Editar">✏️</button>
+            <button class="ev-btn" onclick="deletarTarefaBanco('${t.id}')" style="color:var(--red);padding:3px 8px;background:#FFEBEE" title="Excluir">🗑️</button>
           </div>`;
         }).join("")}
       </div>
