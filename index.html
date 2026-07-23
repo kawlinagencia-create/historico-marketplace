@@ -641,7 +641,7 @@ const PLATS=[
 const STATUS_CLASS={"Concluído":"badge-ok","Em andamento":"badge-wip","Pendente":"badge-pend","Revisão":"badge-rev"};
 const TIPOS_LIST=["Título","Descrição","Foto Capa","Fotos Secundárias","Preço","Ads","Vídeo","Decoração da Loja","Oferta Relâmpago","Cupom","Afiliados","Campanha","Promoção","Estoque","Variação/SKU","Categoria","Frete","Avaliação/Review","Atendimento ao Cliente","Devolução/Reembolso","Kit/Combo","Embalagem","Banner da Loja","Política de Troca","Brinde","Live/Transmissão"];
 const COLAB_KEY="colaboradores_v2";
-let COLABORADORES=JSON.parse(localStorage.getItem(COLAB_KEY)||'["Kaylane","Willian","Jennifer","Brenno"]');
+let COLABORADORES=["Kaylane","Willian","Jennifer","Brenno"]; // será sobrescrito pelo banco
 
 let st={
   view:"geral",plat:"shopee",loja:"",lojaSelecionadas:[],
@@ -672,6 +672,7 @@ function setCSSVars(cor,cor10){
 // ── INICIALIZAR ────────────────────────────────────────────────────────────────
 async function inicializar(){
   try{
+    await carregarColaboradores();
     await carregarLojas();
     st.geralHistorico=await carregarHistorico();
     document.getElementById("sync-dot").className="sync-dot";
@@ -682,6 +683,24 @@ async function inicializar(){
     document.getElementById("sync-dot").className="sync-dot err";
     document.getElementById("sync-text").textContent="erro de conexão";
     console.error(e);
+  }
+}
+
+async function carregarColaboradores(){
+  try{
+    const {data}=await sb.from("colaboradores").select("nome").order("nome");
+    if(data&&data.length>0){
+      COLABORADORES=data.map(c=>c.nome);
+    } else {
+      // Tabela vazia - inserir padrões
+      const defaults=["Kaylane","Willian","Jennifer","Brenno"];
+      await sb.from("colaboradores").insert(defaults.map(nome=>({nome})));
+      COLABORADORES=defaults;
+    }
+  }catch(e){
+    // Tabela pode não existir ainda - usa localStorage como fallback
+    const saved=localStorage.getItem(COLAB_KEY);
+    if(saved) COLABORADORES=JSON.parse(saved);
   }
 }
 
@@ -1046,11 +1065,16 @@ function adicionarColab(){
   showToast("✓ '"+nome+"' adicionado!");
 }
 
-function removerColab(nome){
+async function removerColab(nome){
   if(!confirm("Remover '"+nome+"'?")) return;
-  COLABORADORES=COLABORADORES.filter(c=>c!==nome);
-  localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
-  renderColabListaModal();renderColabSelect();
+  try{
+    setSyncing(true);
+    await sb.from("colaboradores").delete().eq("nome",nome);
+    COLABORADORES=COLABORADORES.filter(c=>c!==nome);
+    setSyncing(false);
+    renderColabListaModal();renderColabSelect();renderConfigColabs();
+    showToast("✓ '"+nome+"' removido!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao remover");}
 }
 
 // ── ADMIN ──────────────────────────────────────────────────────────────────────
@@ -2161,6 +2185,7 @@ function renderRecursos(){
       html+=`<div class="rec-card" style="border-left-color:${pl.cor}">
         <div class="rec-meta">
           <span class="rec-cat rec-cat-${r.categoria||"dica"}">${catLabel[r.categoria]||r.categoria||"—"}</span>
+          ${r.frequencia?`<span style="font-size:10px;padding:2px 7px;border-radius:999px;background:var(--blue-bg);color:var(--blue);font-weight:500">${{diaria:"📅 Diária",semanal:"📅 Semanal",quinzenal:"📅 Quinzenal",mensal:"📅 Mensal",unica:"🔂 Única vez"}[r.frequencia]||r.frequencia}</span>`:""}
           <span style="font-size:10px;color:var(--text3)">${new Date(r.created_at).toLocaleDateString("pt-BR")}</span>
         </div>
         <div class="rec-title">${r.titulo}</div>
@@ -2202,6 +2227,17 @@ function abrirModalRecurso(prefill={}){
           <option value="politica"${prefill.categoria==="politica"?" selected":""}>📌 Política</option>
         </select>
       </div>
+      <div class="modal-field">
+        <label>Periodicidade</label>
+        <select id="nr-freq">
+          <option value=""${!prefill.frequencia?" selected":""}>Sem periodicidade</option>
+          <option value="diaria"${prefill.frequencia==="diaria"?" selected":""}>📅 Diária</option>
+          <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>📅 Semanal</option>
+          <option value="quinzenal"${prefill.frequencia==="quinzenal"?" selected":""}>📅 Quinzenal</option>
+          <option value="mensal"${prefill.frequencia==="mensal"?" selected":""}>📅 Mensal</option>
+          <option value="unica"${prefill.frequencia==="unica"?" selected":""}>🔂 Única vez</option>
+        </select>
+      </div>
       <div class="modal-field" style="grid-column:1/-1">
         <label>Conteúdo / Descrição *</label>
         <textarea id="nr-conteudo" style="min-height:150px" placeholder="Descreva a ferramenta, passo a passo do processo, dica ou política...">${prefill.conteudo||""}</textarea>
@@ -2223,7 +2259,8 @@ async function salvarRecurso(idExistente=""){
   const categoria=document.getElementById("nr-cat").value;
   if(!titulo){showToast("⚠️ Preencha o título");return;}
   if(!conteudo){showToast("⚠️ Preencha o conteúdo");return;}
-  const payload={titulo,conteudo,plataforma,categoria};
+  const frequencia=document.getElementById("nr-freq")?.value||"";
+  const payload={titulo,conteudo,plataforma,categoria,frequencia};
   if(idExistente){
     const {error}=await sb.from("recursos").update(payload).eq("id",idExistente);
     if(!error){
@@ -2297,13 +2334,7 @@ function cfgAdicionarColab(){
   showToast("✓ '"+nome+"' adicionado!");
 }
 
-function cfgRemoverColab(nome){
-  if(!confirm("Remover '"+nome+"'?")) return;
-  COLABORADORES=COLABORADORES.filter(c=>c!==nome);
-  localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
-  renderConfigColabs();renderColabSelect();
-  showToast("✓ Removido!");
-}
+async function cfgRemoverColab(nome){await removerColab(nome);}
 
 function renderConfigTipos(){
   const lista=document.getElementById("cfg-tipos-lista");
