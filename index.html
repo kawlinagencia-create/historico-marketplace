@@ -328,6 +328,7 @@ tr:hover .edit-row-btn{opacity:1}
     <div class="page active" id="page-geral">
       <div class="main-header">
         <div><div class="main-title">Visão Geral</div><div class="main-sub">todos os registros de todas as plataformas</div></div>
+        <button onclick="abrirModalRelatorio()" style="padding:7px 16px;border-radius:7px;border:none;background:#1A237E;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">📄 Gerar relatório</button>
       </div>
       <div class="overview-grid" id="ov-cards"></div>
       <div class="search-bar">
@@ -447,7 +448,15 @@ tr:hover .edit-row-btn{opacity:1}
 
       <div id="checklist-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
 
-      <div style="border-top:2px solid var(--border);margin:1.5rem 0 1.25rem;padding-top:1rem">
+      <!-- ARQUIVO DE TAREFAS -->
+      <div style="margin:1.5rem 0 .5rem;display:flex;align-items:center;justify-content:space-between">
+        <button onclick="toggleArquivo()" id="btn-arquivo" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">
+          📦 Ver tarefas arquivadas <span id="arquivo-count" style="background:var(--border);padding:1px 6px;border-radius:999px;font-size:10px"></span>
+        </button>
+      </div>
+      <div id="arquivo-container" style="display:none;margin-bottom:1.5rem"></div>
+
+      <div style="border-top:2px solid var(--border);margin:0 0 1.25rem;padding-top:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
           <div>
             <p style="font-size:14px;font-weight:600;color:var(--text)">🏪 Tarefas por loja</p>
@@ -1235,10 +1244,10 @@ function preencherDoBanco(id){
 }
 
 async function deletarTarefaBanco(id){
-  if(!confirm("Excluir esta tarefa do banco?")) return;
+  if(!confirm("Excluir esta tarefa?")) return;
   await sb.from("tarefas").delete().eq("id",id);
   TAREFAS=TAREFAS.filter(t=>t.id!==id);
-  renderBancoTarefas();renderChecklist();showToast("✓ Tarefa excluída");
+  renderCheckKPIs();renderBancoTarefas();renderChecklist();showToast("✓ Tarefa excluída");
 }
 
 function atribuirTarefa(id){
@@ -1488,7 +1497,8 @@ function renderChecklist(){
             ${dataLimite?`<span style="font-size:9px;font-weight:500;color:${limiteVencido?"var(--red)":"var(--orange)"}">⏰ ${dataLimite.toLocaleDateString("pt-BR")}</span>`:""}
           </div>
         </div>
-        <div style="display:flex;gap:3px;flex-shrink:0">
+        <div style="display:flex;gap:3px;flex-shrink:0;align-items:center">
+          ${st2==="concluido"?`<button class="ev-btn" onclick="arquivarTarefa('${t.id}')" title="Arquivar tarefa concluída" style="color:#00695C;padding:2px 8px;background:#E0F2F1;border-color:#00695C;font-size:10px">📦 Arquivar</button>`:""}
           ${st.adminMode?`<button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:2px 5px">✏️</button>
           <button class="ev-btn" onclick="deletarTarefa('${t.id}')" style="color:var(--red);padding:2px 5px">🗑️</button>`:""}
         </div>
@@ -1517,7 +1527,8 @@ async function ciclarStatusTarefa(id){
 async function deletarTarefa(id){
   if(!confirm("Excluir esta tarefa?")) return;
   await sb.from("tarefas").delete().eq("id",id);
-  TAREFAS=TAREFAS.filter(t=>t.id!==id);renderChecklist();showToast("✓ Tarefa excluída");
+  TAREFAS=TAREFAS.filter(t=>t.id!==id);
+  renderCheckKPIs();renderChecklist();renderBancoTarefas();showToast("✓ Tarefa excluída");
 }
 
 function abrirModalTarefa(prefill={}){
@@ -2272,6 +2283,231 @@ async function deletarRecurso(id){
     RECURSOS=RECURSOS.filter(r=>r.id!==id);
     renderRecursos();showToast("✓ Recurso excluído!");
   }
+}
+
+// ── ARQUIVAR TAREFAS ──────────────────────────────────────────────────────────
+async function arquivarTarefa(id){
+  const {error}=await sb.from("tarefas").update({arquivada:true}).eq("id",id);
+  if(!error){
+    const t=TAREFAS.find(x=>x.id===id);
+    if(t) t.arquivada=true;
+    renderCheckKPIs();renderChecklist();renderBancoTarefas();
+    showToast("📦 Tarefa arquivada!");
+  }
+}
+
+function toggleArquivo(){
+  const el=document.getElementById("arquivo-container");
+  const btn=document.getElementById("btn-arquivo");
+  if(el.style.display==="none"){
+    el.style.display="block";
+    renderArquivo();
+    btn.innerHTML='📦 Ocultar tarefas arquivadas <span id="arquivo-count" style="background:var(--border);padding:1px 6px;border-radius:999px;font-size:10px">'+TAREFAS.filter(t=>t.arquivada).length+'</span>';
+  } else {
+    el.style.display="none";
+    btn.innerHTML='📦 Ver tarefas arquivadas <span id="arquivo-count" style="background:var(--border);padding:1px 6px;border-radius:999px;font-size:10px">'+TAREFAS.filter(t=>t.arquivada).length+'</span>';
+  }
+}
+
+function renderArquivo(){
+  const el=document.getElementById("arquivo-container");if(!el)return;
+  const arquivadas=TAREFAS.filter(t=>t.arquivada);
+  // Update count
+  document.querySelectorAll("#arquivo-count").forEach(e=>e.textContent=arquivadas.length);
+  if(!arquivadas.length){
+    el.innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;color:var(--text3);font-size:12px">Nenhuma tarefa arquivada</div>`;
+    return;
+  }
+  const lojaCorMap3=getLojaCorMap();
+  el.innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">
+    <div style="padding:.75rem 1rem;background:#F5F5F5;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;font-weight:600;color:var(--text2)">📦 ${arquivadas.length} tarefa${arquivadas.length!==1?"s arquivadas":" arquivada"}</span>
+      ${st.adminMode?`<button onclick="limparArquivo()" style="font-size:10px;padding:3px 10px;border-radius:6px;border:none;background:#FFEBEE;color:var(--red);cursor:pointer">Limpar arquivo</button>`:""}
+    </div>
+    ${arquivadas.map(t=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 1rem;border-bottom:1px solid var(--border);opacity:.7">
+      <span style="font-size:11px">✅</span>
+      <div style="flex:1">
+        <div style="font-size:12px;text-decoration:line-through;color:var(--text3)">${t.titulo}</div>
+        <div style="font-size:10px;color:var(--text3)">${t.colaborador||"Sem colaborador"} ${t.loja?"· "+t.loja:""}</div>
+      </div>
+      <button onclick="desarquivarTarefa('${t.id}')" style="font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">↩ Restaurar</button>
+      ${st.adminMode?`<button onclick="deletarTarefa('${t.id}')" style="font-size:10px;padding:2px 8px;border-radius:6px;border:none;background:#FFEBEE;color:var(--red);cursor:pointer">🗑️</button>`:""}
+    </div>`).join("")}
+  </div>`;
+}
+
+async function desarquivarTarefa(id){
+  await sb.from("tarefas").update({arquivada:false}).eq("id",id);
+  const t=TAREFAS.find(x=>x.id===id);if(t)t.arquivada=false;
+  renderCheckKPIs();renderChecklist();renderArquivo();showToast("↩ Tarefa restaurada!");
+}
+
+async function limparArquivo(){
+  if(!confirm("Excluir permanentemente todas as tarefas arquivadas?")) return;
+  const ids=TAREFAS.filter(t=>t.arquivada).map(t=>t.id);
+  for(const id of ids) await sb.from("tarefas").delete().eq("id",id);
+  TAREFAS=TAREFAS.filter(t=>!t.arquivada);
+  renderCheckKPIs();renderChecklist();renderBancoTarefas();renderArquivo();showToast("🗑️ Arquivo limpo!");
+}
+
+// ── RELATÓRIO ─────────────────────────────────────────────────────────────────
+function abrirModalRelatorio(){
+  const allLojas=[...new Set(Object.values(st.lojas).flat())].sort();
+  const hoje=new Date().toISOString().split("T")[0];
+  const seteDias=new Date(Date.now()-7*86400000).toISOString().split("T")[0];
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-relatorio";
+  overlay.innerHTML=`<div class="modal" style="max-width:500px">
+    <div class="modal-title">📄 Gerar relatório para cliente</div>
+    <div class="modal-sub">Selecione a loja e o período para gerar o relatório semanal</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Loja *</label>
+        <select id="rel-loja">
+          <option value="">Selecione a loja...</option>
+          ${allLojas.map(l=>`<option value="${l}">${l}</option>`).join("")}
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data início *</label>
+        <input type="date" id="rel-inicio" value="${seteDias}"/>
+      </div>
+      <div class="modal-field">
+        <label>Data fim *</label>
+        <input type="date" id="rel-fim" value="${hoje}"/>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Observações (opcional)</label>
+        <textarea id="rel-obs" placeholder="Adicione um resumo ou observações para o cliente..." style="min-height:70px"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-relatorio').remove()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" style="background:#1A237E" onclick="gerarRelatorio()">📄 Gerar e visualizar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+}
+
+function gerarRelatorio(){
+  const loja=document.getElementById("rel-loja").value;
+  const inicio=document.getElementById("rel-inicio").value;
+  const fim=document.getElementById("rel-fim").value;
+  const obs=document.getElementById("rel-obs").value.trim();
+  if(!loja){showToast("⚠️ Selecione a loja");return;}
+  if(!inicio||!fim){showToast("⚠️ Preencha as datas");return;}
+
+  const iniDate=new Date(inicio+"T00:00:00");
+  const fimDate=new Date(fim+"T23:59:59");
+  const registros=st.geralHistorico.filter(r=>{
+    if(r.loja!==loja) return false;
+    const d=new Date(r.created_at);
+    return d>=iniDate&&d<=fimDate;
+  });
+
+  const platMap6=Object.fromEntries(PLATS.map(p=>[p.id,p]));
+  const iniStr=iniDate.toLocaleDateString("pt-BR");
+  const fimStr=fimDate.toLocaleDateString("pt-BR");
+
+  // Group by tipo
+  const porTipo={};
+  registros.forEach(r=>{
+    if(!porTipo[r.tipo]) porTipo[r.tipo]=[];
+    porTipo[r.tipo].push(r);
+  });
+
+  // Unique collaborators
+  const colabs=[...new Set(registros.map(r=>r.colaborador).filter(Boolean))];
+
+  const html=`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Relatório — ${loja}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f8f9fa;color:#222;padding:2rem}
+  .container{max-width:800px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+  .header{background:linear-gradient(135deg,#1A237E,#283593);color:#fff;padding:2rem 2.5rem}
+  .header-logo{font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.7;margin-bottom:.5rem}
+  .header-loja{font-size:28px;font-weight:700;letter-spacing:-.5px}
+  .header-periodo{font-size:13px;opacity:.8;margin-top:.4rem}
+  .body{padding:2rem 2.5rem}
+  .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+  .sum-card{background:#f0f4ff;border-radius:10px;padding:1rem;text-align:center}
+  .sum-num{font-size:32px;font-weight:700;color:#1A237E}
+  .sum-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+  .section-title{font-size:14px;font-weight:700;color:#1A237E;text-transform:uppercase;letter-spacing:.08em;margin:1.5rem 0 .75rem;padding-bottom:.4rem;border-bottom:2px solid #e8eaf6}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{background:#f0f4ff;padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#555}
+  td{padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#333}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafafe}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500}
+  .tipo-badge{background:#e8eaf6;color:#3949AB}
+  .plat-badge{color:#fff;font-size:9px;padding:1px 6px;border-radius:999px}
+  .obs-box{background:#fffde7;border-left:4px solid #f9a825;padding:1rem;border-radius:0 8px 8px 0;font-size:13px;color:#555;margin-top:1.5rem}
+  .footer{background:#f0f4ff;padding:1rem 2.5rem;text-align:center;font-size:11px;color:#888;border-top:1px solid #e8eaf6}
+  @media print{body{padding:0;background:#fff}.container{box-shadow:none;border-radius:0}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-logo">KAWLIN Agência · Relatório de Operações</div>
+    <div class="header-loja">🏪 ${loja}</div>
+    <div class="header-periodo">Período: ${iniStr} a ${fimStr}</div>
+  </div>
+  <div class="body">
+    <div class="summary">
+      <div class="sum-card"><div class="sum-num">${registros.length}</div><div class="sum-label">Alterações realizadas</div></div>
+      <div class="sum-card"><div class="sum-num">${Object.keys(porTipo).length}</div><div class="sum-label">Tipos de ação</div></div>
+      <div class="sum-card"><div class="sum-num">${colabs.length}</div><div class="sum-label">Colaboradores</div></div>
+    </div>
+
+    <div class="section-title">Resumo por tipo de alteração</div>
+    <table>
+      <thead><tr><th>Tipo</th><th>Quantidade</th></tr></thead>
+      <tbody>
+        ${Object.entries(porTipo).sort((a,b)=>b[1].length-a[1].length).map(([tipo,regs])=>`
+        <tr><td><span class="badge tipo-badge">${tipo}</span></td><td><strong>${regs.length}</strong></td></tr>`).join("")}
+      </tbody>
+    </table>
+
+    <div class="section-title">Detalhamento das alterações</div>
+    <table>
+      <thead><tr><th>Data</th><th>Plataforma</th><th>Tipo</th><th>Antes</th><th>Depois</th><th>Colaborador</th></tr></thead>
+      <tbody>
+        ${registros.map(r=>{
+          const pl=platMap6[r.plataforma]||{label:r.plataforma||"—",cor:"#888"};
+          const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
+          return`<tr>
+            <td>${dt}</td>
+            <td><span class="plat-badge" style="background:${pl.cor}">${pl.label}</span></td>
+            <td>${r.tipo||"—"}</td>
+            <td style="color:#999;font-size:11px">${r.antes||"—"}</td>
+            <td style="font-size:11px">${r.depois||"—"}</td>
+            <td>${r.colaborador||"—"}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>
+
+    ${obs?`<div class="obs-box"><strong>Observações:</strong><br>${obs}</div>`:""}
+  </div>
+  <div class="footer">Relatório gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · KAWLIN Agência</div>
+</div>
+<div style="text-align:center;margin-top:1.5rem">
+  <button onclick="window.print()" style="padding:10px 24px;background:#1A237E;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px">🖨️ Imprimir / Salvar PDF</button>
+</div>
+</body></html>`;
+
+  document.getElementById("modal-relatorio").remove();
+  const w=window.open("","_blank");
+  w.document.write(html);
+  w.document.close();
 }
 
 function showToast(msg){
