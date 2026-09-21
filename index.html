@@ -417,6 +417,15 @@ tr:hover .edit-row-btn{opacity:1}
       <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem" id="check-kpis"></div>
 
+      <!-- ARQUIVO DE TAREFAS (TOPO) -->
+      <div style="margin-bottom:1rem">
+        <button onclick="toggleArquivo()" id="btn-arquivo" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;width:100%;justify-content:space-between">
+          <span>📦 Tarefas arquivadas</span>
+          <span id="arquivo-count" style="background:var(--border);padding:1px 6px;border-radius:999px;font-size:10px">0</span>
+        </button>
+        <div id="arquivo-container" style="display:none;margin-top:.5rem"></div>
+      </div>
+
       <!-- CHECKLIST POR COLABORADOR (TOPO) -->
       <div style="margin-bottom:.75rem">
         <p style="font-size:14px;font-weight:600;color:var(--text)">👤 Checklist por colaborador</p>
@@ -447,14 +456,6 @@ tr:hover .edit-row-btn{opacity:1}
       </div>
 
       <div id="checklist-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
-
-      <!-- ARQUIVO DE TAREFAS -->
-      <div style="margin:1.5rem 0 .5rem;display:flex;align-items:center;justify-content:space-between">
-        <button onclick="toggleArquivo()" id="btn-arquivo" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">
-          📦 Ver tarefas arquivadas <span id="arquivo-count" style="background:var(--border);padding:1px 6px;border-radius:999px;font-size:10px"></span>
-        </button>
-      </div>
-      <div id="arquivo-container" style="display:none;margin-bottom:1.5rem"></div>
 
       <div style="border-top:2px solid var(--border);margin:0 0 1.25rem;padding-top:1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
@@ -665,19 +666,25 @@ async function inicializar(){
 
 async function carregarColaboradores(){
   try{
-    const {data}=await sb.from("colaboradores").select("nome").order("nome");
+    const {data,error}=await sb.from("colaboradores").select("nome").order("nome");
+    if(error) throw error;
     if(data&&data.length>0){
       COLABORADORES=data.map(c=>c.nome);
+      localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
     } else {
-      // Tabela vazia - inserir padrões
-      const defaults=["Kaylane","Willian","Jennifer","Brenno"];
-      await sb.from("colaboradores").insert(defaults.map(nome=>({nome})));
+      // Tabela vazia - tenta inserir dos padrões/localStorage
+      const saved=localStorage.getItem(COLAB_KEY);
+      const defaults=saved?JSON.parse(saved):["Kaylane","Willian","Jennifer","Brenno","Daniel"];
+      try{
+        await sb.from("colaboradores").insert(defaults.map(nome=>({nome})));
+      }catch(e2){}
       COLABORADORES=defaults;
     }
   }catch(e){
-    // Tabela pode não existir ainda - usa localStorage como fallback
+    // Fallback para localStorage se Supabase falhar
     const saved=localStorage.getItem(COLAB_KEY);
     if(saved) COLABORADORES=JSON.parse(saved);
+    console.warn("Usando colaboradores do localStorage:",e.message);
   }
 }
 
@@ -1146,9 +1153,9 @@ function renderBancoTarefas(){
   const porLoja={};
   todasLojas.forEach(l=>{porLoja[l]=[];});
   TAREFAS.forEach(t=>{
+    if(t.arquivada) return; // skip archived
     if(t.loja&&porLoja[t.loja]!==undefined){
       let ts=statusTarefa(t);
-      // Por padrão, esconde tarefas concluídas da visão geral por loja
       if(filterStatusBanco){
         if(ts===filterStatusBanco) porLoja[t.loja].push(t);
       } else {
@@ -1202,7 +1209,6 @@ function renderBancoTarefas(){
               </div>
             </div>
             <span style="font-size:10px;padding:2px 7px;border-radius:999px;background:${corSt2[st2]}22;color:${corSt2[st2]};font-weight:500;white-space:nowrap">${iconSt2[st2]} ${labelSt2[st2]}</span>
-            ${!t.colaborador?`<button class="btn-atribuir" onclick="atribuirTarefa('${t.id}')">👤 Atribuir</button>`:""}
             <button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:3px 8px" title="Editar">✏️</button>
             <button class="ev-btn" onclick="deletarTarefaBanco('${t.id}')" style="color:var(--red);padding:3px 8px;background:#FFEBEE" title="Excluir">🗑️</button>
           </div>`;
@@ -1429,8 +1435,11 @@ function renderChecklist(){
   const inicioProx=new Date(fimSemana);inicioProx.setDate(fimSemana.getDate()+1);
   const fimProx=new Date(inicioProx);fimProx.setDate(inicioProx.getDate()+6);
 
-  // Apenas tarefas COM colaborador entram no checklist (tarefas sem colaborador ficam só no banco por loja)
-  let tarefas=TAREFAS.filter(t=>t.colaborador&&t.colaborador!=="");
+  // Update archive count
+  const countEl=document.getElementById("arquivo-count");
+  if(countEl) countEl.textContent=TAREFAS.filter(t=>t.arquivada).length;
+  // Apenas tarefas COM colaborador e NÃO arquivadas entram no checklist
+  let tarefas=TAREFAS.filter(t=>t.colaborador&&t.colaborador!==""&&!t.arquivada);
   if(filterColab) tarefas=tarefas.filter(t=>t.colaborador===filterColab);
   if(filterFreq) tarefas=tarefas.filter(t=>t.frequencia===filterFreq);
   if(filterStatus) tarefas=tarefas.filter(t=>statusTarefa(t)===filterStatus);
@@ -2289,11 +2298,15 @@ async function deletarRecurso(id){
 async function arquivarTarefa(id){
   const {error}=await sb.from("tarefas").update({arquivada:true}).eq("id",id);
   if(!error){
-    const t=TAREFAS.find(x=>x.id===id);
-    if(t) t.arquivada=true;
+    const t=TAREFAS.find(x=>x.id===id);if(t) t.arquivada=true;
     renderCheckKPIs();renderChecklist();renderBancoTarefas();
+    // Update archive count
+    const countEl=document.getElementById("arquivo-count");
+    if(countEl) countEl.textContent=TAREFAS.filter(t=>t.arquivada).length;
+    // Refresh archive if open
+    if(document.getElementById("arquivo-container").style.display!=="none") renderArquivo();
     showToast("📦 Tarefa arquivada!");
-  }
+  } else showToast("⚠️ Erro ao arquivar. Verifique o Supabase.");
 }
 
 function toggleArquivo(){
@@ -2500,8 +2513,9 @@ function gerarRelatorio(){
   <div class="footer">Relatório gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · KAWLIN Agência</div>
 </div>
 <div style="text-align:center;margin-top:1.5rem">
-  <button onclick="window.print()" style="padding:10px 24px;background:#1A237E;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px">🖨️ Imprimir / Salvar PDF</button>
+  <button onclick="window.print()" style="padding:10px 28px;background:#1A237E;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">📥 Salvar como PDF</button>
 </div>
+<style>@media print{button{display:none!important}body{padding:0;background:#fff}.container{box-shadow:none}}</style>
 </body></html>`;
 
   document.getElementById("modal-relatorio").remove();
@@ -2556,7 +2570,18 @@ function cfgAdicionarColab(){
   showToast("✓ '"+nome+"' adicionado!");
 }
 
-async function cfgRemoverColab(nome){await removerColab(nome);}
+async function cfgRemoverColab(nome){
+  if(!confirm("Remover '"+nome+"'?")) return;
+  try{
+    setSyncing(true);
+    await sb.from("colaboradores").delete().eq("nome",nome);
+    COLABORADORES=COLABORADORES.filter(c=>c!==nome);
+    localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
+    setSyncing(false);
+    renderConfigColabs();renderColabSelect();
+    showToast("✓ '"+nome+"' removido!");
+  }catch(e){setSyncing(false);showToast("⚠️ Erro ao remover");}
+}
 
 function renderConfigTipos(){
   const lista=document.getElementById("cfg-tipos-lista");
