@@ -1508,8 +1508,8 @@ function renderChecklist(){
         </div>
         <div style="display:flex;gap:3px;flex-shrink:0;align-items:center">
           ${st2==="concluido"?`<button class="ev-btn" onclick="arquivarTarefa('${t.id}')" title="Arquivar tarefa concluída" style="color:#00695C;padding:2px 8px;background:#E0F2F1;border-color:#00695C;font-size:10px">📦 Arquivar</button>`:""}
-          ${st.adminMode?`<button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:2px 5px">✏️</button>
-          <button class="ev-btn" onclick="deletarTarefa('${t.id}')" style="color:var(--red);padding:2px 5px">🗑️</button>`:""}
+          <button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:2px 5px" title="Editar">✏️</button>
+          <button class="ev-btn" onclick="deletarTarefa('${t.id}')" style="color:var(--red);padding:2px 5px" title="Excluir">🗑️</button>
         </div>
       </div>`;
     });
@@ -2345,7 +2345,7 @@ function renderArquivo(){
         <div style="font-size:10px;color:var(--text3)">${t.colaborador||"Sem colaborador"} ${t.loja?"· "+t.loja:""}</div>
       </div>
       <button onclick="desarquivarTarefa('${t.id}')" style="font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer">↩ Restaurar</button>
-      ${st.adminMode?`<button onclick="deletarTarefa('${t.id}')" style="font-size:10px;padding:2px 8px;border-radius:6px;border:none;background:#FFEBEE;color:var(--red);cursor:pointer">🗑️</button>`:""}
+      <button onclick="deletarTarefa('${t.id}')" style="font-size:10px;padding:2px 8px;border-radius:6px;border:none;background:#FFEBEE;color:var(--red);cursor:pointer">🗑️</button>
     </div>`).join("")}
   </div>`;
 }
