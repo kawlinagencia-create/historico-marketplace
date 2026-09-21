@@ -301,7 +301,6 @@ tr:hover .edit-row-btn{opacity:1}
     <div class="nav-item" id="nav-checklist" onclick="irParaChecklist()" style="--plat-cor:#1565C0"><span>✅</span>Checklist<span class="nav-count" id="nav-check-count"></span></div>
 
     <div class="nav-item" id="nav-calendar" onclick="irParaCalendario()" style="--plat-cor:#6A1B9A"><span>📅</span>Calendário<span class="nav-count" id="nav-cal-count"></span></div>
-    <div class="nav-item" id="nav-recursos" onclick="irParaRecursos()" style="--plat-cor:#00796B"><span>📚</span>Recursos</div>
     <div class="nav-item" id="nav-config" onclick="irParaConfig()" style="--plat-cor:#37474F"><span>⚙️</span>Configurações</div>
     <div class="sb-section" style="margin-top:.4rem">Plataformas</div>
     <div id="plat-list"></div>
@@ -525,37 +524,6 @@ tr:hover .edit-row-btn{opacity:1}
       <!-- Lista de eventos -->
       <div id="calendario-lista"></div>
     </div>
-    <!-- RECURSOS -->
-    <div class="page" id="page-recursos">
-      <div class="main-header">
-        <div>
-          <div class="main-title">📚 Recursos por Plataforma</div>
-          <div class="main-sub">ferramentas, processos e guias operacionais</div>
-        </div>
-        <button onclick="abrirModalRecurso({})" style="padding:7px 16px;border-radius:7px;border:none;background:#00796B;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Novo recurso</button>
-      </div>
-
-      <!-- Filtros -->
-      <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center">
-        <select id="rec-filter-plat" class="filter-sel" onchange="renderRecursos()">
-          <option value="">Todas plataformas</option>
-          <option value="shopee">Shopee</option><option value="shein">Shein</option>
-          <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
-          <option value="geral">Geral (todas)</option>
-        </select>
-        <select id="rec-filter-cat" class="filter-sel" onchange="renderRecursos()">
-          <option value="">Todas categorias</option>
-          <option value="ferramenta">🔧 Ferramenta</option>
-          <option value="processo">📋 Processo</option>
-          <option value="dica">💡 Dica</option>
-          <option value="politica">📌 Política</option>
-        </select>
-        <input type="text" id="rec-search" class="search-big" placeholder="Buscar recurso..." style="max-width:250px" oninput="renderRecursos()"/>
-      </div>
-
-      <div id="recursos-container"><div class="loading"><span class="spinner"></span>Carregando...</div></div>
-    </div>
-
     <!-- CONFIGURAÇÕES -->
     <div class="page" id="page-config">
       <div class="main-header">
@@ -1316,6 +1284,21 @@ function abrirModalBancoTarefa(prefill={}){
           <option value="quinzenal"${prefill.frequencia==="quinzenal"?" selected":""}>Quinzenal</option>
         </select>
       </div>
+      <div class="modal-field">
+        <label>Atribuir a (opcional)</label>
+        <select id="nb-colab" onchange="document.getElementById('nb-data-wrap').style.display=this.value?'flex':'none';document.getElementById('nb-limite-wrap').style.display=this.value?'flex':'none'">
+          <option value="">Sem atribuição por agora</option>
+          ${COLABORADORES.map(c=>`<option value="${c}"${prefill.colaborador===c?" selected":""}>${c}</option>`).join("")}
+        </select>
+      </div>
+      <div class="modal-field" id="nb-data-wrap" style="${prefill.colaborador?"":"display:none"}">
+        <label>Data da tarefa</label>
+        <input type="date" id="nb-data" value="${prefill.data_tarefa||new Date().toISOString().split('T')[0]}"/>
+      </div>
+      <div class="modal-field" id="nb-limite-wrap" style="${prefill.colaborador?"":"display:none"}">
+        <label>Data limite</label>
+        <input type="date" id="nb-limite" value="${prefill.data_limite||""}"/>
+      </div>
       <div class="modal-field" style="grid-column:1/-1">
         <label>Plataformas (selecione uma ou mais)</label>
         <div id="nb-plats-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
@@ -1334,7 +1317,7 @@ function abrirModalBancoTarefa(prefill={}){
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-banco-tarefa').remove()">Cancelar</button>
-      <button class="modal-btn modal-btn-save" style="background:#00695C" onclick="salvarBancoTarefa()">Salvar no banco</button>
+      <button class="modal-btn modal-btn-save" style="background:#00695C" onclick="salvarBancoTarefa()">Salvar</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);
@@ -1363,10 +1346,13 @@ async function salvarBancoTarefa(){
   const prioridade=document.getElementById("nb-pri").value;
   const frequencia=document.getElementById("nb-freq").value;
   const descricao=document.getElementById("nb-desc").value.trim();
+  const colaborador=document.getElementById("nb-colab")?.value||"";
+  const data_tarefa=document.getElementById("nb-data")?.value||new Date().toISOString().split("T")[0];
+  const data_limite=document.getElementById("nb-limite")?.value||null;
   if(!titulo){showToast("⚠️ Preencha o título");return;}
   if(!loja){showToast("⚠️ Selecione a loja");return;}
   const plataformas=_nbPlatsSelected.length>0?_nbPlatsSelected.join(","):"";
-  const payload={titulo,loja,prioridade,frequencia,descricao,colaborador:"",status_manual:"pendente",plataformas};
+  const payload={titulo,loja,prioridade,frequencia,descricao,colaborador,status_manual:"pendente",plataformas,data_tarefa,data_limite};
   const {data,error}=await sb.from("tarefas").insert(payload).select();
   if(!error&&data){
     TAREFAS.push(data[0]);
