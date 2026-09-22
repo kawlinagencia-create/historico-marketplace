@@ -934,6 +934,11 @@ function renderLojaSelect(){
   sel.innerHTML='<option value="">Selecione a loja...</option>'+platLojas.map(l=>`<option value="${l}">${l}</option>`).join("");
 }
 
+function renderTodosSelects(){
+  renderColabSelect();
+  renderLojaSelect();
+}
+
 // ── NAVEGAÇÃO ──────────────────────────────────────────────────────────────────
 function setNavActive(id){document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));document.getElementById(id)?.classList.add("active");}
 function setPageActive(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id)?.classList.add("active");}
