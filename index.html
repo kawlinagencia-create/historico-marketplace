@@ -650,6 +650,9 @@ function setCSSVars(cor,cor10){
 // ── INICIALIZAR ────────────────────────────────────────────────────────────────
 async function inicializar(){
   try{
+    // Test connection first
+    const {data:testData,error:testError}=await sb.from("historico").select("id").limit(1);
+    if(testError) throw testError;
     await carregarColaboradores();
     await carregarLojas();
     st.geralHistorico=await carregarHistorico();
@@ -659,8 +662,12 @@ async function inicializar(){
     renderSidebar();renderGeralCards();renderGeralTabela();
   }catch(e){
     document.getElementById("sync-dot").className="sync-dot err";
-    document.getElementById("sync-text").textContent="erro de conexão";
-    console.error(e);
+    document.getElementById("sync-text").textContent="erro: "+e.message;
+    console.error("Erro Supabase:",e);
+    // Try to load from cache
+    const saved=localStorage.getItem("colab_cache");
+    if(saved) COLABORADORES=JSON.parse(saved);
+    renderTodosSelects();renderSidebar();
   }
 }
 
@@ -813,9 +820,17 @@ function renderFiltros(){
 function renderTabela(){
   let regs=[...st.historico];
   if(st.lojaSelecionadas.length>0) regs=regs.filter(r=>st.lojaSelecionadas.includes(r.loja));
-  if(st.filtroTipo) regs=regs.filter(r=>r.tipo===st.filtroTipo);
-  const s=document.getElementById("search")?.value.toLowerCase();
-  if(s) regs=regs.filter(r=>r.colaborador.toLowerCase().includes(s));
+  const filtroTipoSel=document.getElementById("filtros-tipo-sel")?.value||st.filtroTipo||"";
+  if(filtroTipoSel) regs=regs.filter(r=>r.tipo===filtroTipoSel);
+  const s=document.getElementById("search")?.value.toLowerCase().trim()||"";
+  if(s) regs=regs.filter(r=>
+    (r.colaborador||"").toLowerCase().includes(s)||
+    (r.tipo||"").toLowerCase().includes(s)||
+    (r.detalhes||"").toLowerCase().includes(s)||
+    (r.antes||"").toLowerCase().includes(s)||
+    (r.depois||"").toLowerCase().includes(s)||
+    (r.loja||"").toLowerCase().includes(s)
+  );
   document.getElementById("count-pill").textContent=regs.length+" registro"+(regs.length!==1?"s":"");
   document.getElementById("tbody").innerHTML=!regs.length
     ?`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum registro</div></div></td></tr>`
