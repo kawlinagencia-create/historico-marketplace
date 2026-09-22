@@ -394,7 +394,10 @@ tr:hover .edit-row-btn{opacity:1}
       </div>
       <div class="filtros-row">
         <span class="filtros-label">Filtrar:</span>
-        <select id="filtros-tipo-sel" class="filter-sel" onchange="renderTabela()" style="font-size:11px;padding:4px 10px"><option value="">Todos os tipos</option></select>
+        <div id="filtro-tipo-wrap" style="position:relative">
+          <input id="filtro-tipo-input" type="text" placeholder="Todos os tipos" autocomplete="off" oninput="abrirFiltroTipoDropdown()" onfocus="abrirFiltroTipoDropdown()" onclick="abrirFiltroTipoDropdown()" style="padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;width:150px;box-sizing:border-box"/>
+          <div id="filtro-tipo-dropdown" style="display:none;position:absolute;z-index:20;left:0;top:100%;min-width:180px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-top:4px;max-height:220px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.12)"></div>
+        </div>
         <input style="padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;width:210px;margin-left:4px" id="search" type="text" placeholder="Buscar colaborador, tipo, loja..." oninput="renderTabela()"/>
       </div>
       <div class="table-card">
@@ -813,16 +816,38 @@ function renderHeader(){
 }
 
 function renderFiltros(){
-  const sel=document.getElementById("filtros-tipo-sel");if(!sel)return;
-  const cur=sel.value;
-  sel.innerHTML=`<option value="">Todos os tipos</option>`
-    +TIPOS_LIST.map(t=>`<option value="${t}"${cur===t?" selected":""}>${t}</option>`).join("");
+  st.filtroTipo="";
+  const inp=document.getElementById("filtro-tipo-input");if(inp) inp.value="";
+  fecharFiltroTipoDropdown();
+}
+
+function renderFiltroTipoDropdown(){
+  const drop=document.getElementById("filtro-tipo-dropdown");
+  if(!drop) return;
+  const search=(document.getElementById("filtro-tipo-input")?.value||"").toLowerCase();
+  const itens=[];
+  if(!search) itens.push("");
+  itens.push(...TIPOS_LIST.filter(t=>!search||t.toLowerCase().includes(search)));
+  drop.innerHTML=itens.map(t=>{
+    const isSel=(st.filtroTipo||"")===t&&t!=="";
+    const label=t===""?"Todos os tipos":t;
+    return`<div onclick="selecionarFiltroTipo('${t}')" style="padding:8px 12px;cursor:pointer;font-size:12px;background:${isSel?"#E3F2FD":"transparent"};color:${t===""?"var(--text3)":"inherit"}">${label}</div>`;
+  }).join("")||`<div style="padding:10px;text-align:center;color:var(--text3);font-size:11px">Nenhum resultado</div>`;
+}
+function abrirFiltroTipoDropdown(){const d=document.getElementById("filtro-tipo-dropdown");if(d){d.style.display="block";renderFiltroTipoDropdown();}}
+function fecharFiltroTipoDropdown(){const d=document.getElementById("filtro-tipo-dropdown");if(d)d.style.display="none";}
+function selecionarFiltroTipo(t){
+  st.filtroTipo=t;
+  const inp=document.getElementById("filtro-tipo-input");
+  if(inp) inp.value=t||"";
+  fecharFiltroTipoDropdown();
+  renderTabela();
 }
 
 function renderTabela(){
   let regs=[...st.historico];
   if(st.lojaSelecionadas.length>0) regs=regs.filter(r=>st.lojaSelecionadas.includes(r.loja));
-  const filtroTipoSel=document.getElementById("filtros-tipo-sel")?.value||st.filtroTipo||"";
+  const filtroTipoSel=st.filtroTipo||"";
   if(filtroTipoSel) regs=regs.filter(r=>r.tipo===filtroTipoSel);
   const s=document.getElementById("search")?.value.toLowerCase().trim()||"";
   if(s) regs=regs.filter(r=>
@@ -852,13 +877,6 @@ function renderTabela(){
         <td>${st.adminMode?`<button class="edit-row-btn" onclick="abrirModalEditar('${r.id}')">✏️</button>`:""}</td>
       </tr>`;
     }).join("");
-}
-
-function filtrarTipo(t){
-  st.filtroTipo=t;
-  const sel=document.getElementById("filtros-tipo-sel");
-  if(sel) sel.value=t;
-  renderTabela();
 }
 
 function renderFormPlats(){
@@ -2699,6 +2717,9 @@ document.addEventListener("mousedown",e=>{
   const drop=document.getElementById("tipos-dropdown");
   const wrap=document.getElementById("tipo-filter-wrap");
   if(drop&&drop.style.display==="block"&&wrap&&!wrap.contains(e.target)) fecharTiposDropdown();
+  const fdrop=document.getElementById("filtro-tipo-dropdown");
+  const fwrap=document.getElementById("filtro-tipo-wrap");
+  if(fdrop&&fdrop.style.display==="block"&&fwrap&&!fwrap.contains(e.target)) fecharFiltroTipoDropdown();
 });
 
 inicializar();
