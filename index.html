@@ -375,8 +375,10 @@ tr:hover .edit-row-btn{opacity:1}
         <div class="field" style="margin-bottom:10px"><label>Plataformas <span id="plat-form-count" style="color:var(--text3);font-weight:400"></span></label>
           <div id="form-plats" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"></div>
         </div>
-        <div class="field" style="margin-bottom:10px"><label>Tipo de alteração <span id="tipo-count" style="color:var(--text3);font-weight:400">(selecione um ou mais)</span></label>
-          <div id="tipos-checkboxes" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px"></div>
+        <div class="field" style="margin-bottom:10px;position:relative"><label>Tipo de alteração <span id="tipo-count" style="color:var(--text3);font-weight:400">(selecione um ou mais)</span></label>
+          <div id="tipos-selecionados" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px"></div>
+          <input id="tipo-search-input" type="text" placeholder="Buscar tipo..." autocomplete="off" oninput="renderTiposCheckboxes()" onfocus="abrirTiposDropdown()" style="margin-top:6px;padding:6px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);width:100%;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12px"/>
+          <div id="tipos-dropdown" style="display:none;position:absolute;z-index:20;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-top:4px;max-height:220px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.12)"></div>
         </div>
         <div class="form-grid-3">
           <div class="field"><label>Antes</label><input id="f-antes" type="text" placeholder="Valor anterior"/></div>
@@ -958,7 +960,7 @@ async function selecionarPlat(id){
   setCSSVars(p.cor,p.cor10);setNavActive("");setPageActive("page-plat");
   document.getElementById("search").value="";
   document.getElementById("tbody").innerHTML=`<tr><td colspan="10"><div class="loading"><span class="spinner"></span>Carregando...</div></td></tr>`;
-  renderTodosSelects();renderSidebar();renderHeader();renderFiltros();
+  renderTodosSelects();renderSidebar();renderHeader();renderFiltros();renderFormPlats();renderTiposCheckboxes();
   setSyncing(true);st.historico=await carregarHistorico(id);setSyncing(false);
   renderTabela();
 }
@@ -2692,6 +2694,12 @@ async function cfgRemoverLoja(plat,nome){
     showToast("✓ Loja removida!");
   }catch(e){setSyncing(false);showToast("⚠️ Erro ao remover");}
 }
+
+document.addEventListener("click",e=>{
+  const drop=document.getElementById("tipos-dropdown");
+  const input=document.getElementById("tipo-search-input");
+  if(drop&&drop.style.display==="block"&&!drop.contains(e.target)&&e.target!==input) fecharTiposDropdown();
+});
 
 inicializar();
 </script>
