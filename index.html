@@ -375,10 +375,10 @@ tr:hover .edit-row-btn{opacity:1}
         <div class="field" style="margin-bottom:10px"><label>Plataformas <span id="plat-form-count" style="color:var(--text3);font-weight:400"></span></label>
           <div id="form-plats" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"></div>
         </div>
-        <div class="field" style="margin-bottom:10px;position:relative"><label>Tipo de alteração <span id="tipo-count" style="color:var(--text3);font-weight:400">(selecione um ou mais)</span></label>
+        <div class="field" id="tipo-filter-wrap" style="margin-bottom:10px;position:relative"><label>Tipo de alteração <span id="tipo-count" style="color:var(--text3);font-weight:400">(selecione um ou mais)</span></label>
           <div id="tipos-selecionados" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px"></div>
-          <input id="tipo-search-input" type="text" placeholder="Buscar tipo..." autocomplete="off" oninput="renderTiposCheckboxes()" onfocus="abrirTiposDropdown()" style="margin-top:6px;padding:6px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);width:100%;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12px"/>
-          <div id="tipos-dropdown" style="display:none;position:absolute;z-index:20;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-top:4px;max-height:220px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.12)"></div>
+          <input id="tipo-search-input" type="text" placeholder="Buscar tipo..." autocomplete="off" oninput="abrirTiposDropdown()" onfocus="abrirTiposDropdown()" onclick="abrirTiposDropdown()" style="margin-top:6px;padding:6px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);width:100%;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12px"/>
+          <div id="tipos-dropdown" style="display:none;position:absolute;z-index:20;left:0;right:0;top:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-top:4px;max-height:220px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.12)"></div>
         </div>
         <div class="form-grid-3">
           <div class="field"><label>Antes</label><input id="f-antes" type="text" placeholder="Valor anterior"/></div>
@@ -394,8 +394,8 @@ tr:hover .edit-row-btn{opacity:1}
       </div>
       <div class="filtros-row">
         <span class="filtros-label">Filtrar:</span>
-        <div id="filtros-tipo"></div>
-        <input style="padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;width:160px;margin-left:4px" id="search" type="text" placeholder="Buscar colaborador..." oninput="renderTabela()"/>
+        <select id="filtros-tipo-sel" class="filter-sel" onchange="renderTabela()" style="font-size:11px;padding:4px 10px"><option value="">Todos os tipos</option></select>
+        <input style="padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;width:210px;margin-left:4px" id="search" type="text" placeholder="Buscar colaborador, tipo, loja..." oninput="renderTabela()"/>
       </div>
       <div class="table-card">
         <div class="table-header"><span class="table-title">Histórico</span><span class="count-pill" id="count-pill">—</span></div>
@@ -2695,10 +2695,10 @@ async function cfgRemoverLoja(plat,nome){
   }catch(e){setSyncing(false);showToast("⚠️ Erro ao remover");}
 }
 
-document.addEventListener("click",e=>{
+document.addEventListener("mousedown",e=>{
   const drop=document.getElementById("tipos-dropdown");
-  const input=document.getElementById("tipo-search-input");
-  if(drop&&drop.style.display==="block"&&!drop.contains(e.target)&&e.target!==input) fecharTiposDropdown();
+  const wrap=document.getElementById("tipo-filter-wrap");
+  if(drop&&drop.style.display==="block"&&wrap&&!wrap.contains(e.target)) fecharTiposDropdown();
 });
 
 inicializar();
