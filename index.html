@@ -1918,7 +1918,7 @@ function renderCalendario(){
           html+='<div class="evento-actions" style="flex-shrink:0">';
           html+='<button class="ev-btn" onclick="abrirModalEvento({id:\''+(e.id||'')+'\',...EVENTOS.find(function(x){return x.id===\''+e.id+'\'})||{}})" style="color:#1565C0">✏️ Editar</button>';
           if(st2==="vencido"||st2==="reagendar") html+='<button class="ev-btn" onclick="reagendarEvento(\''+e.id+'\')" style="background:var(--orange-bg);color:var(--orange);border-color:#FFB74D">🔄 Reagendar</button>';
-          if(st.adminMode) html+='<button class="ev-btn" onclick="deletarEvento(\''+e.id+'\')" style="color:var(--red)">🗑️</button>';
+          html+='<button class="ev-btn" onclick="deletarEvento(\''+e.id+'\')" style="color:var(--red)" title="Excluir agendamento">🗑️ Excluir</button>';
           html+='</div></div></div>';
         });
       });
@@ -1984,6 +1984,7 @@ function abrirModalEvento(prefill={}){
       </div>
     </div>
     <div class="modal-actions">
+      ${prefill.id?`<button class="modal-btn" style="margin-right:auto;background:transparent;color:var(--red);border:1px solid var(--red)" onclick="deletarEvento('${prefill.id}')">🗑️ Excluir</button>`:""}
       <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-evento').remove()">Cancelar</button>
       <button class="modal-btn modal-btn-save" style="background:#6A1B9A" onclick="salvarEvento('${prefill.id||""}')">Salvar</button>
     </div>
@@ -2025,9 +2026,23 @@ function reagendarEvento(id){
 }
 
 async function deletarEvento(id){
-  if(!confirm("Excluir este agendamento?")) return;
-  await sb.from("eventos").delete().eq("id",id);
-  EVENTOS=EVENTOS.filter(e=>e.id!==id);renderCalendario();showToast("✓ Excluído!");
+  if(!id) return;
+  const ev=EVENTOS.find(x=>x.id===id);
+  if(!confirm('Excluir o agendamento "'+(ev?ev.titulo:"")+'"?\nEssa ação não pode ser desfeita.')) return;
+  try{
+    setSyncing(true);
+    const {error}=await sb.from("eventos").delete().eq("id",id);
+    setSyncing(false);
+    if(error) throw error;
+    EVENTOS=EVENTOS.filter(e=>e.id!==id);
+    document.getElementById("modal-evento")?.remove();
+    renderCalendario();
+    showToast("✓ Agendamento excluído!");
+  }catch(err){
+    setSyncing(false);
+    console.error("Erro ao excluir evento:",err);
+    showToast("⚠️ Erro ao excluir agendamento");
+  }
 }
 
 // ── TOAST ──────────────────────────────────────────────────────────────────────
