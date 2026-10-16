@@ -2460,81 +2460,67 @@ function abrirModalRelatorio(){
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-relatorio').remove()">Cancelar</button>
-      <button class="modal-btn modal-btn-save" style="background:#1A237E" onclick="gerarRelatorio()">📄 Gerar e visualizar</button>
+      <button class="modal-btn modal-btn-save" style="background:#1A237E" onclick="gerarRelatorio()">📄 Gerar PDF</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);
   overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
 }
 
-function gerarRelatorio(){
-  const loja=document.getElementById("rel-loja").value;
-  const inicio=document.getElementById("rel-inicio").value;
-  const fim=document.getElementById("rel-fim").value;
-  const obs=document.getElementById("rel-obs").value.trim();
-  if(!loja){showToast("⚠️ Selecione a loja");return;}
-  if(!inicio||!fim){showToast("⚠️ Preencha as datas");return;}
+function escRel(v){
+  return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
 
-  const iniDate=new Date(inicio+"T00:00:00");
-  const fimDate=new Date(fim+"T23:59:59");
-  const registros=st.geralHistorico.filter(r=>{
-    if(r.loja!==loja) return false;
-    const d=new Date(r.created_at);
-    return d>=iniDate&&d<=fimDate;
+function carregarHtml2Pdf(){
+  return new Promise((resolve,reject)=>{
+    if(window.html2pdf) return resolve();
+    const sc=document.createElement("script");
+    sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    sc.onload=()=>resolve();
+    sc.onerror=()=>reject(new Error("Falha ao carregar a biblioteca de PDF"));
+    document.head.appendChild(sc);
   });
+}
 
+function montarRelatorioHtml({loja,iniStr,fimStr,registros,obs}){
   const platMap6=Object.fromEntries(PLATS.map(p=>[p.id,p]));
-  const iniStr=iniDate.toLocaleDateString("pt-BR");
-  const fimStr=fimDate.toLocaleDateString("pt-BR");
-
-  // Group by tipo
   const porTipo={};
   registros.forEach(r=>{
-    if(!porTipo[r.tipo]) porTipo[r.tipo]=[];
-    porTipo[r.tipo].push(r);
+    const t=r.tipo||"—";
+    if(!porTipo[t]) porTipo[t]=[];
+    porTipo[t].push(r);
   });
-
-  // Unique collaborators
   const colabs=[...new Set(registros.map(r=>r.colaborador).filter(Boolean))];
-
-  const html=`<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Relatório — ${loja}</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',Arial,sans-serif;background:#f8f9fa;color:#222;padding:2rem}
-  .container{max-width:800px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-  .header{background:linear-gradient(135deg,#1A237E,#283593);color:#fff;padding:2rem 2.5rem}
-  .header-logo{font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.7;margin-bottom:.5rem}
-  .header-loja{font-size:28px;font-weight:700;letter-spacing:-.5px}
-  .header-periodo{font-size:13px;opacity:.8;margin-top:.4rem}
-  .body{padding:2rem 2.5rem}
-  .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
-  .sum-card{background:#f0f4ff;border-radius:10px;padding:1rem;text-align:center}
-  .sum-num{font-size:32px;font-weight:700;color:#1A237E}
-  .sum-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
-  .section-title{font-size:14px;font-weight:700;color:#1A237E;text-transform:uppercase;letter-spacing:.08em;margin:1.5rem 0 .75rem;padding-bottom:.4rem;border-bottom:2px solid #e8eaf6}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  th{background:#f0f4ff;padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#555}
-  td{padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#333}
-  tr:last-child td{border-bottom:none}
-  tr:hover td{background:#fafafe}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500}
-  .tipo-badge{background:#e8eaf6;color:#3949AB}
-  .plat-badge{color:#fff;font-size:9px;padding:1px 6px;border-radius:999px}
-  .obs-box{background:#fffde7;border-left:4px solid #f9a825;padding:1rem;border-radius:0 8px 8px 0;font-size:13px;color:#555;margin-top:1.5rem}
-  .footer{background:#f0f4ff;padding:1rem 2.5rem;text-align:center;font-size:11px;color:#888;border-top:1px solid #e8eaf6}
-  @media print{body{padding:0;background:#fff}.container{box-shadow:none;border-radius:0}}
+  const agora=new Date();
+  return `<style>
+  .rpt,.rpt *{box-sizing:border-box;margin:0;padding:0}
+  .rpt{width:100%;font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#222}
+  .rpt .container{background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e8eaf6}
+  .rpt .header{background:linear-gradient(135deg,#1A237E,#283593);color:#fff;padding:1.75rem 1.5rem}
+  .rpt .header-logo{font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.75;margin-bottom:.5rem}
+  .rpt .header-loja{font-size:28px;font-weight:700;letter-spacing:-.5px}
+  .rpt .header-periodo{font-size:13px;opacity:.85;margin-top:.4rem}
+  .rpt .body{padding:1.75rem 1.5rem}
+  .rpt .summary{display:flex;gap:1rem;margin-bottom:2rem}
+  .rpt .sum-card{flex:1;background:#f0f4ff;border-radius:10px;padding:1rem;text-align:center}
+  .rpt .sum-num{font-size:32px;font-weight:700;color:#1A237E}
+  .rpt .sum-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+  .rpt .section-title{font-size:14px;font-weight:700;color:#1A237E;text-transform:uppercase;letter-spacing:.08em;margin:1.5rem 0 .75rem;padding-bottom:.4rem;border-bottom:2px solid #e8eaf6}
+  .rpt table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+  .rpt th{background:#f0f4ff;padding:8px 8px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:#555;white-space:nowrap}
+  .rpt td{padding:8px 8px;border-bottom:1px solid #eceef5;color:#333;vertical-align:top;word-break:break-word;overflow-wrap:anywhere}
+  .rpt tr:last-child td{border-bottom:none}
+  .rpt .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500}
+  .rpt .tipo-badge{background:#e8eaf6;color:#3949AB}
+  .rpt .plat-badge{display:inline-block;color:#fff;font-size:9px;padding:2px 7px;border-radius:999px}
+  .rpt .obs-box{background:#fffde7;border-left:4px solid #f9a825;padding:1rem;border-radius:0 8px 8px 0;font-size:13px;color:#555;margin-top:1.5rem;white-space:pre-wrap}
+  .rpt .cell-pre{white-space:pre-wrap}
+  .rpt .footer{background:#f0f4ff;padding:1rem 1.5rem;text-align:center;font-size:11px;color:#888;border-top:1px solid #e8eaf6}
 </style>
-</head>
-<body>
-<div class="container">
+<div class="rpt"><div class="container">
   <div class="header">
     <div class="header-logo">KAWLIN Agência · Relatório de Operações</div>
-    <div class="header-loja">🏪 ${loja}</div>
+    <div class="header-loja">${escRel(loja)}</div>
     <div class="header-periodo">Período: ${iniStr} a ${fimStr}</div>
   </div>
   <div class="body">
@@ -2546,46 +2532,93 @@ function gerarRelatorio(){
 
     <div class="section-title">Resumo por tipo de alteração</div>
     <table>
-      <thead><tr><th>Tipo</th><th>Quantidade</th></tr></thead>
+      <thead><tr><th>Tipo</th><th style="width:120px">Quantidade</th></tr></thead>
       <tbody>
         ${Object.entries(porTipo).sort((a,b)=>b[1].length-a[1].length).map(([tipo,regs])=>`
-        <tr><td><span class="badge tipo-badge">${tipo}</span></td><td><strong>${regs.length}</strong></td></tr>`).join("")}
+        <tr><td><span class="badge tipo-badge">${escRel(tipo)}</span></td><td><strong>${regs.length}</strong></td></tr>`).join("")||`<tr><td colspan="2" style="color:#999">Nenhuma alteração no período</td></tr>`}
       </tbody>
     </table>
 
     <div class="section-title">Detalhamento das alterações</div>
     <table>
-      <thead><tr><th>Data</th><th>Plataforma</th><th>Tipo</th><th>Antes</th><th>Depois</th><th>Colaborador</th></tr></thead>
+      <thead><tr>
+        <th style="width:74px">Data</th><th style="width:80px">Plataforma</th><th style="width:84px">Tipo</th>
+        <th>Detalhes</th><th style="width:76px">Antes</th><th style="width:76px">Depois</th><th style="width:92px">Colaborador</th>
+      </tr></thead>
       <tbody>
         ${registros.map(r=>{
           const pl=platMap6[r.plataforma]||{label:r.plataforma||"—",cor:"#888"};
           const dt=r.data_registro||new Date(r.created_at).toLocaleDateString("pt-BR");
           return`<tr>
-            <td>${dt}</td>
-            <td><span class="plat-badge" style="background:${pl.cor}">${pl.label}</span></td>
-            <td>${r.tipo||"—"}</td>
-            <td style="color:#999;font-size:11px">${r.antes||"—"}</td>
-            <td style="font-size:11px">${r.depois||"—"}</td>
-            <td>${r.colaborador||"—"}</td>
+            <td style="white-space:nowrap;font-size:11px">${escRel(dt)}</td>
+            <td><span class="plat-badge" style="background:${pl.cor}">${escRel(pl.label)}</span></td>
+            <td>${escRel(r.tipo||"—")}</td>
+            <td class="cell-pre" style="font-size:11px;color:#444">${escRel(r.detalhes||"—")}</td>
+            <td class="cell-pre" style="color:#999;font-size:11px">${escRel(r.antes||"—")}</td>
+            <td class="cell-pre" style="font-size:11px">${escRel(r.depois||"—")}</td>
+            <td>${escRel(r.colaborador||"—")}</td>
           </tr>`;
-        }).join("")}
+        }).join("")||`<tr><td colspan="7" style="color:#999">Nenhuma alteração no período</td></tr>`}
       </tbody>
     </table>
 
-    ${obs?`<div class="obs-box"><strong>Observações:</strong><br>${obs}</div>`:""}
+    ${obs?`<div class="obs-box"><strong>Observações:</strong><br>${escRel(obs)}</div>`:""}
   </div>
-  <div class="footer">Relatório gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · KAWLIN Agência</div>
-</div>
-<div style="text-align:center;margin-top:1.5rem">
-  <button onclick="window.print()" style="padding:10px 28px;background:#1A237E;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">📥 Salvar como PDF</button>
-</div>
-<style>@media print{button{display:none!important}body{padding:0;background:#fff}.container{box-shadow:none}}</style>
-</body></html>`;
+  <div class="footer">Relatório gerado em ${agora.toLocaleDateString("pt-BR")} às ${agora.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · KAWLIN Agência</div>
+</div></div>`;
+}
 
-  document.getElementById("modal-relatorio").remove();
-  const w=window.open("","_blank");
-  w.document.write(html);
-  w.document.close();
+async function gerarRelatorio(){
+  const loja=document.getElementById("rel-loja").value;
+  const inicio=document.getElementById("rel-inicio").value;
+  const fim=document.getElementById("rel-fim").value;
+  const obs=document.getElementById("rel-obs").value.trim();
+  if(!loja){showToast("⚠️ Selecione a loja");return;}
+  if(!inicio||!fim){showToast("⚠️ Preencha as datas");return;}
+  if(fim<inicio){showToast("⚠️ A data fim deve ser depois da data início");return;}
+
+  const iniDate=new Date(inicio+"T00:00:00");
+  const fimDate=new Date(fim+"T23:59:59");
+  const registros=st.geralHistorico.filter(r=>{
+    if(r.loja!==loja) return false;
+    const d=new Date(r.created_at);
+    return d>=iniDate&&d<=fimDate;
+  });
+
+  const btn=document.querySelector("#modal-relatorio .modal-btn-save");
+  const txtOriginal=btn?btn.innerHTML:"";
+  if(btn){btn.disabled=true;btn.innerHTML="⏳ Gerando PDF...";}
+
+  const holder=document.createElement("div");
+  holder.style.cssText="position:fixed;left:0;top:0;width:733px;background:#fff;z-index:-1;pointer-events:none";
+  holder.innerHTML=montarRelatorioHtml({
+    loja,
+    iniStr:iniDate.toLocaleDateString("pt-BR"),
+    fimStr:fimDate.toLocaleDateString("pt-BR"),
+    registros,obs
+  });
+  document.body.appendChild(holder);
+
+  try{
+    await carregarHtml2Pdf();
+    const nomeLoja=loja.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9]+/g,"_").replace(/^_|_$/g,"");
+    await html2pdf().set({
+      margin:[10,8,12,8],
+      filename:`Relatorio_${nomeLoja}_${inicio}_a_${fim}.pdf`,
+      image:{type:"jpeg",quality:0.98},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},
+      jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},
+      pagebreak:{mode:["css","legacy"],avoid:["tr",".sum-card",".section-title"]}
+    }).from(holder.querySelector(".rpt")).save();
+    document.getElementById("modal-relatorio")?.remove();
+    showToast("✓ Relatório baixado em PDF!");
+  }catch(err){
+    console.error("Erro ao gerar PDF:",err);
+    showToast("⚠️ Não foi possível gerar o PDF. Tente novamente.");
+    if(btn){btn.disabled=false;btn.innerHTML=txtOriginal;}
+  }finally{
+    holder.remove();
+  }
 }
 
 function showToast(msg){
