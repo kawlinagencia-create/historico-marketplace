@@ -2501,7 +2501,7 @@ function montarRelatorioHtml({loja,iniStr,fimStr,registros,obs}){
   .rpt .header-loja{font-size:28px;font-weight:700;letter-spacing:-.5px}
   .rpt .header-periodo{font-size:13px;opacity:.85;margin-top:.4rem}
   .rpt .body{padding:1.75rem 1.5rem}
-  .rpt .summary{display:flex;gap:1rem;margin-bottom:2rem}
+  .rpt .summary{display:flex;gap:1rem;margin-bottom:1rem}
   .rpt .sum-card{flex:1;background:#f0f4ff;border-radius:10px;padding:1rem;text-align:center}
   .rpt .sum-num{font-size:32px;font-weight:700;color:#1A237E}
   .rpt .sum-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
@@ -2520,7 +2520,7 @@ function montarRelatorioHtml({loja,iniStr,fimStr,registros,obs}){
 <div class="rpt"><div class="container">
   <div class="header">
     <div class="header-logo">KAWLIN Agência · Relatório de Operações</div>
-    <div class="header-loja">${escRel(loja)}</div>
+    <div class="header-loja">🏪 ${escRel(loja)}</div>
     <div class="header-periodo">Período: ${iniStr} a ${fimStr}</div>
   </div>
   <div class="body">
@@ -2529,15 +2529,6 @@ function montarRelatorioHtml({loja,iniStr,fimStr,registros,obs}){
       <div class="sum-card"><div class="sum-num">${Object.keys(porTipo).length}</div><div class="sum-label">Tipos de ação</div></div>
       <div class="sum-card"><div class="sum-num">${colabs.length}</div><div class="sum-label">Colaboradores</div></div>
     </div>
-
-    <div class="section-title">Resumo por tipo de alteração</div>
-    <table>
-      <thead><tr><th>Tipo</th><th style="width:120px">Quantidade</th></tr></thead>
-      <tbody>
-        ${Object.entries(porTipo).sort((a,b)=>b[1].length-a[1].length).map(([tipo,regs])=>`
-        <tr><td><span class="badge tipo-badge">${escRel(tipo)}</span></td><td><strong>${regs.length}</strong></td></tr>`).join("")||`<tr><td colspan="2" style="color:#999">Nenhuma alteração no período</td></tr>`}
-      </tbody>
-    </table>
 
     <div class="section-title">Detalhamento das alterações</div>
     <table>
