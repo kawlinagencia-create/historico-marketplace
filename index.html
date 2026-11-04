@@ -1559,7 +1559,12 @@ function renderChecklist(){
   if(filterFreq) tarefas=tarefas.filter(t=>t.frequencia===filterFreq);
   if(filterStatus) tarefas=tarefas.filter(t=>statusTarefa(t)===filterStatus);
   if(filterPri) tarefas=tarefas.filter(t=>t.prioridade===filterPri);
-  if(filterPeriodo==="hoje") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d.getTime()===hoje.getTime();});
+  if(filterPeriodo==="hoje") tarefas=tarefas.filter(t=>{
+    const d=new Date(t.data_tarefa+"T00:00:00");
+    if(d.getTime()===hoje.getTime()) return true;
+    // tarefa de vários dias (com SKUs ou "onde parei") que ficou pela metade continua aparecendo hoje
+    return d<hoje&&statusTarefa(t)!=="concluido"&&(skusDe(t).length>0||notasDe(t).length>0);
+  });
   else if(filterPeriodo==="semana") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioSemana&&d<=fimSemana;});
   else if(filterPeriodo==="proxima") tarefas=tarefas.filter(t=>{const d=new Date(t.data_tarefa+"T00:00:00");return d>=inicioProx&&d<=fimProx;});
 
@@ -1618,6 +1623,7 @@ function renderChecklist(){
             ${t.criado_por?`<span style="font-size:9px;color:var(--text3)">✍️ criada por ${escRel(t.criado_por)}</span>`:""}
           </div>
           ${skuBlockHtml(t)}
+          ${paradaBlockHtml(t)}
         </div>
         <div style="display:flex;gap:3px;flex-shrink:0;align-items:center">
           ${st2==="concluido"?`<button class="ev-btn" onclick="arquivarTarefa('${t.id}')" title="Arquivar tarefa finalizada" style="color:#00695C;padding:2px 8px;background:#E0F2F1;border-color:#00695C;font-size:10px">📦 Arquivar</button>`:""}
@@ -1680,6 +1686,110 @@ function skuBlockHtml(t){
       </div>`).join("")+`</div>`;
   }
   return h+`</div>`;
+}
+
+// ── ONDE PAROU (recado de continuidade para o dia seguinte) ──────────────────
+function notasDe(t){
+  let v=t&&t.onde_parei;
+  if(typeof v==="string"){try{v=JSON.parse(v);}catch(e){v=[];}}
+  if(!Array.isArray(v)) return [];
+  return v.filter(x=>x&&x.data&&x.texto).sort((a,b)=>String(b.data).localeCompare(String(a.data)));
+}
+
+function rotuloDia(iso){
+  const hoje=hojeLocalISO();
+  const d=new Date(iso+"T00:00:00"),h=new Date(hoje+"T00:00:00");
+  const diff=Math.round((h-d)/86400000);
+  if(diff===0) return "hoje";
+  if(diff===1) return "ontem";
+  return fmtDataSku(iso);
+}
+
+function paradaBlockHtml(t){
+  if(statusTarefa(t)==="concluido") return "";
+  const ult=notasDe(t)[0];
+  if(!ult){
+    return `<div style="margin-top:6px"><span onclick="abrirModalOndeParei('${t.id}')" style="font-size:10px;color:#8D6E00;cursor:pointer;border:1px dashed #F9A825;border-radius:6px;padding:2px 8px;display:inline-block">📍 Registrar onde parei</span></div>`;
+  }
+  const antigo=ult.data<hojeLocalISO();
+  return `<div onclick="abrirModalOndeParei('${t.id}')" title="Clique para atualizar" style="margin-top:6px;background:#FFF8E1;border-left:3px solid #F9A825;border-radius:0 6px 6px 0;padding:5px 8px;cursor:pointer">
+    <div style="font-size:9px;font-weight:600;color:#8D6E00;text-transform:uppercase;letter-spacing:.04em">📍 ${antigo?"Continuar daqui":"Parou em"} · ${rotuloDia(ult.data)}${ult.autor?" · "+escRel(ult.autor):""}</div>
+    <div style="font-size:11px;color:#5D4037;margin-top:2px;white-space:pre-wrap;word-break:break-word">${escRel(ult.texto)}</div>
+  </div>`;
+}
+
+function abrirModalOndeParei(id){
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  document.getElementById("modal-onde-parei")?.remove();
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-onde-parei";
+  overlay.innerHTML=`<div class="modal" style="max-width:460px">
+    <div class="modal-title">📍 Onde parei</div>
+    <div class="modal-sub">${escRel(t.titulo)}${t.loja?" — "+escRel(t.loja):""}</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Dia</label>
+        <input type="date" id="op-data" value="${hojeLocalISO()}" onchange="opPreencher('${t.id}')"/>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Onde você parou? *</label>
+        <textarea id="op-texto" placeholder="Ex: Terminei até o SKU KIT-012. Falta ajustar o fundo da foto 2 do KIT-013." style="min-height:90px"></textarea>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1" id="op-hist"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-onde-parei').remove()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" style="background:#F9A825;color:#3E2723" onclick="salvarOndeParei('${t.id}')">Salvar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  opPreencher(id);
+  setTimeout(()=>document.getElementById("op-texto")?.focus(),50);
+}
+
+function opPreencher(id){
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  const data=document.getElementById("op-data").value;
+  const doDia=notasDe(t).find(n=>n.data===data);
+  document.getElementById("op-texto").value=doDia?doDia.texto:"";
+  const hist=notasDe(t).slice(0,6);
+  document.getElementById("op-hist").innerHTML=hist.length?`<label>Registros anteriores</label>
+    <div style="display:flex;flex-direction:column;gap:4px;max-height:150px;overflow-y:auto">${hist.map(n=>`<div style="display:flex;gap:6px;align-items:flex-start;font-size:11px;background:var(--bg);border-radius:6px;padding:5px 8px">
+      <div style="flex:1;min-width:0"><strong style="color:var(--text2)">${fmtDataSku(n.data)}</strong>${n.autor?` · <span style="color:var(--text3)">${escRel(n.autor)}</span>`:""}<div style="white-space:pre-wrap;word-break:break-word;color:var(--text)">${escRel(n.texto)}</div></div>
+      <span onclick="removerOndeParei('${t.id}','${n.data}')" title="Apagar este registro" style="cursor:pointer;color:var(--red);font-size:13px">×</span></div>`).join("")}</div>`:"";
+}
+
+async function gravarNotas(t,novas){
+  const antes=t.onde_parei;
+  t.onde_parei=novas;
+  renderChecklist();
+  const {error}=await sb.from("tarefas").update({onde_parei:novas}).eq("id",t.id);
+  if(error){
+    console.error(error);
+    t.onde_parei=antes;renderChecklist();
+    showToast("⚠️ Não foi possível salvar (crie a coluna onde_parei no Supabase — veja o SQL)");
+    return false;
+  }
+  return true;
+}
+
+async function salvarOndeParei(id){
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  const data=document.getElementById("op-data").value;
+  const texto=document.getElementById("op-texto").value.trim();
+  if(!data){showToast("⚠️ Informe o dia");return;}
+  if(!texto){showToast("⚠️ Escreva onde você parou");return;}
+  const outras=notasDe(t).filter(n=>n.data!==data);
+  const novas=[{data,texto,autor:t.colaborador||""},...outras];
+  document.getElementById("modal-onde-parei")?.remove();
+  if(await gravarNotas(t,novas)) showToast("📍 Registrado! Amanhã é só continuar daí.");
+}
+
+async function removerOndeParei(id,data){
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  if(!confirm("Apagar este registro?")) return;
+  const ok=await gravarNotas(t,notasDe(t).filter(n=>n.data!==data));
+  if(ok&&document.getElementById("modal-onde-parei")) opPreencher(id);
 }
 
 function hojeLocalISO(){
