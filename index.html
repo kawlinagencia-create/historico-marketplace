@@ -414,9 +414,9 @@ tr:hover .edit-row-btn{opacity:1}
       <div class="main-header">
         <div><div class="main-title">Checklist</div><div class="main-sub">tarefas por loja e por colaborador</div></div>
         <div style="display:flex;gap:8px">
-          <button onclick="abrirModalBancoTarefa({})" style="padding:7px 16px;border-radius:7px;border:1px solid #00695C;background:transparent;color:#00695C;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">🏪 + Tarefa por loja</button>
-          <button onclick="abrirModalTarefa({})" style="padding:7px 16px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">👤 + Atribuir</button>
+          <button onclick="abrirModalBancoTarefa({})" style="padding:7px 16px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Nova tarefa</button>
         </div>
+      </div>
       </div>
 
       <!-- KPIs -->
@@ -451,8 +451,8 @@ tr:hover .edit-row-btn{opacity:1}
           <option value="">Todas frequências</option><option value="diaria">Diária</option><option value="semanal">Semanal</option><option value="quinzenal">Quinzenal</option><option value="unica">Única</option>
         </select>
         <select id="check-filter-status" class="filter-sel" onchange="renderChecklist()">
-          <option value="">Todos os status</option><option value="concluido">✅ Concluído</option>
-          <option value="andamento">🟠 Em andamento</option><option value="atrasado">🔴 Atrasado</option><option value="pendente">⚪ Pendente</option>
+          <option value="">Todos os status</option><option value="concluido">✅ Finalizada</option>
+          <option value="atrasado">🔴 Atrasado</option><option value="pendente">⚪ Pendente</option>
         </select>
         <select id="check-filter-periodo" class="filter-sel" onchange="renderChecklist()">
           <option value="hoje">Hoje</option><option value="semana">Esta semana</option>
@@ -475,10 +475,9 @@ tr:hover .edit-row-btn{opacity:1}
               <option value="mlivre">M. Livre</option><option value="tiktok">TikTok</option>
             </select>
             <select id="banco-filter-status" class="filter-sel" onchange="renderBancoTarefas()" style="font-size:11px">
-              <option value="">Pendentes (oculta concluídas)</option>
+              <option value="">Pendentes (oculta finalizadas)</option>
               <option value="pendente">⚪ Pendente</option>
-              <option value="andamento">🟠 Em andamento</option>
-              <option value="concluido">✅ Concluído</option>
+              <option value="concluido">✅ Finalizada</option>
               <option value="atrasado">🔴 Atrasado</option>
             </select>
           </div>
@@ -1229,7 +1228,7 @@ function renderBancoTarefas(){
           ${platsLoja.map(p=>`<span style="font-size:9px;padding:1px 6px;border-radius:999px;background:${platMap4[p]?.cor||'#888'};color:${platMap4[p]?.fc||'#fff'};font-weight:600">${platMap4[p]?.label||p}</span>`).join("")}
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;color:var(--text3)">${tarefas.filter(t=>statusTarefa(t)==="atrasado").length>0?`<span style="color:var(--red);font-weight:600">⚠️ ${tarefas.filter(t=>statusTarefa(t)==="atrasado").length} atrasada</span> · `:""} ${tarefas.filter(t=>statusTarefa(t)==="concluido").length}/${tarefas.length} concluída${tarefas.length!==1?"s":""}</span>
+          <span style="font-size:11px;color:var(--text3)">${tarefas.filter(t=>statusTarefa(t)==="atrasado").length>0?`<span style="color:var(--red);font-weight:600">⚠️ ${tarefas.filter(t=>statusTarefa(t)==="atrasado").length} atrasada</span> · `:""} ${tarefas.filter(t=>statusTarefa(t)==="concluido").length}/${tarefas.length} finalizada${tarefas.length!==1?"s":""}</span>
           <span id="banco-arrow-${loja.replace(/\s/g,"_").replace(/'/g,"_")}">▼</span>
         </div>
       </div>
@@ -1241,9 +1240,10 @@ function renderBancoTarefas(){
           : tarefas.map(t=>{
           const priIcon={alta:"🔴",media:"🟡",baixa:"🟢"};
           const st2=statusTarefa(t);
-          const corSt2={concluido:"var(--green)",andamento:"var(--orange)",atrasado:"var(--red)",pendente:"var(--text3)"};
-          const iconSt2={concluido:"✅",andamento:"🟠",atrasado:"🔴",pendente:"⚪"};
-          const labelSt2={concluido:"Concluído",andamento:"Em andamento",atrasado:"Atrasado",pendente:"Pendente"};
+          const corSt2={concluido:"var(--green)",atrasado:"var(--red)",pendente:"var(--text3)"};
+          const iconSt2={concluido:"✅",atrasado:"🔴",pendente:"⚪"};
+          const labelSt2={concluido:"Finalizada",atrasado:"Atrasado",pendente:"Pendente"};
+          const skT=skusDe(t),skFeitos=skT.filter(x=>x.feito).length;
           return`<div class="banco-task-row" style="${st2==="atrasado"?"background:#FFF8F8;border-left:3px solid var(--red)":st2==="concluido"?"opacity:.7":""}">
             <span style="font-size:14px">${priIcon[t.prioridade]||"⚪"}</span>
             <div style="flex:1">
@@ -1254,7 +1254,8 @@ function renderBancoTarefas(){
                 ${t.plataformas?t.plataformas.split(",").filter(Boolean).map(pid=>{const pp=PLATS.find(x=>x.id===pid);return pp?`<span style="font-size:9px;padding:1px 5px;border-radius:999px;background:${pp.cor};color:${pp.fc||'#fff'};font-weight:600">${pp.label}</span>`:""}).join(""):""}
                 ${t.colaborador?`<span style="font-size:10px;color:var(--text3);display:inline-flex;align-items:center;gap:3px"><span style="width:14px;height:14px;border-radius:50%;background:#E3F2FD;color:#1565C0;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">${t.colaborador.charAt(0)}</span>${t.colaborador}</span>`
                 :`<span style="font-size:10px;color:var(--orange)">Não atribuído</span>`}
-                ${t.data_limite?`<span style="font-size:10px;color:${new Date(t.data_limite+"T00:00:00")<new Date()?"var(--red)":"var(--orange)"};font-weight:500">⏰ ${new Date(t.data_limite+"T00:00:00").toLocaleDateString("pt-BR")}</span>`:""}
+                ${skT.length?`<span style="font-size:10px;color:${skFeitos===skT.length?"var(--green)":"var(--orange)"};font-weight:600">📦 ${skFeitos}/${skT.length} SKUs</span>`:""}
+                ${t.criado_por?`<span style="font-size:10px;color:var(--text3)">✍️ ${escRel(t.criado_por)}</span>`:""}
               </div>
             </div>
             <span style="font-size:10px;padding:2px 7px;border-radius:999px;background:${corSt2[st2]}22;color:${corSt2[st2]};font-weight:500;white-space:nowrap">${iconSt2[st2]} ${labelSt2[st2]}</span>
@@ -1282,22 +1283,6 @@ function editarTarefa(id){
   if(t) abrirModalTarefa(t);
 }
 
-function preencherDoBanco(id){
-  if(!id) return;
-  const t=TAREFAS.find(x=>x.id===id);if(!t)return;
-  const titulo=document.getElementById("nt-titulo");
-  const desc=document.getElementById("nt-desc");
-  const loja=document.getElementById("nt-loja");
-  const pri=document.getElementById("nt-pri");
-  const freq=document.getElementById("nt-freq");
-  if(titulo) titulo.value=t.titulo||"";
-  if(desc) desc.value=t.descricao||"";
-  if(loja) loja.value=t.loja||"";
-  if(pri) pri.value=t.prioridade||"media";
-  if(freq) freq.value=t.frequencia||"unica";
-  showToast("✓ Dados preenchidos do banco!");
-}
-
 async function deletarTarefaBanco(id){
   if(!confirm("Excluir esta tarefa?")) return;
   await sb.from("tarefas").delete().eq("id",id);
@@ -1308,33 +1293,61 @@ async function deletarTarefaBanco(id){
 function atribuirTarefa(id){
   const t=TAREFAS.find(x=>x.id===id);if(!t)return;
   // Atualiza a MESMA tarefa (não cria uma nova) — evita duplicação
-  abrirModalTarefa({...t,_modoAtribuir:true});
+  abrirModalBancoTarefa({...t});
+}
+
+let _nbPlatsSelected=[];
+let _nbSkus=[];
+
+function skusDe(t){
+  let v=t&&t.skus;
+  if(typeof v==="string"){try{v=JSON.parse(v);}catch(e){v=[];}}
+  if(!Array.isArray(v)) return [];
+  return v.map(x=>typeof x==="string"?{sku:x,feito:false}:{sku:String(x.sku||""),feito:!!x.feito}).filter(x=>x.sku);
 }
 
 function abrirModalBancoTarefa(prefill={}){
-  _nbPlatsSelected=prefill.plataformas?prefill.plataformas.split(",").filter(Boolean):[];
+  document.getElementById("modal-banco-tarefa")?.remove();
+  _nbPlatsSelected=prefill.plataformas?String(prefill.plataformas).split(",").filter(Boolean):[];
+  _nbSkus=skusDe(prefill).map(x=>({...x}));
+  let ultimoCriador="";
+  try{ultimoCriador=localStorage.getItem("ultimo_criador_tarefa")||"";}catch(e){}
+  const criador=prefill.criado_por||ultimoCriador;
+  const editando=!!prefill.id;
   const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-banco-tarefa";
   const allLojas=[...new Set(Object.values(st.lojas).flat())].sort();
+  const optColab=(sel)=>COLABORADORES.map(c=>`<option value="${escRel(c)}"${sel===c?" selected":""}>${escRel(c)}</option>`).join("");
   overlay.innerHTML=`<div class="modal">
-    <div class="modal-title">🏪 Tarefa por loja</div>
-    <div class="modal-sub">Adicione uma tarefa ao banco — atribua a um colaborador depois</div>
+    <div class="modal-title">${editando?"✏️ Editar tarefa":"📝 Nova tarefa"}</div>
+    <div class="modal-sub">Informe quem está criando, para quem é a tarefa e, se for o caso, a lista de SKUs</div>
     <div class="modal-grid">
       <div class="modal-field" style="grid-column:1/-1">
         <label>Título da tarefa *</label>
-        <input id="nb-titulo" value="${prefill.titulo||""}" placeholder="Ex: Atualizar fotos de capa"/>
+        <input id="nb-titulo" value="${escRel(prefill.titulo||"")}" placeholder="Ex: Finalização das fotos 1ª e 2ª"/>
       </div>
       <div class="modal-field" style="grid-column:1/-1">
         <label>Descrição</label>
-        <textarea id="nb-desc" placeholder="Detalhes da tarefa...">${prefill.descricao||""}</textarea>
+        <textarea id="nb-desc" placeholder="Detalhes da tarefa...">${escRel(prefill.descricao||"")}</textarea>
+      </div>
+      <div class="modal-field">
+        <label>Criada por *</label>
+        <select id="nb-criador"><option value="">Quem está criando...</option>${optColab(criador)}</select>
+      </div>
+      <div class="modal-field">
+        <label>Para quem é a tarefa</label>
+        <select id="nb-colab" onchange="document.getElementById('nb-data-wrap').style.display=this.value?'flex':'none'">
+          <option value="">Sem atribuição por agora</option>
+          ${optColab(prefill.colaborador||"")}
+        </select>
       </div>
       <div class="modal-field">
         <label>Loja *</label>
-        <select id="nb-loja"><option value="">Selecione...</option>${allLojas.map(l=>`<option value="${l}"${prefill.loja===l?" selected":""}>${l}</option>`).join("")}</select>
+        <select id="nb-loja"><option value="">Selecione...</option>${allLojas.map(l=>`<option value="${escRel(l)}"${prefill.loja===l?" selected":""}>${escRel(l)}</option>`).join("")}</select>
       </div>
       <div class="modal-field">
         <label>Prioridade</label>
         <select id="nb-pri">
-          <option value="media"${prefill.prioridade==="media"?" selected":""}>🟡 Média</option>
+          <option value="media"${(prefill.prioridade||"media")==="media"?" selected":""}>🟡 Média</option>
           <option value="alta"${prefill.prioridade==="alta"?" selected":""}>🔴 Alta</option>
           <option value="baixa"${prefill.prioridade==="baixa"?" selected":""}>🟢 Baixa</option>
         </select>
@@ -1342,32 +1355,31 @@ function abrirModalBancoTarefa(prefill={}){
       <div class="modal-field">
         <label>Frequência</label>
         <select id="nb-freq">
-          <option value="unica"${prefill.frequencia==="unica"?" selected":""}>Única</option>
+          <option value="unica"${(!prefill.frequencia||prefill.frequencia==="unica")?" selected":""}>Única</option>
           <option value="diaria"${prefill.frequencia==="diaria"?" selected":""}>Diária</option>
           <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>Semanal</option>
           <option value="quinzenal"${prefill.frequencia==="quinzenal"?" selected":""}>Quinzenal</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Atribuir a (opcional)</label>
-        <select id="nb-colab" onchange="document.getElementById('nb-data-wrap').style.display=this.value?'flex':'none';document.getElementById('nb-limite-wrap').style.display=this.value?'flex':'none'">
-          <option value="">Sem atribuição por agora</option>
-          ${COLABORADORES.map(c=>`<option value="${c}"${prefill.colaborador===c?" selected":""}>${c}</option>`).join("")}
         </select>
       </div>
       <div class="modal-field" id="nb-data-wrap" style="${prefill.colaborador?"":"display:none"}">
         <label>Data da tarefa</label>
         <input type="date" id="nb-data" value="${prefill.data_tarefa||new Date().toISOString().split('T')[0]}"/>
       </div>
-      <div class="modal-field" id="nb-limite-wrap" style="${prefill.colaborador?"":"display:none"}">
-        <label>Data limite</label>
-        <input type="date" id="nb-limite" value="${prefill.data_limite||""}"/>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>SKUs <span id="nb-sku-count" style="font-weight:400;color:var(--text3)"></span></label>
+        <textarea id="nb-sku-input" rows="2" placeholder="Digite um SKU e tecle Enter — ou cole vários (um por linha, ou separados por vírgula)" style="min-height:44px" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();nbAddSku();}"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+          <button type="button" onclick="nbAddSku()" style="font-size:11px;color:#00695C;background:transparent;border:1px dashed #00695C;border-radius:6px;padding:3px 12px;cursor:pointer;font-family:'DM Sans',sans-serif">+ Adicionar SKU</button>
+          <button type="button" id="nb-sku-clear" onclick="nbLimparSkus()" style="font-size:10px;color:var(--text3);background:transparent;border:none;cursor:pointer;display:none">Limpar todos</button>
+        </div>
+        <div id="nb-skus-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">O progresso da tarefa avança conforme cada SKU for marcado como finalizado no Checklist.</div>
       </div>
       <div class="modal-field" style="grid-column:1/-1">
         <label>Plataformas (selecione uma ou mais)</label>
         <div id="nb-plats-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
           ${PLATS.map(p=>{
-            const sel=(prefill.plataformas||[]).includes(p.id);
+            const sel=_nbPlatsSelected.includes(p.id);
             return`<button type="button" id="nb-plat-${p.id}" onclick="toggleNbPlat('${p.id}')" style="
               padding:4px 12px;border-radius:999px;font-size:11px;font-weight:500;
               border:1.5px solid ${sel?p.cor:"var(--border)"};
@@ -1381,14 +1393,39 @@ function abrirModalBancoTarefa(prefill={}){
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-banco-tarefa').remove()">Cancelar</button>
-      <button class="modal-btn modal-btn-save" style="background:#00695C" onclick="salvarBancoTarefa()">Salvar</button>
+      <button class="modal-btn modal-btn-save" style="background:#00695C" onclick="salvarBancoTarefa('${editando?prefill.id:""}')">Salvar</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);
   overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  nbRenderSkus();
 }
 
-let _nbPlatsSelected=[];
+function nbRenderSkus(){
+  const box=document.getElementById("nb-skus-list");if(!box)return;
+  box.innerHTML=_nbSkus.map((x,i)=>`<span style="display:inline-flex;align-items:center;gap:5px;background:${x.feito?"#E8F5E9":"#E3F2FD"};color:${x.feito?"#2E7D32":"#1565C0"};border-radius:999px;padding:3px 6px 3px 10px;font-size:11px;font-weight:500">${x.feito?"✓ ":""}${escRel(x.sku)}<span onclick="nbRemoverSku(${i})" title="Remover" style="cursor:pointer;font-size:14px;line-height:1;padding:0 3px">×</span></span>`).join("");
+  const c=document.getElementById("nb-sku-count");
+  if(c) c.textContent=_nbSkus.length?`(${_nbSkus.length} adicionado${_nbSkus.length>1?"s":""})`:"(opcional)";
+  const clr=document.getElementById("nb-sku-clear");
+  if(clr) clr.style.display=_nbSkus.length>1?"":"none";
+}
+
+function nbAddSku(){
+  const inp=document.getElementById("nb-sku-input");if(!inp)return;
+  const novos=inp.value.split(/[\n\r,;\t]+/).map(x=>x.trim()).filter(Boolean);
+  let dup=0;
+  novos.forEach(sku=>{
+    if(_nbSkus.some(x=>x.sku.toLowerCase()===sku.toLowerCase())){dup++;return;}
+    _nbSkus.push({sku,feito:false});
+  });
+  inp.value="";
+  nbRenderSkus();
+  if(dup) showToast(`⚠️ ${dup} SKU${dup>1?"s":""} já estava${dup>1?"m":""} na lista`);
+  inp.focus();
+}
+
+function nbRemoverSku(i){_nbSkus.splice(i,1);nbRenderSkus();}
+function nbLimparSkus(){if(_nbSkus.length&&confirm("Remover todos os SKUs da lista?")){_nbSkus=[];nbRenderSkus();}}
 
 function toggleNbPlat(platId){
   const idx=_nbPlatsSelected.indexOf(platId);
@@ -1404,57 +1441,86 @@ function toggleNbPlat(platId){
   }
 }
 
-async function salvarBancoTarefa(){
+async function salvarBancoTarefa(idExistente=""){
+  // SKU digitado e ainda não adicionado entra junto
+  if((document.getElementById("nb-sku-input")?.value||"").trim()) nbAddSku();
   const titulo=document.getElementById("nb-titulo").value.trim();
   const loja=document.getElementById("nb-loja").value;
   const prioridade=document.getElementById("nb-pri").value;
   const frequencia=document.getElementById("nb-freq").value;
   const descricao=document.getElementById("nb-desc").value.trim();
+  const criado_por=document.getElementById("nb-criador").value;
   const colaborador=document.getElementById("nb-colab")?.value||"";
   const data_tarefa=document.getElementById("nb-data")?.value||new Date().toISOString().split("T")[0];
-  const data_limite=document.getElementById("nb-limite")?.value||null;
   if(!titulo){showToast("⚠️ Preencha o título");return;}
+  if(!criado_por){showToast("⚠️ Informe quem está criando a tarefa");return;}
   if(!loja){showToast("⚠️ Selecione a loja");return;}
   const plataformas=_nbPlatsSelected.length>0?_nbPlatsSelected.join(","):"";
-  const payload={titulo,loja,prioridade,frequencia,descricao,colaborador,status_manual:"pendente",plataformas,data_tarefa,data_limite};
-  const {data,error}=await sb.from("tarefas").insert(payload).select();
-  if(!error&&data){
-    TAREFAS.push(data[0]);
-    _nbPlatsSelected=[];
+  const skus=_nbSkus.map(x=>({sku:x.sku,feito:!!x.feito}));
+  const payload={titulo,loja,prioridade,frequencia,descricao,colaborador,criado_por,plataformas,data_tarefa,skus};
+  try{localStorage.setItem("ultimo_criador_tarefa",criado_por);}catch(e){}
+  const erroColuna=(error)=>{
+    console.error(error);
+    const msg=((error&&(error.message||""))+" "+(error&&(error.details||""))).toLowerCase();
+    showToast(msg.includes("skus")||msg.includes("criado_por")?"⚠️ Falta criar as colunas skus e criado_por no Supabase (veja o SQL enviado)":"⚠️ Erro ao salvar");
+  };
+
+  if(idExistente){
+    const atual=TAREFAS.find(t=>t.id===idExistente);
+    // Status acompanha os SKUs: tudo marcado = finalizada
+    if(skus.length) payload.status_manual=skus.every(x=>x.feito)?"concluido":"pendente";
+    else if(atual&&skusDe(atual).length&&atual.status_manual==="concluido") payload.status_manual="pendente";
+    const {error}=await sb.from("tarefas").update(payload).eq("id",idExistente);
+    if(error){erroColuna(error);return;}
+    const idx=TAREFAS.findIndex(t=>t.id===idExistente);
+    if(idx>=0) TAREFAS[idx]={...TAREFAS[idx],...payload};
     document.getElementById("modal-banco-tarefa").remove();
-    renderBancoTarefas();renderChecklist();
-    showToast("✓ Tarefa adicionada ao banco!");
-  } else showToast("⚠️ Erro ao salvar");
+    _nbPlatsSelected=[];_nbSkus=[];
+    renderCheckKPIs();renderBancoTarefas();renderChecklist();
+    showToast("✓ Tarefa atualizada!");
+    return;
+  }
+  payload.status_manual="pendente";
+  const {data,error}=await sb.from("tarefas").insert(payload).select();
+  if(error||!data){erroColuna(error);return;}
+  TAREFAS.push(data[0]);
+  TAREFAS.sort((a,b)=>(a.data_tarefa||"").localeCompare(b.data_tarefa||""));
+  _nbPlatsSelected=[];_nbSkus=[];
+  document.getElementById("modal-banco-tarefa").remove();
+  renderCheckKPIs();renderBancoTarefas();renderChecklist();
+  showToast("✓ Tarefa criada!");
 }
 
 function statusTarefa(t){
-  if(t.status_manual) return t.status_manual;
+  const sk=skusDe(t);
+  if(sk.length) return sk.every(x=>x.feito)?"concluido":"pendente";
+  const m=t.status_manual;
+  if(m==="andamento") return "pendente"; // "Em andamento" foi removido
+  if(m) return m;
   const hoje=new Date();hoje.setHours(0,0,0,0);
   const dataTarefa=new Date(t.data_tarefa+"T00:00:00");
   if(hoje>dataTarefa) return"atrasado";
   return"pendente";
 }
 
-function renderLimite(data_limite){
-  if(!data_limite) return "";
-  const d=new Date(data_limite+"T00:00:00");
-  const vencido=d<new Date();
-  const fmt=d.toLocaleDateString("pt-BR");
-  return`<span style="color:${vencido?"var(--red)":"var(--orange)"};font-weight:500">⏰ Limite: ${fmt}</span>`;
+// 0..1 — com SKUs, avança a cada SKU finalizado; sem SKUs é tudo ou nada
+function progressoTarefa(t){
+  const sk=skusDe(t);
+  if(sk.length) return sk.filter(x=>x.feito).length/sk.length;
+  return statusTarefa(t)==="concluido"?1:0;
 }
 
 function renderCheckKPIs(){
   const el=document.getElementById("check-kpis");if(!el)return;
-  const total=TAREFAS.length;
-  const concluidas=TAREFAS.filter(t=>statusTarefa(t)==="concluido").length;
-  const atrasadas=TAREFAS.filter(t=>statusTarefa(t)==="atrasado").length;
-  const andamento=TAREFAS.filter(t=>statusTarefa(t)==="andamento").length;
-  const pendentes=TAREFAS.filter(t=>statusTarefa(t)==="pendente").length;
+  const ativas=TAREFAS;
+  const total=ativas.length;
+  const concluidas=ativas.filter(t=>statusTarefa(t)==="concluido").length;
+  const atrasadas=ativas.filter(t=>statusTarefa(t)==="atrasado").length;
+  const pendentes=ativas.filter(t=>statusTarefa(t)==="pendente").length;
   const pct=total>0?Math.round(concluidas/total*100):0;
   el.innerHTML=[
     {n:total,l:"Total de tarefas",c:"var(--text2)",s:""},
-    {n:concluidas,l:"Concluídas",c:"var(--green)",s:pct+"% do total"},
-    {n:andamento,l:"Em andamento",c:"var(--orange)",s:""},
+    {n:concluidas,l:"Finalizadas",c:"var(--green)",s:pct+"% do total"},
     {n:atrasadas,l:"Atrasadas",c:"var(--red)",s:atrasadas>0?"⚠️ Atenção":""},
     {n:pendentes,l:"Pendentes",c:"var(--text3)",s:""},
   ].map(k=>`<div class="kpi-card">
@@ -1504,7 +1570,7 @@ function renderChecklist(){
     alertasEl.innerHTML=atrasadas.length?`<div class="alerta-box alerta-err">
       <span>⚠️</span>
       <div><strong>${atrasadas.length} tarefa${atrasadas.length>1?"s atrasadas":" atrasada"}!</strong>
-      ${atrasadas.map(t=>`<br>• <strong>${t.titulo}</strong> — ${t.colaborador} | Limite: ${t.data_limite?new Date(t.data_limite+"T00:00:00").toLocaleDateString("pt-BR"):"sem data limite"}`).join("")}</div>
+      ${atrasadas.map(t=>`<br>• <strong>${escRel(t.titulo)}</strong> — ${escRel(t.colaborador)} | Data: ${t.data_tarefa?new Date(t.data_tarefa+"T00:00:00").toLocaleDateString("pt-BR"):"—"}`).join("")}</div>
     </div>`:"";
   }
   const navCount=document.getElementById("nav-check-count");
@@ -1522,9 +1588,8 @@ function renderChecklist(){
   let html=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:start">`;
   colabs.forEach(function(colab){
     const items=porColab[colab].sort((a,b)=>(a.data_tarefa||"").localeCompare(b.data_tarefa||""));
-    const concluidas=items.filter(t=>statusTarefa(t)==="concluido").length;
     const atrasadasColab=items.filter(t=>statusTarefa(t)==="atrasado").length;
-    const pct=items.length>0?Math.round(concluidas/items.length*100):0;
+    const pct=items.length>0?Math.round(items.reduce((acc,t)=>acc+progressoTarefa(t),0)/items.length*100):0;
     const cor=atrasadasColab>0?"var(--red)":pct===100?"var(--green)":"var(--orange)";
 
     html+=`<div class="colab-section" style="margin-bottom:0">
@@ -1539,24 +1604,23 @@ function renderChecklist(){
 
     items.forEach(function(t){
       const st2=statusTarefa(t);
-      const dataLimite=t.data_limite?new Date(t.data_limite+"T00:00:00"):null;
-      const limiteVencido=dataLimite&&dataLimite<hoje;
       const dataT=t.data_tarefa?new Date(t.data_tarefa+"T00:00:00"):null;
       const isHoje=dataT&&dataT.getTime()===hoje.getTime();
-      const checkIcon=st2==="concluido"?"✓":st2==="andamento"?"◑":st2==="atrasado"?"!":"○";
-      const corFundo=st2==="concluido"?"var(--green-bg)":st2==="atrasado"?"var(--red-bg)":st2==="andamento"?"var(--orange-bg)":"transparent";
-      html+=`<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;margin-bottom:4px;border-radius:8px;background:${corFundo};border-left:3px solid ${st2==="concluido"?"var(--green)":st2==="atrasado"?"var(--red)":st2==="andamento"?"var(--orange)":"var(--border2)"}">
-        <div class="task-check ${st2}" onclick="ciclarStatusTarefa('${t.id}')" title="Clique para alterar status" style="margin-top:1px;flex-shrink:0">${checkIcon}</div>
+      const checkIcon=st2==="concluido"?"✓":st2==="atrasado"?"!":"○";
+      const corFundo=st2==="concluido"?"var(--green-bg)":st2==="atrasado"?"var(--red-bg)":"transparent";
+      html+=`<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;margin-bottom:4px;border-radius:8px;background:${corFundo};border-left:3px solid ${st2==="concluido"?"var(--green)":st2==="atrasado"?"var(--red)":"var(--border2)"}">
+        <div class="task-check ${st2}" onclick="ciclarStatusTarefa('${t.id}')" title="${skusDe(t).length?"Ver SKUs":st2==="concluido"?"Reabrir tarefa":"Marcar como finalizada"}" style="margin-top:1px;flex-shrink:0">${checkIcon}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:500;color:var(--text);${st2==="concluido"?"text-decoration:line-through;color:var(--text3)":""}">${priBadge(t.prioridade)} ${t.titulo}</div>
+          <div style="font-size:12px;font-weight:500;color:var(--text);${st2==="concluido"?"text-decoration:line-through;color:var(--text3)":""}">${priBadge(t.prioridade)} ${escRel(t.titulo)}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;align-items:center">
-            ${t.loja?`<span style="font-size:9px;color:var(--text3)">🏪 ${t.loja}</span>`:""}
+            ${t.loja?`<span style="font-size:9px;color:var(--text3)">🏪 ${escRel(t.loja)}</span>`:""}
             ${isHoje?`<span style="font-size:9px;color:var(--plat-cor);font-weight:600">📌 HOJE</span>`:dataT?`<span style="font-size:9px;color:var(--text3)">${dataT.toLocaleDateString("pt-BR")}</span>`:""}
-            ${dataLimite?`<span style="font-size:9px;font-weight:500;color:${limiteVencido?"var(--red)":"var(--orange)"}">⏰ ${dataLimite.toLocaleDateString("pt-BR")}</span>`:""}
+            ${t.criado_por?`<span style="font-size:9px;color:var(--text3)">✍️ criada por ${escRel(t.criado_por)}</span>`:""}
           </div>
+          ${skuBlockHtml(t)}
         </div>
         <div style="display:flex;gap:3px;flex-shrink:0;align-items:center">
-          ${st2==="concluido"?`<button class="ev-btn" onclick="arquivarTarefa('${t.id}')" title="Arquivar tarefa concluída" style="color:#00695C;padding:2px 8px;background:#E0F2F1;border-color:#00695C;font-size:10px">📦 Arquivar</button>`:""}
+          ${st2==="concluido"?`<button class="ev-btn" onclick="arquivarTarefa('${t.id}')" title="Arquivar tarefa finalizada" style="color:#00695C;padding:2px 8px;background:#E0F2F1;border-color:#00695C;font-size:10px">📦 Arquivar</button>`:""}
           <button class="ev-btn" onclick="editarTarefa('${t.id}')" style="color:#1565C0;padding:2px 5px" title="Editar">✏️</button>
           <button class="ev-btn" onclick="deletarTarefa('${t.id}')" style="color:var(--red);padding:2px 5px" title="Excluir">🗑️</button>
         </div>
@@ -1570,16 +1634,66 @@ function renderChecklist(){
   container.innerHTML=html;
 }
 
+// Tarefa sem SKUs: alterna Pendente ⇄ Finalizada. Com SKUs: abre/fecha a lista.
 async function ciclarStatusTarefa(id){
-  const t=TAREFAS.find(x=>x.id===id);if(!t) return;
-  const atual=statusTarefa(t);
-  const ciclo={"pendente":"andamento","andamento":"concluido","concluido":"pendente","atrasado":"andamento"};
-  const novoStatus=ciclo[atual]||"andamento";
-  const {error}=await sb.from("tarefas").update({status_manual:novoStatus}).eq("id",id);
-  if(!error){t.status_manual=novoStatus;renderChecklist();renderBancoTarefas();
-    const labels={andamento:"Em andamento",concluido:"Concluído",pendente:"Pendente"};
-    showToast(`→ ${labels[novoStatus]||novoStatus}`);
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  if(skusDe(t).length){toggleSkuLista(id);return;}
+  const novoStatus=statusTarefa(t)==="concluido"?"pendente":"concluido";
+  const {error}=await sb.from("tarefas").update({status_manual:novoStatus}).eq("id",t.id);
+  if(!error){t.status_manual=novoStatus;renderCheckKPIs();renderChecklist();renderBancoTarefas();
+    showToast(novoStatus==="concluido"?"✓ Tarefa finalizada":"→ Tarefa reaberta");
+  } else showToast("⚠️ Erro ao atualizar");
+}
+
+const _skuAbertos=new Set();
+function toggleSkuLista(id){
+  const k=String(id);
+  if(_skuAbertos.has(k)) _skuAbertos.delete(k); else _skuAbertos.add(k);
+  renderChecklist();
+}
+
+function skuBlockHtml(t){
+  const sk=skusDe(t);
+  if(!sk.length) return "";
+  const feitos=sk.filter(x=>x.feito).length;
+  const pct=Math.round(feitos/sk.length*100);
+  const aberto=_skuAbertos.has(String(t.id));
+  const cor=pct===100?"var(--green)":"var(--orange)";
+  let h=`<div style="margin-top:6px">
+    <div style="display:flex;align-items:center;gap:6px;cursor:pointer" onclick="toggleSkuLista('${t.id}')" title="Mostrar/ocultar SKUs">
+      <div class="progress-bar" style="flex:1;height:5px"><div class="progress-fill" style="width:${pct}%;background:${cor}"></div></div>
+      <span style="font-size:10px;font-weight:600;color:${cor};white-space:nowrap">${feitos}/${sk.length} SKUs · ${pct}%</span>
+      <span style="font-size:9px;color:var(--text3)">${aberto?"▲":"▼"}</span>
+    </div>`;
+  if(aberto){
+    h+=`<div style="margin-top:6px;display:flex;flex-direction:column;gap:2px;max-height:240px;overflow-y:auto">`+
+      sk.map((x,i)=>`<label style="display:flex;align-items:center;gap:7px;padding:3px 4px;border-radius:5px;cursor:pointer;font-size:11px;color:${x.feito?"var(--text3)":"var(--text)"};${x.feito?"text-decoration:line-through;":""}">
+        <input type="checkbox" ${x.feito?"checked":""} onchange="toggleSku('${t.id}',${i})" style="width:14px;height:14px;cursor:pointer;accent-color:#2E7D32;margin:0"/>
+        <span style="word-break:break-all">${escRel(x.sku)}</span>
+      </label>`).join("")+`</div>`;
   }
+  return h+`</div>`;
+}
+
+async function toggleSku(id,idx){
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  const antes=skusDe(t).map(x=>({...x}));
+  if(!antes[idx]) return;
+  const novos=antes.map((x,i)=>i===idx?{...x,feito:!x.feito}:x);
+  const status_manual=novos.every(x=>x.feito)?"concluido":"pendente";
+  const statusAntes=t.status_manual;
+  // atualiza na hora; desfaz se o banco recusar
+  t.skus=novos;t.status_manual=status_manual;
+  renderCheckKPIs();renderChecklist();renderBancoTarefas();
+  const {error}=await sb.from("tarefas").update({skus:novos,status_manual}).eq("id",t.id);
+  if(error){
+    console.error(error);
+    t.skus=antes;t.status_manual=statusAntes;
+    renderCheckKPIs();renderChecklist();renderBancoTarefas();
+    showToast("⚠️ Não foi possível salvar o SKU (confira as colunas no Supabase)");
+    return;
+  }
+  if(status_manual==="concluido") showToast("🎉 Todos os SKUs finalizados — tarefa finalizada!");
 }
 
 async function deletarTarefa(id){
@@ -1589,130 +1703,9 @@ async function deletarTarefa(id){
   renderCheckKPIs();renderChecklist();renderBancoTarefas();showToast("✓ Tarefa excluída");
 }
 
-function abrirModalTarefa(prefill={}){
-  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-tarefa";
-  const hoje=new Date();
-  const ehSexta=hoje.getDay()===5;
-  const dataDefault=ehSexta?new Date(hoje.getTime()+3*86400000):hoje;
-  const dataStr=prefill.data_tarefa||dataDefault.toISOString().split("T")[0];
-  const allLojas=[...new Set(Object.values(st.lojas).flat())].sort();
-  const bancoPendentes=TAREFAS.filter(t=>!t.colaborador||t.colaborador==="");
-  overlay.innerHTML=`<div class="modal">
-    <div class="modal-title">${prefill._modoAtribuir?"👤 Atribuir tarefa":prefill.id?"✏️ Editar tarefa":"👤 Nova tarefa"}</div>
-    <div class="modal-sub">${prefill._modoAtribuir?"Selecione o colaborador e a data para esta tarefa":prefill.id?"Atualize os dados da tarefa":"Crie uma nova tarefa e atribua a um colaborador"}${!prefill.id&&ehSexta?" — programando para a próxima semana 📅":""}</div>
-    <div class="modal-grid">
-      ${!prefill.id&&bancoPendentes.length>0?`
-      <div class="modal-field" style="grid-column:1/-1">
-        <label>📋 Puxar do banco de tarefas (opcional)</label>
-        <select id="nt-banco" onchange="preencherDoBanco(this.value)" style="border-color:#00695C">
-          <option value="">— Selecione do banco ou preencha abaixo —</option>
-          ${bancoPendentes.map(t=>`<option value="${t.id}">[${t.loja||"Sem loja"}] ${t.titulo}</option>`).join("")}
-        </select>
-      </div>`:""}
-      ${prefill._modoAtribuir?`<div class="modal-field" style="grid-column:1/-1;background:#E0F2F1;border-radius:8px;padding:8px 12px;font-size:11px;color:#00695C">🏪 Tarefa do banco de <strong>${prefill.loja||"loja"}</strong> — selecione o colaborador abaixo para atribuir</div>`:""}
-      <div class="modal-field" style="grid-column:1/-1">
-        <label>Título da tarefa *</label>
-        <input id="nt-titulo" value="${prefill.titulo||""}" placeholder="Ex: Atualizar preços na Shopee"/>
-      </div>
-      <div class="modal-field" style="grid-column:1/-1">
-        <label>Descrição / Observação</label>
-        <textarea id="nt-desc" placeholder="Detalhes da tarefa...">${prefill.descricao||""}</textarea>
-      </div>
-      <div class="modal-field">
-        <label>Colaborador *</label>
-        <select id="nt-colab">
-          <option value="">Selecione...</option>
-          ${COLABORADORES.map(c=>`<option value="${c}"${(prefill.colaborador||"")=== c?" selected":""}>${c}</option>`).join("")}
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Loja</label>
-        <select id="nt-loja">
-          <option value="">Selecione a loja...</option>
-          ${allLojas.map(l=>`<option value="${l}"${(prefill.loja||"")=== l?" selected":""}>${l}</option>`).join("")}
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Prioridade</label>
-        <select id="nt-pri">
-          <option value="media"${(prefill.prioridade||"media")==="media"?" selected":""}>🟡 Média</option>
-          <option value="alta"${prefill.prioridade==="alta"?" selected":""}>🔴 Alta</option>
-          <option value="baixa"${prefill.prioridade==="baixa"?" selected":""}>🟢 Baixa</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Frequência</label>
-        <select id="nt-freq">
-          <option value="diaria"${(prefill.frequencia||"")==="diaria"?" selected":""}>Diária</option>
-          <option value="semanal"${prefill.frequencia==="semanal"?" selected":""}>Semanal</option>
-          <option value="quinzenal"${prefill.frequencia==="quinzenal"?" selected":""}>Quinzenal</option>
-          <option value="unica"${(!prefill.frequencia||prefill.frequencia==="unica")?" selected":""}>Única</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Status</label>
-        <select id="nt-status">
-          <option value="pendente"${(!prefill.status_manual||prefill.status_manual==="pendente")?" selected":""}>⚪ Pendente</option>
-          <option value="andamento"${prefill.status_manual==="andamento"?" selected":""}>🟠 Em andamento</option>
-          <option value="concluido"${prefill.status_manual==="concluido"?" selected":""}>✅ Concluído</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Data da tarefa *</label>
-        <input type="date" id="nt-data" value="${dataStr}"/>
-      </div>
-      <div class="modal-field">
-        <label>Data limite ⚠️</label>
-        <input type="date" id="nt-limite" value="${prefill.data_limite||""}"/>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn modal-btn-cancel" onclick="document.getElementById('modal-tarefa').remove()">Cancelar</button>
-      <button class="modal-btn modal-btn-save" style="background:#1565C0" onclick="salvarTarefa('${prefill.id||""}')">Salvar</button>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
-}
+// Atribuir e criar tarefa agora usam o mesmo formulário
+function abrirModalTarefa(prefill={}){abrirModalBancoTarefa(prefill);}
 
-
-async function salvarTarefa(idExistente=""){
-  const titulo=document.getElementById("nt-titulo").value.trim();
-  const colaborador=document.getElementById("nt-colab").value;
-  const loja=document.getElementById("nt-loja")?.value||"";
-  const prioridade=document.getElementById("nt-pri")?.value||"media";
-  const frequencia=document.getElementById("nt-freq").value;
-  const data_tarefa=document.getElementById("nt-data").value;
-  const status_manual=document.getElementById("nt-status").value;
-  const descricao=document.getElementById("nt-desc")?.value.trim()||"";
-  const data_limite=document.getElementById("nt-limite").value||null;
-  if(!titulo){showToast("⚠️ Preencha o título da tarefa");return;}
-  if(!colaborador){showToast("⚠️ Selecione o colaborador");return;}
-  if(!data_tarefa){showToast("⚠️ Informe a data da tarefa");return;}
-  const payload={titulo,colaborador,loja,prioridade,frequencia,data_tarefa,status_manual,descricao,data_limite};
-  if(idExistente){
-    const {error}=await sb.from("tarefas").update(payload).eq("id",idExistente);
-    if(!error){
-      const idx=TAREFAS.findIndex(t=>t.id===idExistente);
-      if(idx>=0) TAREFAS[idx]={...TAREFAS[idx],...payload};
-      document.getElementById("modal-tarefa").remove();
-      renderBancoTarefas();renderChecklist();
-      showToast("✓ Tarefa atualizada!");
-    } else showToast("⚠️ Erro ao atualizar");
-  } else {
-    const {data,error}=await sb.from("tarefas").insert(payload).select();
-    if(!error&&data){
-      TAREFAS.push(data[0]);
-      TAREFAS.sort((a,b)=>(a.data_tarefa||"").localeCompare(b.data_tarefa||""));
-      document.getElementById("modal-tarefa").remove();
-      renderBancoTarefas();renderChecklist();
-      showToast("✓ Tarefa adicionada!");
-    } else {
-      showToast("⚠️ Erro ao salvar tarefa");
-      console.error(error);
-    }
-  }
-}
 
 // ══════════════════════════════════════════════════════════════════
 // CALENDÁRIO
