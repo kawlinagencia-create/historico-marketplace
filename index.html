@@ -1303,7 +1303,7 @@ function skusDe(t){
   let v=t&&t.skus;
   if(typeof v==="string"){try{v=JSON.parse(v);}catch(e){v=[];}}
   if(!Array.isArray(v)) return [];
-  return v.map(x=>typeof x==="string"?{sku:x,feito:false}:{sku:String(x.sku||""),feito:!!x.feito}).filter(x=>x.sku);
+  return v.map(x=>typeof x==="string"?{sku:x,feito:false}:{sku:String(x.sku||""),feito:!!x.feito,data_conclusao:x.data_conclusao||"",obs:x.obs||""}).filter(x=>x.sku);
 }
 
 function abrirModalBancoTarefa(prefill={}){
@@ -1367,7 +1367,7 @@ function abrirModalBancoTarefa(prefill={}){
       </div>
       <div class="modal-field" style="grid-column:1/-1">
         <label>SKUs <span id="nb-sku-count" style="font-weight:400;color:var(--text3)"></span></label>
-        <textarea id="nb-sku-input" rows="2" placeholder="Digite um SKU e tecle Enter — ou cole vários (um por linha, ou separados por vírgula)" style="min-height:44px" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();nbAddSku();}"></textarea>
+        <textarea id="nb-sku-input" rows="1" placeholder="Digite o SKU e tecle Enter (ou cole vários)" style="min-height:0;height:34px;padding:7px 10px;resize:none;overflow:hidden;line-height:18px" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();nbAddSku();}"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
           <button type="button" onclick="nbAddSku()" style="font-size:11px;color:#00695C;background:transparent;border:1px dashed #00695C;border-radius:6px;padding:3px 12px;cursor:pointer;font-family:'DM Sans',sans-serif">+ Adicionar SKU</button>
           <button type="button" id="nb-sku-clear" onclick="nbLimparSkus()" style="font-size:10px;color:var(--text3);background:transparent;border:none;cursor:pointer;display:none">Limpar todos</button>
@@ -1456,7 +1456,7 @@ async function salvarBancoTarefa(idExistente=""){
   if(!criado_por){showToast("⚠️ Informe quem está criando a tarefa");return;}
   if(!loja){showToast("⚠️ Selecione a loja");return;}
   const plataformas=_nbPlatsSelected.length>0?_nbPlatsSelected.join(","):"";
-  const skus=_nbSkus.map(x=>({sku:x.sku,feito:!!x.feito}));
+  const skus=_nbSkus.map(x=>({...x,feito:!!x.feito}));
   const payload={titulo,loja,prioridade,frequencia,descricao,colaborador,criado_por,plataformas,data_tarefa,skus};
   try{localStorage.setItem("ultimo_criador_tarefa",criado_por);}catch(e){}
   const erroColuna=(error)=>{
@@ -1667,19 +1667,88 @@ function skuBlockHtml(t){
     </div>`;
   if(aberto){
     h+=`<div style="margin-top:6px;display:flex;flex-direction:column;gap:2px;max-height:240px;overflow-y:auto">`+
-      sk.map((x,i)=>`<label style="display:flex;align-items:center;gap:7px;padding:3px 4px;border-radius:5px;cursor:pointer;font-size:11px;color:${x.feito?"var(--text3)":"var(--text)"};${x.feito?"text-decoration:line-through;":""}">
-        <input type="checkbox" ${x.feito?"checked":""} onchange="toggleSku('${t.id}',${i})" style="width:14px;height:14px;cursor:pointer;accent-color:#2E7D32;margin:0"/>
-        <span style="word-break:break-all">${escRel(x.sku)}</span>
-      </label>`).join("")+`</div>`;
+      sk.map((x,i)=>`<div style="padding:3px 4px;border-radius:5px;font-size:11px">
+        <div style="display:flex;align-items:center;gap:7px">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;flex:1;min-width:0;color:${x.feito?"var(--text3)":"var(--text)"}">
+            <input type="checkbox" ${x.feito?"checked":""} onchange="toggleSku('${t.id}',${i})" style="width:14px;height:14px;cursor:pointer;accent-color:#2E7D32;margin:0;flex-shrink:0"/>
+            <span style="word-break:break-all;${x.feito?"text-decoration:line-through;":""}">${escRel(x.sku)}</span>
+          </label>
+          ${x.feito?`<span style="font-size:10px;color:var(--green);white-space:nowrap">✓ ${fmtDataSku(x.data_conclusao)}</span>
+          <span onclick="abrirModalConclusaoSku('${t.id}',${i})" title="Editar data / observação" style="cursor:pointer;font-size:11px">✏️</span>`:""}
+        </div>
+        ${x.feito&&x.obs?`<div style="margin:2px 0 0 21px;font-size:10px;color:var(--text3);white-space:pre-wrap;word-break:break-word">💬 ${escRel(x.obs)}</div>`:""}
+      </div>`).join("")+`</div>`;
   }
   return h+`</div>`;
 }
 
-async function toggleSku(id,idx){
+function hojeLocalISO(){
+  const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function fmtDataSku(iso){
+  if(!iso) return "";
+  const m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m?`${m[3]}/${m[2]}/${m[1]}`:iso;
+}
+
+// Marcar: abre o formulário (data + observação). Desmarcar: reabre o SKU direto.
+function toggleSku(id,idx){
   const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  const sk=skusDe(t);
+  if(!sk[idx]) return;
+  if(sk[idx].feito){
+    gravarSkus(t,sk.map((x,i)=>i===idx?{...x,feito:false,data_conclusao:"",obs:""}:x));
+  } else {
+    abrirModalConclusaoSku(id,idx);
+  }
+}
+
+function abrirModalConclusaoSku(id,idx){
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  const x=skusDe(t)[idx];if(!x) return;
+  document.getElementById("modal-sku-conclusao")?.remove();
+  const overlay=document.createElement("div");overlay.className="modal-overlay";overlay.id="modal-sku-conclusao";
+  overlay.innerHTML=`<div class="modal" style="max-width:420px">
+    <div class="modal-title">✅ Finalizar SKU</div>
+    <div class="modal-sub">${escRel(x.sku)} — ${escRel(t.titulo)}</div>
+    <div class="modal-grid">
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Data da finalização *</label>
+        <input type="date" id="sku-data" value="${x.data_conclusao||hojeLocalISO()}"/>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1">
+        <label>Observação (opcional)</label>
+        <textarea id="sku-obs" placeholder="Ex: precisou refazer a foto 2" style="min-height:60px">${escRel(x.obs||"")}</textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="fecharModalConclusaoSku()">Cancelar</button>
+      <button class="modal-btn modal-btn-save" style="background:#2E7D32" onclick="salvarConclusaoSku('${t.id}',${idx})">${x.feito?"Salvar":"Finalizar SKU"}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click",e=>{if(e.target===overlay)fecharModalConclusaoSku();});
+  setTimeout(()=>document.getElementById("sku-obs")?.focus(),50);
+}
+
+function fecharModalConclusaoSku(){
+  document.getElementById("modal-sku-conclusao")?.remove();
+  renderChecklist(); // volta a caixinha ao estado real caso tenha sido cancelado
+}
+
+async function salvarConclusaoSku(id,idx){
+  const t=TAREFAS.find(x=>String(x.id)===String(id));if(!t) return;
+  const data=document.getElementById("sku-data").value;
+  const obs=document.getElementById("sku-obs").value.trim();
+  if(!data){showToast("⚠️ Informe a data");return;}
+  const novos=skusDe(t).map((x,i)=>i===idx?{...x,feito:true,data_conclusao:data,obs}:x);
+  document.getElementById("modal-sku-conclusao")?.remove();
+  await gravarSkus(t,novos);
+}
+
+async function gravarSkus(t,novos){
   const antes=skusDe(t).map(x=>({...x}));
-  if(!antes[idx]) return;
-  const novos=antes.map((x,i)=>i===idx?{...x,feito:!x.feito}:x);
   const status_manual=novos.every(x=>x.feito)?"concluido":"pendente";
   const statusAntes=t.status_manual;
   // atualiza na hora; desfaz se o banco recusar
@@ -1694,6 +1763,7 @@ async function toggleSku(id,idx){
     return;
   }
   if(status_manual==="concluido") showToast("🎉 Todos os SKUs finalizados — tarefa finalizada!");
+  else showToast("✓ SKU atualizado");
 }
 
 async function deletarTarefa(id){
