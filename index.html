@@ -417,7 +417,6 @@ tr:hover .edit-row-btn{opacity:1}
           <button onclick="abrirModalBancoTarefa({})" style="padding:7px 16px;border-radius:7px;border:none;background:#1565C0;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">+ Nova tarefa</button>
         </div>
       </div>
-      </div>
 
       <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem" id="check-kpis"></div>
@@ -1087,13 +1086,23 @@ function renderColabListaModal(){
     </div>`).join("");
 }
 
-function adicionarColab(){
-  const inp=document.getElementById("novo-colab-input");
-  const nome=inp.value.trim();if(!nome)return;
-  if(COLABORADORES.includes(nome)){showToast("⚠️ Colaborador já existe");return;}
+// Grava o colaborador no Supabase (antes só ia para o navegador e sumia no próximo carregamento)
+async function inserirColabBanco(nome){
+  setSyncing(true);
+  const {error}=await sb.from("colaboradores").insert({nome});
+  setSyncing(false);
+  if(error){console.error(error);showToast("⚠️ Não foi possível salvar o colaborador no banco");return false;}
   COLABORADORES.push(nome);
   localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
-  inp.value="";renderColabListaModal();renderColabSelect();
+  return true;
+}
+
+async function adicionarColab(){
+  const inp=document.getElementById("novo-colab-input");
+  const nome=inp.value.trim();if(!nome)return;
+  if(COLABORADORES.some(c=>c.toLowerCase()===nome.toLowerCase())){showToast("⚠️ Colaborador já existe");return;}
+  if(!await inserirColabBanco(nome)) return;
+  inp.value="";renderColabListaModal();renderColabSelect();renderConfigColabs();
   showToast("✓ '"+nome+"' adicionado!");
 }
 
@@ -1101,8 +1110,10 @@ async function removerColab(nome){
   if(!confirm("Remover '"+nome+"'?")) return;
   try{
     setSyncing(true);
-    await sb.from("colaboradores").delete().eq("nome",nome);
+    const {error}=await sb.from("colaboradores").delete().eq("nome",nome);
+    if(error) throw error;
     COLABORADORES=COLABORADORES.filter(c=>c!==nome);
+    localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
     setSyncing(false);
     renderColabListaModal();renderColabSelect();renderConfigColabs();
     showToast("✓ '"+nome+"' removido!");
@@ -2821,12 +2832,11 @@ function renderConfigColabs(){
     </div>`).join("")||`<p style="font-size:11px;color:var(--text3)">Nenhum colaborador</p>`;
 }
 
-function cfgAdicionarColab(){
+async function cfgAdicionarColab(){
   const inp=document.getElementById("cfg-colab-input");
   const nome=inp.value.trim();if(!nome)return;
-  if(COLABORADORES.includes(nome)){showToast("⚠️ Já existe");return;}
-  COLABORADORES.push(nome);
-  localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
+  if(COLABORADORES.some(c=>c.toLowerCase()===nome.toLowerCase())){showToast("⚠️ Já existe");return;}
+  if(!await inserirColabBanco(nome)) return;
   inp.value="";renderConfigColabs();renderColabSelect();
   showToast("✓ '"+nome+"' adicionado!");
 }
@@ -2835,7 +2845,8 @@ async function cfgRemoverColab(nome){
   if(!confirm("Remover '"+nome+"'?")) return;
   try{
     setSyncing(true);
-    await sb.from("colaboradores").delete().eq("nome",nome);
+    const {error}=await sb.from("colaboradores").delete().eq("nome",nome);
+    if(error) throw error;
     COLABORADORES=COLABORADORES.filter(c=>c!==nome);
     localStorage.setItem(COLAB_KEY,JSON.stringify(COLABORADORES));
     setSyncing(false);
@@ -2906,7 +2917,8 @@ async function cfgAdicionarLoja(){
   if((st.lojas[plat]||[]).includes(nome)){showToast("⚠️ Loja já existe");return;}
   try{
     setSyncing(true);
-    await sb.from("lojas").insert({plataforma:plat,nome});
+    const {error:eIns}=await sb.from("lojas").insert({plataforma:plat,nome});
+    if(eIns) throw eIns;
     st.lojas[plat]=[...(st.lojas[plat]||[]),nome];
     inp.value="";setSyncing(false);
     cfgRenderLojas();renderSidebar();renderLojaSelect();renderConfigPlats();
@@ -2918,7 +2930,8 @@ async function cfgRemoverLoja(plat,nome){
   if(!confirm("Remover loja '"+nome+"' da plataforma? Os registros históricos desta loja serão mantidos.")) return;
   try{
     setSyncing(true);
-    await sb.from("lojas").delete().eq("plataforma",plat).eq("nome",nome);
+    const {error:eDel}=await sb.from("lojas").delete().eq("plataforma",plat).eq("nome",nome);
+    if(eDel) throw eDel;
     st.lojas[plat]=(st.lojas[plat]||[]).filter(l=>l!==nome);
     setSyncing(false);cfgRenderLojas();renderSidebar();renderLojaSelect();renderConfigPlats();
     showToast("✓ Loja removida!");
