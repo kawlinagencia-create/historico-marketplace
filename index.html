@@ -1151,7 +1151,7 @@ function abrirModalEditar(id){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  // clicar fora não fecha: evita perder o que foi digitado (use Cancelar)
 }
 
 async function salvarEdicao(id){
@@ -1408,7 +1408,7 @@ function abrirModalBancoTarefa(prefill={}){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  // clicar fora não fecha: evita perder o que foi digitado (use Cancelar)
   nbRenderSkus();
 }
 
@@ -1603,7 +1603,8 @@ function renderChecklist(){
 
   let html=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:start">`;
   colabs.forEach(function(colab){
-    const items=porColab[colab].sort((a,b)=>(a.data_tarefa||"").localeCompare(b.data_tarefa||""));
+    // mais recentes em cima, mais antigas embaixo
+    const items=porColab[colab].sort((a,b)=>(b.data_tarefa||"").localeCompare(a.data_tarefa||"")||(b.created_at||"").localeCompare(a.created_at||""));
     const atrasadasColab=items.filter(t=>statusTarefa(t)==="atrasado").length;
     const pct=items.length>0?Math.round(items.reduce((acc,t)=>acc+progressoTarefa(t),0)/items.length*100):0;
     const cor=atrasadasColab>0?"var(--red)":pct===100?"var(--green)":"var(--orange)";
@@ -1753,7 +1754,7 @@ function abrirModalOndeParei(id){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  // clicar fora não fecha: evita perder o que foi digitado (use Cancelar)
   opPreencher(id);
   setTimeout(()=>document.getElementById("op-texto")?.focus(),50);
 }
@@ -1849,7 +1850,7 @@ function abrirModalConclusaoSku(id,idx){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)fecharModalConclusaoSku();});
+  // clicar fora não fecha: evita perder o que foi digitado (use Cancelar)
   setTimeout(()=>document.getElementById("sku-obs")?.focus(),50);
 }
 
@@ -2174,7 +2175,7 @@ function abrirModalEvento(prefill={}){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  // clicar fora não fecha: evita perder o que foi digitado (use Cancelar)
 }
 
 async function salvarEvento(idExistente=""){
@@ -2503,7 +2504,7 @@ function abrirModalRecurso(prefill={}){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  // clicar fora não fecha: evita perder o que foi digitado (use Cancelar)
 }
 
 async function salvarRecurso(idExistente=""){
@@ -2648,7 +2649,7 @@ function abrirModalRelatorio(){
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.remove();});
+  // clicar fora não fecha: evita perder o que foi digitado (use Cancelar)
 }
 
 function escRel(v){
