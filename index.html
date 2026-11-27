@@ -658,6 +658,7 @@ async function inicializar(){
     if(testError) throw testError;
     await carregarColaboradores();
     await carregarLojas();
+    await carregarTipos();
     st.geralHistorico=await carregarHistorico();
     document.getElementById("sync-dot").className="sync-dot";
     document.getElementById("sync-text").textContent="sincronizado";
@@ -2868,23 +2869,56 @@ function renderConfigTipos(){
     </div>`).join("")||`<p style="font-size:11px;color:var(--text3)">Nenhum tipo</p>`;
 }
 
-function cfgAdicionarTipo(){
+// Tipos de alteração ficam no Supabase (tabela tipos_alteracao) para valer em qualquer
+// computador/navegador. Se a tabela ainda não existir, cai no modo antigo (só neste navegador).
+let _tiposNoBanco=false;
+const MSG_SQL_TIPOS="⚠️ Salvo só neste navegador: crie a tabela tipos_alteracao no Supabase (veja o SQL)";
+
+async function carregarTipos(){
+  try{
+    const {data,error}=await sb.from("tipos_alteracao").select("nome").order("id");
+    if(error) throw error;
+    if(data&&data.length){
+      TIPOS_LIST.length=0;data.forEach(t=>TIPOS_LIST.push(t.nome));
+    } else {
+      // tabela vazia: semeia com a lista que este navegador já tinha
+      const {error:eSeed}=await sb.from("tipos_alteracao").insert(TIPOS_LIST.map(nome=>({nome})));
+      if(eSeed) throw eSeed;
+    }
+    localStorage.setItem(TIPOS_KEY,JSON.stringify([...TIPOS_LIST]));
+    _tiposNoBanco=true;
+  }catch(e){
+    _tiposNoBanco=false;
+    console.warn("Tipos: usando o navegador (tabela tipos_alteracao indisponível):",e&&e.message);
+  }
+  try{renderConfigTipos();renderTiposCheckboxes();renderFiltros();}catch(e){}
+}
+
+async function cfgAdicionarTipo(){
   const inp=document.getElementById("cfg-tipo-input");
   const nome=inp.value.trim();if(!nome)return;
-  if(TIPOS_LIST.includes(nome)){showToast("⚠️ Já existe");return;}
+  if(TIPOS_LIST.some(t=>t.toLowerCase()===nome.toLowerCase())){showToast("⚠️ Já existe");return;}
+  if(_tiposNoBanco){
+    const {error}=await sb.from("tipos_alteracao").insert({nome});
+    if(error){console.error(error);showToast("⚠️ Não foi possível salvar o tipo no banco");return;}
+  }
   TIPOS_LIST.push(nome);
   localStorage.setItem(TIPOS_KEY,JSON.stringify([...TIPOS_LIST]));
   inp.value="";renderConfigTipos();renderTiposCheckboxes();renderFiltros();
-  showToast("✓ '"+nome+"' adicionado!");
+  showToast(_tiposNoBanco?"✓ '"+nome+"' adicionado!":MSG_SQL_TIPOS);
 }
 
-function cfgRemoverTipo(nome){
+async function cfgRemoverTipo(nome){
   if(!confirm("Remover o tipo '"+nome+"'?")) return;
+  if(_tiposNoBanco){
+    const {error}=await sb.from("tipos_alteracao").delete().eq("nome",nome);
+    if(error){console.error(error);showToast("⚠️ Não foi possível remover o tipo no banco");return;}
+  }
   const idx=TIPOS_LIST.indexOf(nome);
   if(idx>=0) TIPOS_LIST.splice(idx,1);
   localStorage.setItem(TIPOS_KEY,JSON.stringify([...TIPOS_LIST]));
   renderConfigTipos();renderTiposCheckboxes();renderFiltros();
-  showToast("✓ Removido!");
+  showToast(_tiposNoBanco?"✓ Removido!":MSG_SQL_TIPOS);
 }
 
 function renderConfigPlats(){
